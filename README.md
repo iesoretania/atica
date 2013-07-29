@@ -1,4 +1,5 @@
 # ATICA
+[![Build Status](https://travis-ci.org/iesoretania/atica.png?branch=master)](https://travis-ci.org/iesoretania/atica)
 
 Web application for supporting Quality Management Systems.
 

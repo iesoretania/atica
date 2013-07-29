@@ -19,5 +19,8 @@
         "slim/extras": "2.*",
         "slim/views": "0.*",
         "twig/twig": "1.*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "3.7.*"
     }
 }
