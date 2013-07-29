@@ -1,0 +1,78 @@
+{#  ATICA - Web application for supporting Quality Management Systems
+    Copyright (C) 2009-2013: Luis-Ramón López López
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <!-- HTML5 shim, for IE6-8 support of HTML elements -->
+        <!--[if lt IE 9]>
+          <script src="lib/html5shim/html5.js"></script>
+        <![endif]-->
+        <meta charset="utf-8">
+        <title>ÁTICA</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,700' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" media="screen">
+        <link rel="stylesheet" href="lib/bootstrap/css/font-awesome.min.css" media="screen">
+        <link rel="shortcut icon" href="img/favicon.ico" />
+        <link rel="apple-touch-icon" href="img/mobile-favicon.png" />
+        <link rel="stylesheet" href="css/app.css" />
+    </head>   
+    <body>
+        <div class="navbar navbar-inverse">
+            
+            <div class="container">
+
+                <a class="navbar-brand" href="{{ urlFor('inicio') }}"><span class="icon-cloud"></span><!--span class="icon-stack-base icon-file-text" style="font-size: 60%; margin-left: -10px; color: gray"></span--> ÁTICA</a>
+                <p class="navbar-text thin pull-left hidden-sm">{{ organization.display_name }}</p>
+                {% block navbar %}
+                {% endblock %}
+            </div><!--/.container -->
+        </div><!--/.navbar -->
+
+        <div class="container">
+        {% block breadcrumb %}
+            {% if search %}
+            <form class="pull-right" action="">
+                <input type="text" class="input-small search-bar col-lg-8" placeholder="Buscar...">
+            </form>
+            {% endif %}
+            {% if navigation %}
+            <ul class="breadcrumb">
+                <li><a href="{{ urlFor('inicio') }}"><span class="icon-home icon-large"></span></a></li>
+                {% for section in navigation %}
+                {% if loop.last == true %}
+                <li class="active">{{ section.display_name }}</li>
+                {% else %}
+                <li><a href="{{ section.target|e('url') }}" >{{ section.display_name }}</a></li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+            {% endif %}
+        {% endblock %}
+        {% block content %}
+        {% endblock %}
+        </div>
+        <footer>
+        {% block footer %}
+            <p>
+                &copy; 2009-2013, Luis Ramón López López
+            </p>
+        {% endblock %}
+        </footer>
+        <script src="lib/jquery/jquery.min.js"></script>
+        <script src="lib/bootstrap/js/bootstrap.min.js"></script>
+    </body>
+</html>

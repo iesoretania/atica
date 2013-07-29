@@ -1,0 +1,45 @@
+{#  ATICA - Web application for supporting Quality Management Systems
+    Copyright (C) 2009-2013: Luis-Ramón López López
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
+
+{% extends "base.html.twig" %}
+
+{% block navbar %}
+{% endblock %}
+            
+{% block content %}
+        <div class="panel panel-primary atica-panel-login">
+            <div class="panel-heading">Acceder a la aplicación</div>
+            <div class="alert alert-danger">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <strong>No se puede acceder.</strong> Compruebe el nombre de usuario y/o la contraseña.
+            </div>
+            <form method="post" action="entrar">
+                <fieldset>
+                    <legend>Introduzca los datos de acceso</legend>
+                    <div class="form-group">
+                        <label for="username">Nombre de usuario</label>
+                        <input type="text" class="form-control" id="username" autofocus="1" placeholder="{{ config['login.hint.username'] }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Contraseña</label>
+                        <input type="password" class="form-control" id="password" placeholder="{{ config['login.hint.password'] }}">
+                    </div>
+                    <button type="submit" class="btn btn-default">Entrar en la aplicación</button>
+                </fieldset>
+            </form>
+            <div class="panel-footer text-muted text-center thin">{{ config['login.help'] }}</div>
+        </div>
+{% endblock %}

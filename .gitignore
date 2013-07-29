@@ -1,0 +1,19 @@
+## generic files and folders to ignore
+.DS_Store
+*~
+*.lock
+
+## common IDEs
+nbproject
+.project
+.settings
+.idea/*
+
+## custom & real-time generated files
+config/config.php
+logs/*.log
+templates/cache/??
+
+## external components
+vendor/*
+

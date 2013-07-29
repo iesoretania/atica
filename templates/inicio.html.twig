@@ -1,0 +1,66 @@
+{#  ATICA - Web application for supporting Quality Management Systems
+    Copyright (C) 2009-2013: Luis-Ramón López López
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
+
+{% extends "base.html.twig" %}
+
+{% block navbar %}
+                <ul class="nav navbar-nav pull-right">
+                    <li class="dropdown">
+                        <a href="tasks" class="dropdown-toggle" data-toggle="dropdown">
+                            <span class="visible-sm">Tareas (<span class="id-task-count">2</span>)</span>
+                            <span class="icon-tasks icon-large hidden-sm"> <span class="badge" style="background-color: #d15b47"><span class="id-task-count">2</span></span></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class=""><a href="#one">one</a></li>
+                            <li class=""><a href="#two">two</a></li>
+                            <li class="divider"></li>
+                            <li class=""><a href="#three">three</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="messages" class="dropdown-toggle" data-toggle="dropdown">
+                            <span class="visible-sm">Mensajes (<span class="id-mail-count">2</span>)</span>
+                            <span class="icon-envelope icon-large hidden-sm"> <span class="badge" style="background-color: #d15b47"><span class="id-mail-count">2</span></span></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class=""><a href="#one">one</a></li>
+                            <li class=""><a href="#two">two</a></li>
+                            <li class="divider"></li>
+                            <li class=""><a href="#three">three</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="user" class="dropdown-toggle" data-toggle="dropdown">
+                            <span class="icon-user"></span> <span class="thin">Luis Ramón López</span> <span class="icon-caret-down"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class=""><a href="#one">one</a></li>
+                            <li class=""><a href="#two">two</a></li>
+                            <li class="divider"></li>
+                            <li class=""><a href="logout">Salir</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+{% endblock %}
+            
+{% block content %}
+        <ul>
+            {% for item in people %}
+                <li><a href="#">{{ item.user_name }}</a></li>
+            {% endfor %}
+        </ul>
+{% endblock %}

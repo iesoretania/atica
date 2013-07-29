@@ -1,0 +1,61 @@
+/*  ATICA - Web application for supporting Quality Management Systems
+    Copyright (C) 2009-2013: Luis-Ramón López López
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see [http://www.gnu.org/licenses/]. */
+
+.navbar {
+    border-radius: 0;
+    background: #3991c3; /* Old browsers */
+    background: -moz-linear-gradient(top, #3991c3 0%, #6aa4cc 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#3991c3), color-stop(100%,#6aa4cc)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top, #3991c3 0%,#6aa4cc 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top, #3991c3 0%,#6aa4cc 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top, #3991c3 0%,#6aa4cc 100%); /* IE10+ */
+    background: linear-gradient(to bottom, #3991c3 0%,#6aa4cc 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3991c3', endColorstr='#6aa4cc',GradientType=0 ); /* IE6-9 */
+}
+
+.navbar ul li:hover {
+    background-color: #2a2a66;
+    /*border-top: solid 1px #ddd;
+    border-bottom: solid 1px #ddd;*/
+}
+
+.thin {
+    font-weight: 300;
+}
+
+.breadcrumb>li+li:before {
+    /*content: "\3E";*/
+    content: "\F105";
+    font-family: "FontAwesome";
+}
+.search-bar {
+    margin-top: 5px;
+}
+
+footer {
+    padding-top: 20px;
+    padding-bottom: 10px;
+    margin-top: 40px;
+    text-align: center;
+    border-top: 1px solid #e5e5e5;
+}
+
+.atica-panel-login {
+    width: 500px;
+    max-width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+}
