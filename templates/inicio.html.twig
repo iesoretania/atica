@@ -18,49 +18,13 @@
 
 {% block navbar %}
                 <ul class="nav navbar-nav pull-right">
-                    <li class="dropdown">
-                        <a href="tasks" class="dropdown-toggle" data-toggle="dropdown">
-                            <span class="visible-sm">Tareas (<span class="id-task-count">2</span>)</span>
-                            <span class="icon-tasks icon-large hidden-sm"> <span class="badge" style="background-color: #d15b47"><span class="id-task-count">2</span></span></span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li class=""><a href="#one">one</a></li>
-                            <li class=""><a href="#two">two</a></li>
-                            <li class="divider"></li>
-                            <li class=""><a href="#three">three</a></li>
-                        </ul>
-                    </li>
                     <li>
-                        <a href="messages" class="dropdown-toggle" data-toggle="dropdown">
-                            <span class="visible-sm">Mensajes (<span class="id-mail-count">2</span>)</span>
-                            <span class="icon-envelope icon-large hidden-sm"> <span class="badge" style="background-color: #d15b47"><span class="id-mail-count">2</span></span></span>
+                        <a href="{{ urlFor('entrar') }}">
+                            <span class="icon-user"></span> <span class="thin">Entrar en la aplicación</span></span>
                         </a>
-                        <ul class="dropdown-menu">
-                            <li class=""><a href="#one">one</a></li>
-                            <li class=""><a href="#two">two</a></li>
-                            <li class="divider"></li>
-                            <li class=""><a href="#three">three</a></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a href="user" class="dropdown-toggle" data-toggle="dropdown">
-                            <span class="icon-user"></span> <span class="thin">Luis Ramón López</span> <span class="icon-caret-down"></span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li class=""><a href="#one">one</a></li>
-                            <li class=""><a href="#two">two</a></li>
-                            <li class="divider"></li>
-                            <li class=""><a href="logout">Salir</a></li>
-                        </ul>
                     </li>
                 </ul>
-            </div>
 {% endblock %}
             
 {% block content %}
-        <ul>
-            {% for item in people %}
-                <li><a href="#">{{ item.user_name }}</a></li>
-            {% endfor %}
-        </ul>
 {% endblock %}

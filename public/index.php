@@ -27,11 +27,7 @@ session_start();
 $config = array();
 
 $data = ORM::for_table('configuration')->where_not_null('content_type')->
-        where_null('organization_id')->find_many();
-
-foreach($data as $item) {
-    $config[$item['id']] = $item['content'];
-}
+        where_null('organization_id')->find_array();
 
 // Leer datos de la organización
 if (isset($_SESSION['organization_id'])) {
@@ -39,16 +35,17 @@ if (isset($_SESSION['organization_id'])) {
             ORM::for_table('organization')->
             find_one($_SESSION['organization_id'])->as_array();
     
-    $data = ORM::for_table('configuration')->
+    // configuración local de la organización
+    $data = array_merge($data, ORM::for_table('configuration')->
             where_equal('organization_id', $_SESSION['organization_id'])->
             where_not_null('content_type')->
-            find_many();
-
-            foreach($data as $item) {
-                $config[$item['id']] = $item['content'];
-            }
+            find_array());
 } else {
     $organization = NULL;
+}
+
+foreach($data as $item) {
+    $config[$item['item_id']] = $item['content'];
 }
 
 // Prepare app
@@ -79,30 +76,31 @@ $twig->addGlobal('organization', $organization);
 $twig->addGlobal('config', $config);
 // Define routes
 $app->get('/', function () use ($app) {
-            $app->redirect('/inicio');
-        });
+    $app->redirect('/inicio');
+});
 
 $app->get('/inicio(/:id)', function ($id = '') use ($app) {
-            $people = ORM::for_table('person')->order_by_asc('user_name')->find_array();
-            $breadcrumb = array(array('display_name' => 'Tareas', 'target' => '#'), array('display_name' => 'Pendientes', 'target' => '#'));
-            $app->render('inicio.html.twig', array('people' => $people, 'navigation' => $breadcrumb, 'search' => true));
-        })->name('inicio');
+    $breadcrumb = array(
+        array('display_name' => 'Portada', 'target' => '#'));
+    $app->render('inicio.html.twig', array(
+        'navigation' => $breadcrumb, 'search' => true));
+})->name('inicio');
 
 $app->get('/entrar(/:id)', function ($id = '') use ($app) {
-            $breadcrumb = array(array('display_name' => 'Acceder', 'target' => '#'));
-            $app->render('entrar.html.twig', array('navigation' => $breadcrumb));
-        })->name('entrar');
+    $breadcrumb = array(array('display_name' => 'Acceder', 'target' => '#'));
+    $app->render('entrar.html.twig', array('navigation' => $breadcrumb));
+})->name('entrar');
 
 $app->post('/entrar(/:id)', function ($id = '') use ($app) {
-            $breadcrumb = array(array('display_name' => 'Dentro', 'target' => '#'));
-            $app->render('base.html.twig', array('navigation' => $breadcrumb));
-        });
+    $breadcrumb = array(array('display_name' => 'Dentro', 'target' => '#'));
+    $app->render('base.html.twig', array('navigation' => $breadcrumb));
+});
 
 $app->get('/bienvenida', function () use ($app) {
-            $instance = array('display_name' => 'I.E.S. Oretania');
-            $breadcrumb = array(array('display_name' => 'Primer acceso', 'target' => '#'));
-            $app->render('bienvenida.html.twig', array('navigation' => $breadcrumb));
-        })->name('bienvenida');
+    $instance = array('display_name' => 'I.E.S. Oretania');
+    $breadcrumb = array(array('display_name' => 'Primer acceso', 'target' => '#'));
+    $app->render('bienvenida.html.twig', array('navigation' => $breadcrumb));
+})->name('bienvenida');
 
 // Run app
 $app->run();

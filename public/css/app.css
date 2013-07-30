@@ -37,9 +37,9 @@
 }
 
 .breadcrumb>li+li:before {
-    /*content: "\3E";*/
-    content: "\F105";
-    font-family: "FontAwesome";
+    content: "\203A";
+    /*content: "\F105";
+    font-family: "FontAwesome";*/
 }
 .search-bar {
     margin-top: 5px;
