@@ -21,23 +21,18 @@
             
 {% block content %}
         <div class="panel panel-primary atica-panel-login">
-            <div class="panel-heading">Acceder a la aplicación &mdash; {{ organization.display_name }}</div>
-            <div class="alert alert-danger">
-                <button type="button" class="close" data-dismiss="alert">&times;</button>
-                <strong>No se puede acceder.</strong> Compruebe el nombre de usuario y/o la contraseña e inténtelo de nuevo.
-            </div>
-            <form method="post" action="entrar">
+            <form method="post" action="organizacion">
                 <fieldset>
-                    <legend>Introduzca los datos de acceso</legend>
-                    <div class="form-group">
-                        <label for="username">Nombre de usuario</label>
-                        <input type="text" class="form-control" id="username" autofocus="1" placeholder="{{ config['login.hint.username'] }}">
+                    <legend>Seleccione la organización a la que desea acceder</legend>
+                    {% for org in organizations %}
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="organization_id" id="org{{ loop.n }}" value="{{ org.id }}" {% if org.id == organization.id %}checked{% endif %}>
+                            <strong>{{ org.display_name }}</strong>{% if org.additional_info %} &mdash; {{ org.additional_info }}{% endif %}
+                        </label>
                     </div>
-                    <div class="form-group">
-                        <label for="password">Contraseña</label>
-                        <input type="password" class="form-control" id="password" placeholder="{{ config['login.hint.password'] }}">
-                    </div>
-                    <button type="submit" class="btn btn-default">Entrar en la aplicación</button>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-default">Seleccionar organización</button>
                 </fieldset>
             </form>
             <div class="panel-footer text-muted text-center thin">{{ config['login.help'] }}</div>
