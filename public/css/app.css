@@ -32,6 +32,23 @@
     border-bottom: solid 1px #ddd;*/
 }
 
+.navbar ul li.login:hover {
+    background-color: transparent;
+}
+
+.navbar ul li.login a:hover {
+    background-color: #46b8da;
+    border-color: #46b8da;
+    color: #fff;
+}
+
+.navbar ul li.login a {
+    margin-top: 3px;
+    border-radius: 4px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
 .thin {
     font-weight: 300;
 }

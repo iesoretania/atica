@@ -21,6 +21,12 @@ ORM::configure(array(
     'password' => 'root'
 ));
 
-ORM::configure('driver_options', array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
+ORM::configure('driver_options',
+        array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
+
+$preferences = array(
+    'appname' => 'ÁTICA',
+    'salt' => 'v2j4d+-),qh@80q]}6XLqbYrq=)`::HVh9VU9j~jDX?' // please change!!!
+);
 
 ?>

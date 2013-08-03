@@ -50,7 +50,7 @@ $twig = $view->getInstance();
 
 
 // Leer configuración global
-$config = array();
+$config = array( 'appname' => $preferences['appname'] );
 
 $data = ORM::for_table('configuration')->where_not_null('content_type')->
         where_null('organization_id')->find_array();
