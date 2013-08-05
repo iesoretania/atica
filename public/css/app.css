@@ -36,13 +36,13 @@
     background-color: transparent;
 }
 
-.navbar ul li.login a:hover {
+.navbar ul li.login a.login:hover {
     background-color: #46b8da;
     border-color: #46b8da;
     color: #fff;
 }
 
-.navbar ul li.login a {
+.navbar ul li.login a.login {
     margin-top: 4px;
     border-radius: 4px;
     padding-top: 10px;

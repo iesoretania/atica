@@ -14,17 +14,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
 
-{% extends "base.html.twig" %}
-
-{% block navbar %}
-                <ul class="nav navbar-nav pull-right">
-                    <li class="login">
-                        <a class="btn btn-info" href="{{ urlFor('entrar') }}">
-                            <span class="icon-user"></span> <span class="thin">Entrar en la aplicación</span></span>
-                        </a>
-                    </li>
-                </ul>
-{% endblock %}
+{% extends "menu.html.twig" %}
             
 {% block content %}
 {% endblock %}

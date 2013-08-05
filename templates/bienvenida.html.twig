@@ -14,14 +14,11 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
 
-{% extends "base.html.twig" %}
-
-{% block navbar %}
-{% endblock %}
+{% extends "menu.html.twig" %}
             
 {% block content %}
         <div class="jumbotron">
-            <h1>¡Bienvenido!</h1>
-            <p>Por favor, tome unos minutos para asegurarse de que los datos de la aplicación son correctos</p>
+            <h1>¡Bienvenido {{ user.first_name }}!</h1>
+            <p>Por favor, tómese unos minutos para asegurarse de que los datos de la aplicación son correctos</p>
         </div>
 {% endblock %}

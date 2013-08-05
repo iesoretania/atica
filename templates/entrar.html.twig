@@ -22,20 +22,30 @@
 {% block content %}
         <div class="panel panel-primary atica-panel-login">
             <div class="panel-heading">Acceder a la aplicación &mdash; {{ organization.display_name }}</div>
+            {% if flash['login_error'] %}
             <div class="alert alert-danger">
                 <button type="button" class="close" data-dismiss="alert">&times;</button>
+                {% if flash['login_error'] == 'not found' %}
                 <strong>No se puede acceder.</strong> Compruebe el nombre de usuario y/o la contraseña e inténtelo de nuevo.
+                {% elseif flash['login_error'] == 'no organization' %}
+                <strong>Usuario no asociado a organización.</strong> Por favor, seleccione <a href="{{ urlFor('organizacion') }}" class="alert-link">una organización a la que pertenezca</a>.
+                {% elseif flash['login_error'] == 'blocked' %}
+                <strong>Usuario bloqueado.</strong> Ha superado el límite de reintentos sin éxito para entrar. Por favor espere hasta las {{ flash['login_blocked_for'] }}.
+                {% else %}
+                <strong>No se puede acceder.</strong> Ha ocurrido un error desconocido. Póngase en contacto con el coordinador de calidad.
+                {% endif %}
             </div>
+            {% endif %}
             <form method="post" action="entrar">
                 <fieldset>
                     <legend>Introduzca los datos de acceso</legend>
                     <div class="form-group">
                         <label for="username">Nombre de usuario</label>
-                        <input type="text" class="form-control" id="username" autofocus="1" placeholder="{{ config['login.hint.username'] }}">
+                        <input type="text" class="form-control" name="username" autofocus="1" placeholder="{{ config['login.hint.username'] }}">
                     </div>
                     <div class="form-group">
                         <label for="password">Contraseña</label>
-                        <input type="password" class="form-control" id="password" placeholder="{{ config['login.hint.password'] }}">
+                        <input type="password" class="form-control" name="password" placeholder="{{ config['login.hint.password'] }}">
                     </div>
                     <button type="submit" class="btn btn-default">Entrar en la aplicación</button>
                 </fieldset>

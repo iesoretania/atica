@@ -1,0 +1,45 @@
+{#  ATICA - Web application for supporting Quality Management Systems
+    Copyright (C) 2009-2013: Luis-Ramón López López
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
+
+{% extends "base.html.twig" %}
+
+{% block navbar %}
+                <ul class="nav navbar-nav pull-right">
+                {% if user %}
+                    <li class="login">
+                        <div class="dropdown">
+                            <a class="btn btn-info login" id="usermenu" role="button" data-toggle="dropdown" data-target="#" href="{{ urlFor('inicio') }}">
+                                <span class="icon-user"></span> <span class="thin">{{ user.display_name }}</span></span> <span class="icon-caret-down"></span>
+                            </a>
+                            <ul class="dropdown-menu" role="menu" aria-labelledby="usermenu">
+                                <li role="presentation"><a href="personal">Datos personales</a></li>
+                                <li role="presentation" class="divider"></li>
+                                <li role="presentation"><a href="salir">Salir</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                {% else %}
+                    <li class="login">
+                        <a class="btn btn-info login" href="{{ urlFor('entrar') }}">
+                            <span class="icon-user"></span> <span class="thin">Entrar en la aplicación</span></span>
+                        </a>
+                    </li>
+                {% endif %}
+                </ul>
+{% endblock %}
+            
+{% block content %}
+{% endblock %}

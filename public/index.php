@@ -80,8 +80,34 @@ foreach($data as $item) {
     $config[$item['item_id']] = $item['content'];
 }
 
-$twig->addGlobal('organization', $organization);
+// Leer datos del usuario activo
+$user = NULL;
+if (isset($_SESSION['person_id'])) {
+    $user = ORM::for_table('person')->
+            find_one($_SESSION['person_id'])->as_array();
+    
+    // comprobar si pertenece a la organización
+    $membership = ORM::for_table('person_organization')->
+            where('organization_id', $_SESSION['organization_id'])->
+            where('person_id', $_SESSION['person_id'])->find_one();
+    
+    // si no pertenece, sacar al usuario porque no debería ocurrir
+    if (!$membership) {
+        $user = NULL;
+        unset($_SESSION['person_id']);
+    }
+    else {
+        // comprobar si es administrador local (siempre lo será si es
+        // administrador global)
+        $user['is_local_administrator'] = $user['is_global_administrator'] ||
+                $membership['is_local_administrator'];
+    }
+}
+
+// Definir variables globales para las plantillas
 $twig->addGlobal('config', $config);
+$twig->addGlobal('organization', $organization);
+$twig->addGlobal('user', $user);
 
 // Definir rutas
 $app->get('/', function () use ($app) {
@@ -129,16 +155,59 @@ $app->get('/entrar(/:id)', function ($id = '') use ($app) {
     $app->render('entrar.html.twig', array('navigation' => $breadcrumb));
 })->name('entrar');
 
-$app->post('/entrar(/:id)', function ($id = '') use ($app) {
+$app->post('/entrar(/:id)', function ($id = '') use ($app, $preferences) {
     if (!isset($_SESSION['organization_id'])) {
         $app->redirect('organizacion');
     }
-    $breadcrumb = array(array('display_name' => 'Dentro', 'target' => '#'));
-    $app->render('base.html.twig', array('navigation' => $breadcrumb));
+    $username = trim($_POST['username']);
+    
+    $login_security = ORM::for_table('person')->
+            select('retry_count')->select('blocked_access')->
+            where('user_name', $username)->find_one();
+    
+    if ((!$login_security) ||
+        ($login_security && (NULL == $login_security['blocked_access']))) {
+        
+        $user = ORM::for_table('person')->
+                where('user_name', $username)->
+                where('password', sha1($preferences['salt'] . $_POST['password']))->
+                find_one();
+
+        if ($user) {
+            $login_security->set('retry_count', 0);
+            $login_security->save();            
+            
+            $membership = ORM::for_table('person_organization')->
+                    where('organization_id', $_SESSION['organization_id'])->
+                    where('person_id', $user['id'])->find_one();
+
+            if ($membership) {
+                if ($membership['is_active']) {
+                    $_SESSION['person_id'] = $user['id'];
+                    $app->redirect('bienvenida');                
+                }
+            }
+            else {
+                $app->flash('login_error', 'no organization');
+            }
+        }
+        else {
+            if ($login_security) {
+                $login_security->set('retry_count', 1);
+                $login_security->save();
+            }
+            $app->flash('login_error', 'not found');
+        }
+    }
+    else {
+        $app->flash('login_error', 'blocked');
+        $app->flash('login_blocked_for', $login_security['blocked_access']);
+    }
+    $app->redirect('entrar');
 });
 
-$app->get('/bienvenida', function () use ($app) {
-    if (!isset($_SESSION['person_id'])) {
+$app->get('/bienvenida', function () use ($app, $user) {
+    if (!$user) {
         $app->redirect('inicio');
     }    
     $breadcrumb = array(array('display_name' => 'Primer acceso', 'target' => '#'));
