@@ -175,6 +175,7 @@ $app->post('/entrar(/:id)', function ($id = '') use ($app, $preferences) {
     }
     $username = trim($_POST['username']);
     
+    // TODO: refactorizar para usar modelos y Paris
     $login_security = ORM::for_table('person')->
             select('retry_count')->select('blocked_access')->
             where('user_name', $username)->find_one();
@@ -188,6 +189,7 @@ $app->post('/entrar(/:id)', function ($id = '') use ($app, $preferences) {
                 find_one();
 
         if ($user) {
+            // poner a cero la cuenta de intentos infructuosos
             $login_security->set('retry_count', 0);
             $login_security->save();            
             
@@ -208,8 +210,7 @@ $app->post('/entrar(/:id)', function ($id = '') use ($app, $preferences) {
         }
         else {
             if ($login_security) {
-                $login_security->set('retry_count', 1);
-                $login_security->save();
+                // TODO: incrementar el número de intentos infructuosos
             }
             $app->flash('login_error', 'not found');
         }

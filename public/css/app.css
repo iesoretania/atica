@@ -40,6 +40,13 @@
     background-color: #46b8da;
     border-color: #46b8da;
     color: #fff;
+    transition: border-color ease-in-out .1s,
+                box-shadow ease-in-out .1s,
+                background-color ease-in-out .1s;
+    
+    -webkit-transition: border-color ease-in-out .1s,
+                box-shadow ease-in-out .1s,
+                background-color ease-in-out .1s;
 }
 
 .navbar ul li.login a.login {

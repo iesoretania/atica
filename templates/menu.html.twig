@@ -22,7 +22,7 @@
                     <li class="login">
                         <div class="dropdown">
                             <a class="btn btn-info login" id="usermenu" role="button" data-toggle="dropdown" data-target="#" href="{{ urlFor('personal') }}">
-                                <span class="icon-user"></span> <span class="thin">{{ user.display_name }}</span></span> <span class="icon-caret-down"></span>
+                                <span class="icon-user"></span>&nbsp;<span class="thin">{{ user.display_name }}</span></span> <span class="icon-caret-down"></span>
                             </a>
                             <ul class="dropdown-menu" role="menu" aria-labelledby="usermenu">
                                 <li role="presentation"><a href="personal">Datos personales</a></li>
@@ -34,7 +34,7 @@
                 {% else %}
                     <li class="login">
                         <a class="btn btn-info login" href="{{ urlFor('entrar') }}">
-                            <span class="icon-user"></span> <span class="thin">Entrar en la aplicación</span></span>
+                            <span class="icon-signin"></span>&nbsp;<span class="thin">Entrar en la aplicación</span></span>
                         </a>
                     </li>
                 {% endif %}
