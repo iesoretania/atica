@@ -17,16 +17,8 @@
 {% extends "menu.html.twig" %}
             
 {% block content %}
-            {% if flash['home_info'] %}
-            <div class="alert alert-info">
-                <button type="button" class="close" data-dismiss="alert">&times;</button>
-                {% if flash['home_info'] == 'logout' %}
-                <strong>Salida realizada con éxito.</strong> Gracias por la visita.
-                {% elseif flash['home_info'] == 'no organization' %}
-
-                {% else %}
-                <strong>{{ flash['home_info_summary'] }}</strong> {{ flash['home_info_detail'] }}
-                {% endif %}
-            </div>
-            {% endif %}
+        <div class="jumbotron">
+            <h1>¡Bienvenido {{ user.first_name }}!</h1>
+            <p>Por favor, tómese unos minutos para asegurarse de que los datos de la aplicación son correctos</p>
+        </div>
 {% endblock %}

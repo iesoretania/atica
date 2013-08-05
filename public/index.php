@@ -206,6 +206,12 @@ $app->post('/entrar(/:id)', function ($id = '') use ($app, $preferences) {
     $app->redirect('entrar');
 });
 
+$app->get('/salir', function () use ($app) {
+    unset($_SESSION['person_id']);
+    $app->flash('home_info', 'logout');
+    $app->redirect('inicio');
+})->name('salir');
+
 $app->get('/bienvenida', function () use ($app, $user) {
     if (!$user) {
         $app->redirect('inicio');
@@ -214,5 +220,14 @@ $app->get('/bienvenida', function () use ($app, $user) {
     $app->render('bienvenida.html.twig', array('navigation' => $breadcrumb));
 })->name('bienvenida');
 
-// Run app
+$app->get('/personal', function () use ($app, $user) {
+    if (!$user) {
+        $app->redirect('inicio');
+    }    
+    $breadcrumb = array(array('display_name' => 'Datos personales', 'target' => '#'));
+    $app->render('personal.html.twig', array('navigation' => $breadcrumb));
+})->name('personal');
+
+
+// Ejecutar aplicación
 $app->run();
