@@ -21,7 +21,7 @@
             <div class="alert alert-info">
                 <button type="button" class="close" data-dismiss="alert">&times;</button>
                 {% if flash['home_info'] == 'logout' %}
-                <strong>Salida realizada con éxito.</strong> Gracias por la visita.
+                <strong>La salida se ha realizado con éxito.</strong> Puede volver a entrar <a href="{{ urlFor('organizacion') }}" class="alert-link">desde este enlace</a>.
                 {% elseif flash['home_info'] == 'no organization' %}
 
                 {% else %}

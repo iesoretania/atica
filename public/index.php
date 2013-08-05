@@ -66,6 +66,20 @@ if (isset($_SESSION['organization_id'])) {
         $organization = ORM::for_table('organization')->find_one()->as_array();
         $_SESSION['organization_id'] = $organization['id'];
     }
+    else {
+        // autodetectar organización a partir de la URL
+        $url = $app->request()->getUrl() . $app->request()->getRootUri() . '/';
+        $organizations = ORM::for_table('organization')->order_by_asc('code')->
+                where_not_null('url_prefix')->find_many();
+        
+        foreach ($organizations as $org) {
+            if (0 === strpos($url, $org['url_prefix'])) {
+                $_SESSION['organization_id'] = $org['id'];
+                $organization = $org;
+                break;
+            }
+        }
+    }
 }
 
 if (NULL != $organization) {
@@ -130,10 +144,10 @@ $app->post('/organizacion', function () use ($app) {
             where('id',$_POST['organization_id'])->count();
     if (1 == $organization_nr) {
         $_SESSION['organization_id'] = $_POST['organization_id'];
-        $app->redirect('/inicio');
+        $app->redirect('inicio');
     }
     else {
-        $app->redirect('/organizacion');
+        $app->redirect('organizacion');
     }
 });
 
@@ -184,7 +198,8 @@ $app->post('/entrar(/:id)', function ($id = '') use ($app, $preferences) {
             if ($membership) {
                 if ($membership['is_active']) {
                     $_SESSION['person_id'] = $user['id'];
-                    $app->redirect('bienvenida');                
+                    $req = $app->request();
+                    $app->redirect('inicio');                
                 }
             }
             else {
