@@ -22,10 +22,11 @@
         <![endif]-->
         <meta charset="utf-8">
         <title>{{ config['appname'] }}</title>
+        {% if config['base_url'] %}<base href="{{ config['base_url'] }}">{% endif %}
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,700' rel='stylesheet' type='text/css'>
-        <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" media="screen">
-        <link rel="stylesheet" href="lib/bootstrap/css/font-awesome.min.css" media="screen">
+        <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="lib/bootstrap/css/font-awesome.min.css">
         <link rel="shortcut icon" href="img/favicon.ico" />
         <link rel="apple-touch-icon" href="img/mobile-favicon.png" />
         <link rel="stylesheet" href="css/app.css" />
@@ -71,7 +72,7 @@
         {% block content %}
         {% endblock %}
         </div>
-        <footer>
+        <footer class="hidden-print">
         {% block footer %}
             <p>
                 &copy; 2009-2013, Luis Ramón López López

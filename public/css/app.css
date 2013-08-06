@@ -118,5 +118,9 @@ footer {
     border-right: 3px solid;
     padding-right: 28px;
     border-left: 3px solid;
-    padding-left: 13px;     
+    padding-left: 13px;
+    transition: border-color ease-in-out .1s,
+                background-color ease-in-out .1s;
+    -webkit-transition: border-color ease-in-out .1s,
+                background-color ease-in-out .1s;
 }

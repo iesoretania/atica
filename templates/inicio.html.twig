@@ -15,8 +15,20 @@
     along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
 
 {% extends "menu.html.twig" %}
-            
+
 {% block content %}
+            {% if flash['home_info'] %}
+            <div class="alert alert-info col-lg-12">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                {% if flash['home_info'] == 'logout' %}
+                <strong>Ha salido de la aplicación.</strong> Puede volver a entrar <a href="{{ urlFor('entrar') }}" class="alert-link">desde este enlace</a>.
+                {% elseif flash['home_info'] == 'no organization' %}
+
+                {% else %}
+                <strong>{{ flash['home_info_summary'] }}</strong> {{ flash['home_info_detail'] }}
+                {% endif %}
+            </div>
+            {% endif %}
             <div class="row">
                 <div class="col-lg-2">
                     {% block sidebar %}
@@ -29,23 +41,11 @@
                             {{ element.caption }}
                         </a>
                         {% endfor %}
-                    </div>                       
+                    </div>
                     {% endif %}
                     {% endblock %}
                 </div>
                 <div class="col-lg-10">
-                    {% if flash['home_info'] %}
-                    <div class="alert alert-info">
-                        <button type="button" class="close" data-dismiss="alert">&times;</button>
-                        {% if flash['home_info'] == 'logout' %}
-                        <strong>La salida se ha realizado con éxito.</strong> Puede volver a entrar <a href="{{ urlFor('entrar') }}" class="alert-link">desde este enlace</a>.
-                        {% elseif flash['home_info'] == 'no organization' %}
-
-                        {% else %}
-                        <strong>{{ flash['home_info_summary'] }}</strong> {{ flash['home_info_detail'] }}
-                        {% endif %}
-                    </div>
-                    {% endif %}
                     {% block maincontent %}
                     <div class="panel">
                         Bienvenido a la plataforma

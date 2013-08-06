@@ -50,7 +50,9 @@ $twig = $view->getInstance();
 
 
 // Leer configuración global
-$config = array( 'appname' => $preferences['appname'] );
+$config = array( 'appname' => $preferences['appname'],
+        'base_url' => $app->request()->getUrl() .
+                $app->request()->getRootUri() . '/');
 
 $data = ORM::for_table('configuration')->where_not_null('content_type')->
         where_null('organization_id')->find_array();
@@ -68,12 +70,11 @@ if (isset($_SESSION['organization_id'])) {
     }
     else {
         // autodetectar organización a partir de la URL
-        $url = $app->request()->getUrl() . $app->request()->getRootUri() . '/';
         $organizations = ORM::for_table('organization')->order_by_asc('code')->
                 where_not_null('url_prefix')->find_many();
 
         foreach ($organizations as $org) {
-            if (0 === strpos($url, $org['url_prefix'])) {
+            if (0 === strpos($config['base_url'], $org['url_prefix'])) {
                 $_SESSION['organization_id'] = $org['id'];
                 $organization = $org;
                 break;
