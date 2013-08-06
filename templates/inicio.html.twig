@@ -17,16 +17,40 @@
 {% extends "menu.html.twig" %}
             
 {% block content %}
-            {% if flash['home_info'] %}
-            <div class="alert alert-info">
-                <button type="button" class="close" data-dismiss="alert">&times;</button>
-                {% if flash['home_info'] == 'logout' %}
-                <strong>La salida se ha realizado con éxito.</strong> Puede volver a entrar <a href="{{ urlFor('organizacion') }}" class="alert-link">desde este enlace</a>.
-                {% elseif flash['home_info'] == 'no organization' %}
+            <div class="row">
+                <div class="col-lg-2">
+                    {% block sidebar %}
+                    {% if sidebar %}
+                    <div class="list-group sidebar">
+                        {% for element in sidebar %}
+                        <a class="list-group-item{% if not element.target %} list-group-item-text{% endif %}{% if element.active %} active{% endif %}"{% if element.target %} href="{{ element.target }}"{% endif %}>
+                            {% if element.icon %}<span class="icon-{{ element.icon }}"></span> {% endif %}
+                            {% if element.badge %}<span class="badge">{{ element.badge }}{% if element.badge_icon %} <span class="icon-{{ element.badge_icon }}"></span>{% endif %}</span>{% endif %}
+                            {{ element.caption }}
+                        </a>
+                        {% endfor %}
+                    </div>                       
+                    {% endif %}
+                    {% endblock %}
+                </div>
+                <div class="col-lg-10">
+                    {% if flash['home_info'] %}
+                    <div class="alert alert-info">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        {% if flash['home_info'] == 'logout' %}
+                        <strong>La salida se ha realizado con éxito.</strong> Puede volver a entrar <a href="{{ urlFor('entrar') }}" class="alert-link">desde este enlace</a>.
+                        {% elseif flash['home_info'] == 'no organization' %}
 
-                {% else %}
-                <strong>{{ flash['home_info_summary'] }}</strong> {{ flash['home_info_detail'] }}
-                {% endif %}
+                        {% else %}
+                        <strong>{{ flash['home_info_summary'] }}</strong> {{ flash['home_info_detail'] }}
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    {% block maincontent %}
+                    <div class="panel">
+                        Bienvenido a la plataforma
+                    </div>
+                    {% endblock %}
+                </div>
             </div>
-            {% endif %}
 {% endblock %}

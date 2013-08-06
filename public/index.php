@@ -71,7 +71,7 @@ if (isset($_SESSION['organization_id'])) {
         $url = $app->request()->getUrl() . $app->request()->getRootUri() . '/';
         $organizations = ORM::for_table('organization')->order_by_asc('code')->
                 where_not_null('url_prefix')->find_many();
-        
+
         foreach ($organizations as $org) {
             if (0 === strpos($url, $org['url_prefix'])) {
                 $_SESSION['organization_id'] = $org['id'];
@@ -99,12 +99,12 @@ $user = NULL;
 if (isset($_SESSION['person_id'])) {
     $user = ORM::for_table('person')->
             find_one($_SESSION['person_id'])->as_array();
-    
+
     // comprobar si pertenece a la organización
     $membership = ORM::for_table('person_organization')->
             where('organization_id', $_SESSION['organization_id'])->
             where('person_id', $_SESSION['person_id'])->find_one();
-    
+
     // si no pertenece, sacar al usuario porque no debería ocurrir
     if (!$membership) {
         $user = NULL;
@@ -144,45 +144,54 @@ $app->post('/organizacion', function () use ($app) {
             where('id',$_POST['organization_id'])->count();
     if (1 == $organization_nr) {
         $_SESSION['organization_id'] = $_POST['organization_id'];
-        $app->redirect('inicio');
+        $app->redirect($app->urlFor('inicio'));
     }
     else {
-        $app->redirect('organizacion');
+        $app->redirect($app->urlFor('organizacion'));
     }
 });
 
-$app->get('/inicio(/:id)', function ($id = '') use ($app) {
+$app->get('/inicio', function () use ($app) {
     if (!isset($_SESSION['organization_id'])) {
-        $app->redirect('organizacion');
+        $app->redirect($app->urlFor('organizacion'));
     }
     $breadcrumb = array(
-        array('display_name' => 'Portada', 'target' => '#'));
+        array('display_name' => 'Actividades', 'target' => $app->urlFor('inicio')),
+        array('display_name' => 'Ver todas', 'target' => '#')
+    );
+    $sidebar = array(
+        array('caption' => 'Actividades', 'icon' => 'list'),
+        array('caption' => 'Ver todas', 'active' => true, 'target' => '#'),
+        array('caption' => 'Profesor', 'target' => '#', 'badge' => 3, 'badge_icon' => 'thumbs-up'),
+        array('caption' => 'Jefe de departamento', 'target' => '#', 'badge' => '3', 'badge_icon' => 'exclamation-sign'),
+        array('caption' => 'Tutor de FCT', 'target' => '#', 'badge' => 3, 'badge_icon' => 'check')
+    );
     $app->render('inicio.html.twig', array(
-        'navigation' => $breadcrumb, 'search' => true));
+        'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar));
 })->name('inicio');
 
-$app->get('/entrar(/:id)', function ($id = '') use ($app) {
+$app->get('/entrar', function () use ($app) {
     if (!isset($_SESSION['organization_id'])) {
-        $app->redirect('organizacion');
-    }    
+        $app->redirect($app->urlFor('organizacion'));
+    }
     $breadcrumb = array(array('display_name' => 'Acceder', 'target' => '#'));
     $app->render('entrar.html.twig', array('navigation' => $breadcrumb));
 })->name('entrar');
 
-$app->post('/entrar(/:id)', function ($id = '') use ($app, $preferences) {
+$app->post('/entrar', function () use ($app, $preferences) {
     if (!isset($_SESSION['organization_id'])) {
-        $app->redirect('organizacion');
+        $app->redirect($app->urlFor('organizacion'));
     }
     $username = trim($_POST['username']);
-    
+
     // TODO: refactorizar para usar modelos y Paris
     $login_security = ORM::for_table('person')->
             select('retry_count')->select('blocked_access')->
             where('user_name', $username)->find_one();
-    
+
     if ((!$login_security) ||
         ($login_security && (NULL == $login_security['blocked_access']))) {
-        
+
         $user = ORM::for_table('person')->
                 where('user_name', $username)->
                 where('password', sha1($preferences['salt'] . $_POST['password']))->
@@ -191,8 +200,8 @@ $app->post('/entrar(/:id)', function ($id = '') use ($app, $preferences) {
         if ($user) {
             // poner a cero la cuenta de intentos infructuosos
             $login_security->set('retry_count', 0);
-            $login_security->save();            
-            
+            $login_security->save();
+
             $membership = ORM::for_table('person_organization')->
                     where('organization_id', $_SESSION['organization_id'])->
                     where('person_id', $user['id'])->find_one();
@@ -201,7 +210,7 @@ $app->post('/entrar(/:id)', function ($id = '') use ($app, $preferences) {
                 if ($membership['is_active']) {
                     $_SESSION['person_id'] = $user['id'];
                     $req = $app->request();
-                    $app->redirect('inicio');                
+                    $app->redirect($app->urlFor('inicio'));
                 }
             }
             else {
@@ -219,27 +228,27 @@ $app->post('/entrar(/:id)', function ($id = '') use ($app, $preferences) {
         $app->flash('login_error', 'blocked');
         $app->flash('login_blocked_for', $login_security['blocked_access']);
     }
-    $app->redirect('entrar');
+    $app->redirect($app->urlFor('entrar'));
 });
 
 $app->get('/salir', function () use ($app) {
     unset($_SESSION['person_id']);
     $app->flash('home_info', 'logout');
-    $app->redirect('inicio');
+    $app->redirect($app->urlFor('inicio'));
 })->name('salir');
 
 $app->get('/bienvenida', function () use ($app, $user) {
     if (!$user) {
-        $app->redirect('inicio');
-    }    
+        $app->redirect($app->urlFor('inicio'));
+    }
     $breadcrumb = array(array('display_name' => 'Primer acceso', 'target' => '#'));
     $app->render('bienvenida.html.twig', array('navigation' => $breadcrumb));
 })->name('bienvenida');
 
 $app->get('/personal', function () use ($app, $user) {
     if (!$user) {
-        $app->redirect('inicio');
-    }    
+        $app->redirect($app->urlFor('inicio'));
+    }
     $breadcrumb = array(array('display_name' => 'Datos personales', 'target' => '#'));
     $app->render('personal.html.twig', array('navigation' => $breadcrumb));
 })->name('personal');

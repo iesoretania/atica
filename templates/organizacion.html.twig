@@ -27,7 +27,7 @@
                     {% for org in organizations %}
                     <div class="radio">
                         <label>
-                            <input type="radio" name="organization_id" id="org{{ loop.n }}" value="{{ org.id }}" {% if org.id == organization.id %}checked{% endif %}>
+                            <input type="radio" name="organization_id" id="org{{ loop.n }}" value="{{ org.id }}" {% if org.id == organization.id %}checked autofocus="true"{% endif %}>
                             <strong>{{ org.display_name }}</strong>{% if org.additional_info %} &mdash; {{ org.additional_info }}{% endif %}
                         </label>
                     </div>
