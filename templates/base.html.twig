@@ -44,8 +44,8 @@
         <div class="container">
         {% block breadcrumb %}
             {% if search %}
-            <form class="pull-right" action="">
-                <input type="text" class="input-small search-bar col-lg-8" placeholder="Buscar...">
+            <form class="pull-right hidden-print visible-lg" action="">
+                <input type="text" class="input-small search-bar" placeholder="Buscar...">
             </form>
             {% endif %}
             {% if navigation %}
@@ -59,6 +59,13 @@
                 {% endif %}
                 {% endfor %}
             </ul>
+            {% endif %}
+            {% if search %}
+            <div class="well well-small hidden-print hidden-lg">
+                <form action="">
+                    <input type="text" class="input-small search-bar col-lg-12 form-control" placeholder="Buscar...">
+                </form>
+            </div>
             {% endif %}
         {% endblock %}
         {% block content %}
