@@ -35,7 +35,7 @@ This application uses the following libraries and frameworks:
 
   * [Slim], a PHP framework.
   * [Twig], a template engine.
-  * [Idiorm & Paris], a database toolkit.
+  * [Idiorm], a database toolkit.
   * [Bootstrap], a collection of HTML, CSS and JS design templates.
   * [TinyMCE], a WYSIWYG HTML editor.
 
@@ -47,7 +47,7 @@ This application is licensed under [AGPL version 3].
 
 [TinyMCE]: http://www.tinymce.com/index.php
 [Slim]: http://www.slimframework.com/
-[Idiorm & Paris]: http://j4mie.github.io/idiormandparis/
+[Idiorm]: http://j4mie.github.io/idiormandparis/
 [Bootstrap]: http://getbootstrap.com/
 [Twig]: http://twig.sensiolabs.org/
 [AGPL version 3]: http://www.gnu.org/licenses/agpl.htmlu.org/licenses/agpl.html
