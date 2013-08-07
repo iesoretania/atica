@@ -18,6 +18,7 @@
 
 require '../vendor/autoload.php';
 require_once '../config/config.php';
+require_once '../models/Person.php';
 
 session_name('ATICAID');
 session_cache_limiter(false);
@@ -186,30 +187,33 @@ $app->post('/entrar', function () use ($app, $preferences) {
     $username = trim($_POST['username']);
 
     // TODO: refactorizar para usar modelos y Paris
-    $login_security = ORM::for_table('person')->
-            select('retry_count')->select('blocked_access')->
-            where('user_name', $username)->find_one();
+    $now = date('Y-m-d H:i:s');
+    $login_security = Model::factory('Person')->
+            where('user_name', $username)->
+            find_one();
 
     if ((!$login_security) ||
-        ($login_security && (NULL == $login_security['blocked_access']))) {
+        ($login_security && ($login_security->blocked_access < $now))) {
 
-        $user = ORM::for_table('person')->
+        $user = Model::factory('Person')->
                 where('user_name', $username)->
                 where('password', sha1($preferences['salt'] . $_POST['password']))->
                 find_one();
 
         if ($user) {
             // poner a cero la cuenta de intentos infructuosos
-            $login_security->set('retry_count', 0);
-            $login_security->save();
+            $user->retry_count = 0;
+            $user->blocked_access = NULL;
+            $user->last_login = $now;
+            $user->save();
 
             $membership = ORM::for_table('person_organization')->
                     where('organization_id', $_SESSION['organization_id'])->
-                    where('person_id', $user['id'])->find_one();
+                    where('person_id', $user->id)->find_one();
 
             if ($membership) {
                 if ($membership['is_active']) {
-                    $_SESSION['person_id'] = $user['id'];
+                    $_SESSION['person_id'] = $user->id;
                     $req = $app->request();
                     $app->redirect($app->urlFor('inicio'));
                 }
@@ -220,14 +224,24 @@ $app->post('/entrar', function () use ($app, $preferences) {
         }
         else {
             if ($login_security) {
-                // TODO: incrementar el número de intentos infructuosos
+                // comprobar el número de intentos infructuosos
+                $login_security->retry_count++;
+                if ($login_security->retry_count > $preferences['login.retries']) {
+                    // bloquear al usuario
+                    $until = new DateTime;
+                    $until->modify("+" . $preferences['login.block'] . " min");
+                    $login_security->blocked_access = $until->format('Y-m-d H:i:s');
+                }
+                $login_security->save();
             }
             $app->flash('login_error', 'not found');
         }
     }
     else {
         $app->flash('login_error', 'blocked');
-        $app->flash('login_blocked_for', $login_security['blocked_access']);
+        $until = new DateTime($login_security->blocked_access);
+        $until->modify('+1 min');
+        $app->flash('login_blocked_for', $until->format('H:i'));
     }
     $app->redirect($app->urlFor('entrar'));
 });

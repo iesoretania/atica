@@ -30,7 +30,7 @@
                 {% elseif flash['login_error'] == 'no organization' %}
                 <strong>Usuario no asociado a organización.</strong> Por favor, seleccione <a href="{{ urlFor('organizacion') }}" class="alert-link">una organización a la que pertenezca</a>.
                 {% elseif flash['login_error'] == 'blocked' %}
-                <strong>Usuario bloqueado.</strong> Ha superado el límite de reintentos sin éxito para entrar. Por favor espere hasta las {{ flash['login_blocked_for'] }}.
+                <strong>Usuario bloqueado.</strong> Ha superado el límite de intentos sin éxito para entrar. Por favor espere hasta las {{ flash['login_blocked_for'] }}.
                 {% else %}
                 <strong>No se puede acceder.</strong> Ha ocurrido un error desconocido. Póngase en contacto con el coordinador de calidad.
                 {% endif %}
