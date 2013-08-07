@@ -125,13 +125,6 @@ $twig->addGlobal('organization', $organization);
 $twig->addGlobal('user', $user);
 
 // Definir rutas
-$app->get('/', function () use ($app) {
-    if (!isset($_SESSION['organization_id'])) {
-        $app->redirect('organizacion');
-    }
-    $app->redirect('inicio');
-});
-
 $app->get('/organizacion', function () use ($app) {
     $breadcrumb = NULL;
     $organizations = ORM::for_table('organization')->
@@ -152,7 +145,7 @@ $app->post('/organizacion', function () use ($app) {
     }
 });
 
-$app->get('/inicio', function () use ($app) {
+$app->get('/(inicio)', function () use ($app) {
     if (!isset($_SESSION['organization_id'])) {
         $app->redirect($app->urlFor('organizacion'));
     }
