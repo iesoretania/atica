@@ -124,3 +124,27 @@ footer {
     -webkit-transition: border-color ease-in-out .1s,
                 background-color ease-in-out .1s;
 }
+
+.flashing {
+    animation: flashing 0.5s infinite ease-in-out alternate;
+    -webkit-animation: flashing 0.5s infinite ease-in-out alternate;
+}
+
+
+@keyframes flashing {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@-webkit-keyframes flashing {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
