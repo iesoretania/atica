@@ -18,7 +18,7 @@
             
 {% block content %}
             <div class="jumbotron">
-                <h1>¡Bienvenido {{ user.first_name }}!</h1>
+                <h1>¡Bienvenid{{ ['o/a', 'o', 'a'][user.gender] }} {{ user.first_name }}!</h1>
                 <p>Por favor, tómese unos minutos para asegurarse de que los datos de la aplicación son correctos</p>
             </div>
 {% endblock %}
