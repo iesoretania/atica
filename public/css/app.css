@@ -50,10 +50,10 @@
 }
 
 .navbar ul li.login a.login {
-    margin-top: 4px;
+    margin-top: 6px;
     border-radius: 4px;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-top: 8px;
+    padding-bottom: 8px;
     background-color: #3c7fa6;
     border-color: #3c7fa6;
     width: 100%;
