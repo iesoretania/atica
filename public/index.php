@@ -138,7 +138,7 @@ $app->post('/organizacion', function () use ($app) {
             where('id',$_POST['organization_id'])->count();
     if (1 == $organization_nr) {
         $_SESSION['organization_id'] = $_POST['organization_id'];
-        $app->redirect($app->urlFor('inicio'));
+        $app->redirect($app->urlFor('portada'));
     }
     else {
         $app->redirect($app->urlFor('organizacion'));
