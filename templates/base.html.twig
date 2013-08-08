@@ -35,7 +35,7 @@
         <div class="navbar navbar-inverse">
 
             <div class="container">
-                <a class="navbar-brand" href="{{ urlFor('inicio') }}"><span class="icon-cloud"></span> {{ config['appname'] }}</a>
+                <a class="navbar-brand" href="{{ urlFor('portada') }}"><span class="icon-cloud"></span> {{ config['appname'] }}</a>
                 <p class="navbar-text thin pull-left hidden-sm">{{ organization.display_name }}</p>
                 {% block navbar %}
                 {% endblock %}
@@ -51,7 +51,7 @@
             {% endif %}
             {% if navigation %}
             <ul class="breadcrumb">
-                <li><a href="{{ urlFor('inicio') }}"><span class="icon-home icon-large"></span></a></li>
+                <li><a href="{{ urlFor('portada') }}"><span class="icon-home icon-large"></span></a></li>
                 {% for section in navigation %}
                 {% if loop.last == true %}
                 <li class="active">{{ section.display_name }}</li>

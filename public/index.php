@@ -144,26 +144,6 @@ $app->post('/organizacion', function () use ($app) {
         $app->redirect($app->urlFor('organizacion'));
     }
 });
-
-$app->get('/(inicio)', function () use ($app) {
-    if (!isset($_SESSION['organization_id'])) {
-        $app->redirect($app->urlFor('organizacion'));
-    }
-    $breadcrumb = array(
-        array('display_name' => 'Actividades', 'target' => $app->urlFor('inicio')),
-        array('display_name' => 'Ver todas', 'target' => '#')
-    );
-    $sidebar = array(
-        array('caption' => 'Actividades', 'icon' => 'list'),
-        array('caption' => 'Ver todas', 'active' => true, 'target' => '#'),
-        array('caption' => 'Profesor', 'target' => '#', 'badge' => 3, 'badge_icon' => 'thumbs-up'),
-        array('caption' => 'Jefe de departamento', 'target' => '#', 'badge' => '3', 'badge_icon' => 'exclamation-sign'),
-        array('caption' => 'Tutor de FCT', 'target' => '#', 'badge' => 3, 'badge_icon' => 'check')
-    );
-    $app->render('inicio.html.twig', array(
-        'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar));
-})->name('inicio');
-
 $app->get('/entrar', function () use ($app) {
     if (!isset($_SESSION['organization_id'])) {
         $app->redirect($app->urlFor('organizacion'));
@@ -211,7 +191,7 @@ $app->post('/entrar', function () use ($app, $preferences) {
                 if ($membership['is_active']) {
                     $_SESSION['person_id'] = $user['id'];
                     $req = $app->request();
-                    $app->redirect($app->urlFor('inicio'));
+                    $app->redirect($app->urlFor('actividad'));
                 }
             }
             else {
@@ -245,12 +225,12 @@ $app->post('/entrar', function () use ($app, $preferences) {
 $app->get('/salir', function () use ($app) {
     unset($_SESSION['person_id']);
     $app->flash('home_info', 'logout');
-    $app->redirect($app->urlFor('inicio'));
+    $app->redirect($app->urlFor('portada'));
 })->name('salir');
 
 $app->get('/bienvenida', function () use ($app, $user) {
     if (!$user) {
-        $app->redirect($app->urlFor('inicio'));
+        $app->redirect($app->urlFor('actividad'));
     }
     $breadcrumb = array(array('display_name' => 'Primer acceso', 'target' => '#'));
     $app->render('bienvenida.html.twig', array('navigation' => $breadcrumb));
@@ -258,12 +238,65 @@ $app->get('/bienvenida', function () use ($app, $user) {
 
 $app->get('/personal', function () use ($app, $user) {
     if (!$user) {
-        $app->redirect($app->urlFor('inicio'));
+        $app->redirect($app->urlFor('actividad'));
     }
     $breadcrumb = array(array('display_name' => 'Datos personales', 'target' => '#'));
     $app->render('personal.html.twig', array('navigation' => $breadcrumb));
 })->name('personal');
 
+$app->get('/(portada)', function () use ($app, $user) {
+    if (!isset($_SESSION['organization_id'])) {
+        $app->redirect($app->urlFor('organizacion'));
+    }
+    $breadcrumb = array(
+        array('display_name' => 'Portada', 'target' => '#')
+    );
+    $sidebar = array();
+
+    array_push($sidebar,
+        array('caption' => 'Secciones', 'icon' => 'list'),
+        array('caption' => 'Portada', 'active' => true, 'target' => $app->urlFor('portada')),
+        array('caption' => 'Plan de centro', 'target' => '#'),
+        array('caption' => 'Criterios de evaluación', 'target' => '#'),
+        array('caption' => 'Programaciones didácticas', 'target' => '#')
+    );
+
+    if ($user) {
+        array_push($sidebar,
+            array('caption' => 'Navegación', 'icon' => 'compass'),
+            array('caption' => 'Actividades', 'target' => $app->urlFor('actividad')),
+            array('caption' => 'Árbol de documentos', 'target' => $app->urlFor('portada'))
+        );
+    }
+    $app->render('portada.html.twig', array(
+        'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar));
+})->name('portada');
+
+$app->get('/actividad(/:id)', function ($id = NULL) use ($app) {
+    if (!isset($_SESSION['organization_id'])) {
+        $app->redirect($app->urlFor('organizacion'));
+    }
+    $breadcrumb = array(
+        array('display_name' => 'Actividades', 'target' => $app->urlFor('actividad')),
+        array('display_name' => 'Ver todas', 'target' => '#')
+    );
+    $sidebar = array();
+
+    array_push($sidebar,
+        array('caption' => 'Actividades', 'icon' => 'list'),
+        array('caption' => 'Ver todas', 'active' => true, 'target' => '#'),
+        array('caption' => 'Profesor', 'target' => '#', 'badge' => 3, 'badge_icon' => 'thumbs-up'),
+        array('caption' => 'Jefe de departamento', 'target' => '#', 'badge' => '3', 'badge_icon' => 'exclamation-sign'),
+        array('caption' => 'Tutor de FCT', 'target' => '#', 'badge' => 3, 'badge_icon' => 'check')
+    );
+    array_push($sidebar,
+        array('caption' => 'Navegación', 'icon' => 'compass'),
+        array('caption' => 'Portada', 'target' => $app->urlFor('portada')),
+        array('caption' => 'Árbol de documentos', 'target' => $app->urlFor('portada'))
+    );    
+    $app->render('inicio.html.twig', array(
+        'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar));
+})->name('actividad');
 
 // Ejecutar aplicación
 $app->run();
