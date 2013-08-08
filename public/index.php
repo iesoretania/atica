@@ -253,20 +253,20 @@ $app->get('/(portada)', function () use ($app, $user) {
     );
     $sidebar = array();
 
-    array_push($sidebar,
+    array_push($sidebar, array(
         array('caption' => 'Secciones', 'icon' => 'list'),
         array('caption' => 'Portada', 'active' => true, 'target' => $app->urlFor('portada')),
         array('caption' => 'Plan de centro', 'target' => '#'),
         array('caption' => 'Criterios de evaluación', 'target' => '#'),
         array('caption' => 'Programaciones didácticas', 'target' => '#')
-    );
+    ));
 
     if ($user) {
-        array_push($sidebar,
+        array_push($sidebar, array(
             array('caption' => 'Navegación', 'icon' => 'compass'),
             array('caption' => 'Actividades', 'target' => $app->urlFor('actividad')),
             array('caption' => 'Árbol de documentos', 'target' => $app->urlFor('portada'))
-        );
+        ));
     }
     $app->render('portada.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar));
@@ -282,18 +282,18 @@ $app->get('/actividad(/:id)', function ($id = NULL) use ($app) {
     );
     $sidebar = array();
 
-    array_push($sidebar,
+    array_push($sidebar, array(
         array('caption' => 'Actividades', 'icon' => 'list'),
         array('caption' => 'Ver todas', 'active' => true, 'target' => '#'),
         array('caption' => 'Profesor', 'target' => '#', 'badge' => 3, 'badge_icon' => 'thumbs-up'),
         array('caption' => 'Jefe de departamento', 'target' => '#', 'badge' => '3', 'badge_icon' => 'exclamation-sign'),
         array('caption' => 'Tutor de FCT', 'target' => '#', 'badge' => 3, 'badge_icon' => 'check')
-    );
-    array_push($sidebar,
+    ));
+    array_push($sidebar, array(
         array('caption' => 'Navegación', 'icon' => 'compass'),
         array('caption' => 'Portada', 'target' => $app->urlFor('portada')),
         array('caption' => 'Árbol de documentos', 'target' => $app->urlFor('portada'))
-    );    
+    ));    
     $app->render('inicio.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar));
 })->name('actividad');
