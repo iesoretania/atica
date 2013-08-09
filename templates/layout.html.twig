@@ -21,7 +21,7 @@
             <div class="alert alert-info col-lg-12">
                 <button type="button" class="close" data-dismiss="alert">&times;</button>
                 {% if flash['home_info'] == 'logout' %}
-                <strong>Ha salido de la aplicación.</strong> Puede volver a entrar <a href="{{ urlFor('entrar') }}" class="alert-link">desde este enlace</a>.
+                <strong>Ha salido de la aplicación.</strong> Puede volver a entrar <a href="{{ urlFor('login') }}" class="alert-link">desde este enlace</a>.
                 {% elseif flash['home_info'] == 'no organization' %}
 
                 {% else %}
@@ -30,7 +30,7 @@
             </div>
             {% endif %}
             <div class="row">
-                <div class="col-lg-2">
+                <div class="col-lg-2 hidden-print">
                     {% block sidebar %}
                     {% if sidebar %}
                         {% for group in sidebar %}

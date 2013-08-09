@@ -127,40 +127,40 @@ $twig->addGlobal('user', $user);
 // Definir rutas
 $app->get('/organizacion', function () use ($app, $user) {
     if (isset($user)) {
-        $app->redirect($app->urlFor('actividades'));
+        $app->redirect($app->urlFor('activities'));
     }
     $breadcrumb = NULL;
     $organizations = ORM::for_table('organization')->
             order_by_asc('display_name')->find_array();
-    $app->render('organizacion.html.twig', array('navigation' => $breadcrumb,
+    $app->render('organization.html.twig', array('navigation' => $breadcrumb,
         'organizations' => $organizations));
-})->name('organizacion');
+})->name('organization');
 
 $app->post('/organizacion', function () use ($app, $user) {
     if (isset($user)) {
-        $app->redirect($app->urlFor('actividades'));
+        $app->redirect($app->urlFor('activities'));
     }
     $organization_nr = ORM::for_table('organization')->
             where('id',$_POST['organization_id'])->count();
     if (1 == $organization_nr) {
         $_SESSION['organization_id'] = $_POST['organization_id'];
-        $app->redirect($app->urlFor('portada'));
+        $app->redirect($app->urlFor('frontpage'));
     }
     else {
-        $app->redirect($app->urlFor('organizacion'));
+        $app->redirect($app->urlFor('organization'));
     }
 });
 $app->get('/entrar', function () use ($app) {
     if (!isset($_SESSION['organization_id'])) {
-        $app->redirect($app->urlFor('organizacion'));
+        $app->redirect($app->urlFor('organization'));
     }
     $breadcrumb = array(array('display_name' => 'Acceder', 'target' => '#'));
-    $app->render('entrar.html.twig', array('navigation' => $breadcrumb));
-})->name('entrar');
+    $app->render('login.html.twig', array('navigation' => $breadcrumb));
+})->name('login');
 
 $app->post('/entrar', function () use ($app, $preferences) {
     if (!isset($_SESSION['organization_id'])) {
-        $app->redirect($app->urlFor('organizacion'));
+        $app->redirect($app->urlFor('organization'));
     }
     $username = trim($_POST['username']);
 
@@ -197,7 +197,7 @@ $app->post('/entrar', function () use ($app, $preferences) {
                 if ($membership['is_active']) {
                     $_SESSION['person_id'] = $user['id'];
                     $req = $app->request();
-                    $app->redirect($app->urlFor('actividades'));
+                    $app->redirect($app->urlFor('activities'));
                 }
                 else {
                     $app->flash('login_error', 'not active');
@@ -228,26 +228,26 @@ $app->post('/entrar', function () use ($app, $preferences) {
         $until->modify('+1 min');
         $app->flash('login_blocked_for', $until->format('H:i'));
     }
-    $app->redirect($app->urlFor('entrar'));
+    $app->redirect($app->urlFor('login'));
 });
 
 $app->get('/salir', function () use ($app) {
     unset($_SESSION['person_id']);
     $app->flash('home_info', 'logout');
-    $app->redirect($app->urlFor('portada'));
-})->name('salir');
+    $app->redirect($app->urlFor('frontpage'));
+})->name('logout');
 
 $app->get('/bienvenida', function () use ($app, $user) {
     if (!$user) {
-        $app->redirect($app->urlFor('entrar'));
+        $app->redirect($app->urlFor('login'));
     }
     $breadcrumb = array(array('display_name' => 'Primer acceso', 'target' => '#'));
-    $app->render('bienvenida.html.twig', array('navigation' => $breadcrumb));
-})->name('bienvenida');
+    $app->render('welcome.html.twig', array('navigation' => $breadcrumb));
+})->name('welcome');
 
 $app->get('/personal', function () use ($app, $user) {
     if (!$user) {
-        $app->redirect($app->urlFor('entrar'));
+        $app->redirect($app->urlFor('login'));
     }
     $breadcrumb = array(array('display_name' => 'Datos personales', 'target' => '#'));
     $app->render('personal.html.twig', array('navigation' => $breadcrumb));
@@ -255,7 +255,7 @@ $app->get('/personal', function () use ($app, $user) {
 
 $app->get('/(portada)', function () use ($app, $user) {
     if (!isset($_SESSION['organization_id'])) {
-        $app->redirect($app->urlFor('organizacion'));
+        $app->redirect($app->urlFor('organization'));
     }
     $breadcrumb = array(
         array('display_name' => 'Portada', 'target' => '#')
@@ -264,7 +264,7 @@ $app->get('/(portada)', function () use ($app, $user) {
 
     array_push($sidebar, array(
         array('caption' => 'Secciones', 'icon' => 'list'),
-        array('caption' => 'Portada', 'active' => true, 'target' => $app->urlFor('portada')),
+        array('caption' => 'Portada', 'active' => true, 'target' => $app->urlFor('frontpage')),
         array('caption' => 'Plan de centro', 'target' => '#'),
         array('caption' => 'Criterios de evaluación', 'target' => '#'),
         array('caption' => 'Programaciones didácticas', 'target' => '#')
@@ -273,17 +273,17 @@ $app->get('/(portada)', function () use ($app, $user) {
     if ($user) {
         array_push($sidebar, array(
             array('caption' => 'Navegación', 'icon' => 'compass'),
-            array('caption' => 'Actividades', 'target' => $app->urlFor('actividades')),
-            array('caption' => 'Árbol de documentos', 'target' => $app->urlFor('portada'))
+            array('caption' => 'Actividades', 'target' => $app->urlFor('activities')),
+            array('caption' => 'Árbol de documentos', 'target' => $app->urlFor('frontpage'))
         ));
     }
-    $app->render('portada.html.twig', array(
+    $app->render('frontpage.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar));
-})->name('portada');
+})->name('frontpage');
 
 $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user) {
     if (!$user) {
-        $app->redirect($app->urlFor('entrar'));
+        $app->redirect($app->urlFor('login'));
     }
     
     // obtener perfiles
@@ -293,12 +293,14 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user) {
             where('person_id', $user['id'])->
             order_by_asc('profile_group.display_name_neutral')->find_many();
     
+    // barra lateral de perfiles
     $profile_bar = array(
         array('caption' => 'Actividades', 'icon' => 'list'),
-        array('caption' => 'Ver todas', 'active' => ($id == NULL), 'target' => $app->urlFor('actividades'))
+        array('caption' => 'Ver todas', 'active' => ($id == NULL), 'target' => $app->urlFor('activities'))
     );
     $current = NULL;
-    $detail = 'Ver todas';
+    $detail = '';
+    $profile_ids = array();
     foreach ($profiles as $profile) {
         $gender = array ($profile['display_name_neutral'], $profile['display_name_male'], $profile['display_name_female']);
         $caption = $gender[$user['gender']] . " " . $profile['display_name'];
@@ -310,27 +312,51 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user) {
         else {
             $active = false;
         }
+        array_push($profile_ids, $profile['id']);
         array_push($profile_bar, array('caption' => $caption,
-            'active' => $active, 'target' => $app->urlFor('actividades', array('id' => $profile['id']))));
+            'active' => $active, 'target' => $app->urlFor('activities', array('id' => $profile['id']))));
     }
+    
+    // si hay un perfil como parámetro que no está asociado al usuario, redirigir
     if ((NULL != $id) && (NULL == $current)) {
-        $app->redirect($app->urlFor('actividades'));
+        $app->redirect($app->urlFor('activities'));
     }
-    $breadcrumb = array(
-        array('display_name' => 'Actividades', 'target' => $app->urlFor('actividades')),
-        array('display_name' => $detail, 'target' => '#')
-    );
+    
     $sidebar = array();
 
     array_push($sidebar, $profile_bar);
+    
+    // añadir barra lateral de navegación
     array_push($sidebar, array(
         array('caption' => 'Navegación', 'icon' => 'compass'),
-        array('caption' => 'Portada', 'target' => $app->urlFor('portada')),
-        array('caption' => 'Árbol de documentos', 'target' => $app->urlFor('portada'))
+        array('caption' => 'Portada', 'target' => $app->urlFor('frontpage')),
+        array('caption' => 'Árbol de documentos', 'target' => $app->urlFor('frontpage'))
     ));    
-    $app->render('inicio.html.twig', array(
-        'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar));
-})->name('actividades');
+    
+    // barra superior de navegación
+    $breadcrumb = array(
+        array('display_name' => 'Actividades', 'target' => $app->urlFor('activities')),
+        array('display_name' => $detail, 'target' => '#')
+    );
+    
+    if ($id) {
+        $profile_ids = array( $id );
+    }
+    
+    // obtener actividades
+    $activities = ORM::for_table('event')->
+        inner_join('activity_event', array('activity_event.event_id', '=', 'event.id'))->
+        inner_join('activity_profile', array('activity_profile.activity_id', '=', 'activity_event.activity_id'))->
+        group_by('activity_event.event_id')->
+        group_by('activity_profile.profile_id')->
+        order_by_asc('activity_event.activity_id')->
+        order_by_asc('order_nr')->
+        where_in('profile_id', $profile_ids)->find_array();
+    
+    // generar página
+    $app->render('activities.html.twig', array(
+        'navigation' => $breadcrumb, 'search' => true, 'detail' => $detail, 'sidebar' => $sidebar, 'activities' => $activities));
+})->name('activities');
 
 // Ejecutar aplicación
 $app->run();
