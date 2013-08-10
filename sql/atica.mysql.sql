@@ -1,5 +1,4 @@
 SET FOREIGN_KEY_CHECKS=0;
-SET time_zone = "+00:00";
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -141,6 +140,7 @@ CREATE TABLE "event" (
   description text,
   from_week int(11) unsigned NOT NULL,
   to_week int(11) unsigned NOT NULL,
+  period_description varchar(255) DEFAULT NULL,
   is_automatic tinyint(1) unsigned NOT NULL DEFAULT '0',
   is_manual tinyint(1) unsigned NOT NULL DEFAULT '1',
   is_visible tinyint(1) unsigned NOT NULL DEFAULT '1',
@@ -299,7 +299,8 @@ CREATE TABLE non_conformance_type (
 
 CREATE TABLE organization (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
-  display_name varchar(45) NOT NULL,
+  display_name varchar(65) NOT NULL,
+  additional_info varchar(65) DEFAULT NULL,
   "code" varchar(45) NOT NULL,
   url_prefix varchar(255) DEFAULT NULL,
   PRIMARY KEY (id)
@@ -322,6 +323,8 @@ CREATE TABLE person (
   token_expiration datetime DEFAULT NULL,
   token_operation int(11) unsigned DEFAULT NULL,
   token_data varchar(255) DEFAULT NULL,
+  last_login datetime DEFAULT NULL,
+  retry_count int(11) NOT NULL DEFAULT '0',
   blocked_access datetime DEFAULT NULL,
   PRIMARY KEY (id)
 );
