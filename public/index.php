@@ -25,8 +25,9 @@ session_start();
 
 // Preparar aplicación
 $app = new \Slim\Slim(array(
+    'mode' => 'development',
     'templates.path' => '../templates',
-    'log.level' => 4,
+    'log.level' => \Slim\Log::DEBUG,
     'log.enabled' => true,
     'log.writer' => new \Slim\Extras\Log\DateTimeFileWriter(array(
         'path' => '../logs',
@@ -47,15 +48,6 @@ $view->parserExtensions = array(
     new \Slim\Views\TwigExtension(),
 );
 $twig = $view->getInstance();
-
-
-// Leer configuración global
-$config = array( 'appname' => $preferences['appname'],
-        'base_url' => $app->request()->getUrl() .
-                $app->request()->getRootUri() . '/');
-
-$data = ORM::for_table('configuration')->where_not_null('content_type')->
-        where_null('organization_id')->find_array();
 
 // Leer datos de la organización
 $organization = NULL;
@@ -83,8 +75,18 @@ if (isset($_SESSION['organization_id'])) {
     }
 }
 
+// Leer configuración global
+$config = array(
+    'appname' => $preferences['appname'],
+    'base_url' => $app->request()->getUrl() . $app->request()->getRootUri() . '/');
+
+$app->setName($preferences['appname']);
+
+$data = ORM::for_table('configuration')->where_not_null('content_type')->
+        where_null('organization_id')->find_array();
+
+// Leer configuración local de la organización
 if (NULL != $organization) {
-    // configuración local de la organización
     $data = array_merge($data, ORM::for_table('configuration')->
             where_equal('organization_id', $_SESSION['organization_id'])->
             where_not_null('content_type')->
@@ -92,6 +94,7 @@ if (NULL != $organization) {
 }
 
 foreach($data as $item) {
+    // convertir las filas de configuración en un array
     $config[$item['item_id']] = $item['content'];
 }
 
