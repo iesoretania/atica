@@ -33,17 +33,19 @@
                 <div class="col-lg-2 hidden-print">
                     {% block sidebar %}
                     {% if sidebar %}
+                        <nav>
                         {% for group in sidebar %}
-                        <div class="list-group sidebar">
-                            {% for element in group %}
-                            <a class="list-group-item{% if not element.target %} list-group-item-text{% endif %}{% if element.active %} active{% endif %}"{% if element.target %} href="{{ element.target }}"{% endif %}>
-                                {% if element.icon %}<span class="icon-{{ element.icon }}"></span> {% endif %}
-                                {% if element.badge %}<span class="badge">{{ element.badge }}{% if element.badge_icon %} <span class="icon-{{ element.badge_icon }}"></span>{% endif %}</span>{% endif %}
-                                {{ element.caption }}
-                            </a>
+                            <div class="list-group sidebar">
+                                {% for element in group %}
+                                <a class="list-group-item{% if not element.target %} list-group-item-text{% endif %}{% if element.active %} active{% endif %}"{% if element.target %} href="{{ element.target }}"{% endif %}>
+                                    {% if element.icon %}<span class="icon-{{ element.icon }}"></span> {% endif %}
+                                    {% if element.badge %}<span class="badge">{{ element.badge }}{% if element.badge_icon %} <span class="icon-{{ element.badge_icon }}"></span>{% endif %}</span>{% endif %}
+                                    {{ element.caption }}
+                                </a>
+                                {% endfor %}
+                            </div>
                             {% endfor %}
-                        </div>
-                        {% endfor %}
+                        </nav>
                     {% endif %}
                     {% endblock %}
                 </div>
