@@ -9,7 +9,7 @@ nbproject
 .settings
 .idea/*
 
-## custom & real-time generated files
+## custom & runtime generated files
 config/config.php
 logs/*.log
 templates/cache/??
