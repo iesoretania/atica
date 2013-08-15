@@ -18,7 +18,7 @@
 
 {% block content %}
             {% if flash['home_info'] %}
-            <div class="alert alert-info col-lg-12">
+            <div class="alert alert-info col-lg-12 alert-dismissable">
                 <button type="button" class="close" data-dismiss="alert">&times;</button>
                 {% if flash['home_info'] == 'logout' %}
                 <strong>Ha salido de la aplicación.</strong> Puede volver a entrar <a href="{{ urlFor('login') }}" class="alert-link">desde este enlace</a>.

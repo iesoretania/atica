@@ -15,6 +15,7 @@
     along with this program.  If not, see [http://www.gnu.org/licenses/]. */
 
 .navbar {
+    border: none;
     border-radius: 0;
     background: #3991c3; /* Old browsers */
     background: -moz-linear-gradient(top, #3991c3 0%, #6aa4cc 100%); /* FF3.6+ */
@@ -24,6 +25,19 @@
     background: -ms-linear-gradient(top, #3991c3 0%,#6aa4cc 100%); /* IE10+ */
     background: linear-gradient(to bottom, #3991c3 0%,#6aa4cc 100%); /* W3C */
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3991c3', endColorstr='#6aa4cc',GradientType=0 ); /* IE6-9 */
+}
+
+.navbar-brand {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    padding-bottom: 0;
+}
+
+.navbar-nav {
+    margin-left: 5px;
+    margin-right: 5px;
 }
 
 .navbar ul li:hover {
@@ -125,6 +139,11 @@ footer {
                 background-color ease-in-out .1s;
     -webkit-transition: border-color ease-in-out .1s,
                 background-color ease-in-out .1s;
+    color: #286588;
+}
+
+.sidebar a {
+    color: #3991c3;
 }
 
 .flashing {
