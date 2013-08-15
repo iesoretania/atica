@@ -34,13 +34,13 @@
     <body>
         <nav class="navbar navbar-inverse" role="banner">
             <div class="container">
-                <div class="navbar-header">
-                    <a class="navbar-brand" href="{{ urlFor('frontpage') }}"><span class="icon-cloud"></span> {{ config['appname'] }}</a>
-                </div><!--/.navbar-header -->
-                <p class="navbar-text thin hidden-xs">{{ organization.display_name }}</p>
-                {% block navbar %}
-                {% endblock %}
-                </div><!--/.container -->
+            <div class="navbar-header">
+                <a class="navbar-brand" href="{{ urlFor('frontpage') }}"><span class="icon-cloud"></span> {{ config['appname'] }}</a>
+            </div><!--/.container -->
+            <p class="navbar-text thin hidden-xs">{{ organization.display_name }}</p>
+            {% block navbar %}
+            {% endblock %}
+            </div>
         </nav><!--/.navbar -->
 
         <div class="container">
