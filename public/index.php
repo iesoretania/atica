@@ -39,6 +39,7 @@ $app = new \Slim\Slim(array(
 $view = $app->view(new \Slim\Views\Twig());
 $view->parserOptions = array(
     'charset' => 'utf-8',
+    'debug' => true,
     'cache' => realpath('../templates/cache'),
     'auto_reload' => true,
     'strict_variables' => false,
@@ -48,6 +49,7 @@ $view->parserExtensions = array(
     new \Slim\Views\TwigExtension(),
 );
 $twig = $view->getInstance();
+$twig->addExtension(new Twig_Extension_Debug());
 
 // Leer datos de la organización
 $organization = NULL;

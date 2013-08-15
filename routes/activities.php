@@ -20,14 +20,14 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user) {
     if (!$user) {
         $app->redirect($app->urlFor('login'));
     }
-    
+
     // obtener perfiles
     $profiles = ORM::for_table('person_profile')->
             inner_join('profile', array('person_profile.profile_id','=','profile.id'))->
             inner_join('profile_group', array('profile_group.id','=','profile.profile_group_id'))->
             where('person_id', $user['id'])->
             order_by_asc('profile_group.display_name_neutral')->find_many();
-    
+
     // barra lateral de perfiles
     $profile_bar = array(
         array('caption' => 'Actividades', 'icon' => 'list'),
@@ -51,44 +51,125 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user) {
         array_push($profile_bar, array('caption' => $caption,
             'active' => $active, 'target' => $app->urlFor('activities', array('id' => $profile['id']))));
     }
-    
+
     // si hay un perfil como parámetro que no está asociado al usuario, redirigir
     if ((NULL != $id) && (NULL == $current)) {
         $app->redirect($app->urlFor('activities'));
     }
-    
+
     $sidebar = array();
 
     array_push($sidebar, $profile_bar);
-    
+
     // añadir barra lateral de navegación
     array_push($sidebar, array(
         array('caption' => 'Navegación', 'icon' => 'compass'),
         array('caption' => 'Portada', 'target' => $app->urlFor('frontpage')),
         array('caption' => 'Árbol de documentos', 'target' => $app->urlFor('frontpage'))
-    ));    
-    
+    ));
+
     // barra superior de navegación
     $breadcrumb = array(
         array('display_name' => 'Actividades', 'target' => $app->urlFor('activities')),
         array('display_name' => $detail, 'target' => '#')
     );
-    
+
     if ($id) {
         $profile_ids = array( $id );
     }
-    
+
     // obtener actividades
-    $activities = ORM::for_table('event')->
-        inner_join('activity_event', array('activity_event.event_id', '=', 'event.id'))->
-        inner_join('activity_profile', array('activity_profile.activity_id', '=', 'activity_event.activity_id'))->
-        group_by('activity_event.event_id')->
-        group_by('activity_profile.profile_id')->
-        order_by_asc('activity_event.activity_id')->
-        order_by_asc('order_nr')->
-        where_in('profile_id', $profile_ids)->find_array();
+    $events = getEventsForProfiles($profile_ids);
+
+    // formatear los eventos en grupos de perfiles de arrays
+    $parsedEvents = parseEvents($events,
+            'profile_id', array('profile_display_name', 'profile_group_display_name'),
+            'activity_id', array('activity_display_name', 'activity_description'));
     
-    // generar página
+// generar página
     $app->render('activities.html.twig', array(
-        'navigation' => $breadcrumb, 'search' => true, 'detail' => $detail, 'sidebar' => $sidebar, 'activities' => $activities));
+        'navigation' => $breadcrumb, 'search' => true, 'detail' => $detail, 'sidebar' => $sidebar, 'events' => $parsedEvents));
 })->name('activities');
+
+function getEventsForProfiles($profile_ids) {
+    return ORM::for_table('event')->
+            select('event.*')->
+            select('activity_profile.*')->
+            select('activity.display_name', 'activity_display_name')->
+            select('activity.description', 'activity_description')->
+            select('profile.display_name', 'profile_display_name')->
+            select('profile_group.display_name_neutral', 'profile_group_display_name')->
+            inner_join('activity_event', array('activity_event.event_id', '=', 'event.id'))->
+            inner_join('activity_profile', array('activity_profile.activity_id', '=', 'activity_event.activity_id'))->
+            inner_join('activity', array('activity.id', '=', 'activity_event.activity_id'))->
+            inner_join('profile', array('profile.id', '=', 'activity_profile.profile_id'))->
+            inner_join('profile_group', array('profile_group.id', '=', 'profile.profile_group_id'))->
+            group_by('activity_profile.profile_id')->
+            group_by('activity_event.event_id')->
+            order_by_asc('activity_event.activity_id')->
+            order_by_asc('activity_event.order_nr')->
+            where_in('profile_id', $profile_ids)->find_array();
+}
+
+function addDataInfo($data, $info = array(), $fields = array()) {
+    $current = array();
+    
+    foreach ($info as $field) {
+        $current[$field] = $fields[$field];
+    }
+    return array(
+        'info' => $current,
+        'data' => $data
+    );
+}
+
+function parseEvents($events,
+        $first_level = 'profile_id', $first_info = array(),
+        $second_level = 'activity_id', $second_info = array()) {
+
+    $return = array();
+    $currentFirst = array();
+    $currentSecond = array();
+
+    $lastItem = NULL;
+    
+    $old = array(
+        'first' => NULL,
+        'second' => NULL
+    );
+    
+    foreach ($events as $event) {
+        
+        if (($old['first'] != $event[$first_level]) ||
+            ($old['second'] != $event[$second_level])) {
+            
+            if (!empty($currentSecond)) {
+                $currentFirst[$old['second']] = addDataInfo($currentSecond, $second_info, $lastItem);
+                $currentSecond = array();
+            }
+            $old['second'] = $event[$second_level];
+            
+            if ($old['first'] != $event[$first_level]) {
+                if (!empty($currentFirst)) {
+                    $return[$old['first']] = addDataInfo($currentFirst, $first_info, $lastItem);
+                    
+                    $currentFirst = array();
+                }
+                $old['first'] = $event[$first_level];
+            }
+        }
+        
+        $currentSecond[] = $event;
+        $lastItem = $event;
+    }
+    
+    if (!empty($currentSecond)) {
+        $currentFirst[$old['second']] = addDataInfo($currentSecond, $second_info, $lastItem);
+    }
+    
+    if (!empty($currentFirst)) {
+        $return[$old['first']] = addDataInfo($currentFirst, $first_info, $lastItem);
+    }
+    
+    return $return;
+}
