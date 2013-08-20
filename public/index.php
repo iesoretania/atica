@@ -95,9 +95,11 @@ if (NULL != $organization) {
             find_array());
 }
 
-foreach($data as $item) {
-    // convertir las filas de configuración en un array
-    $config[$item['item_id']] = $item['content'];
+if (($data) && (count($data)>0)) {
+    foreach($data as $item) {
+        // convertir las filas de configuración en un array
+        $config[$item['item_id']] = $item['content'];
+    }
 }
 
 // Leer datos del usuario activo
