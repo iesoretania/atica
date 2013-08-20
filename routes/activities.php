@@ -79,7 +79,7 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user) {
     }
 
     // obtener actividades
-    $events = getEventsForProfiles($profile_ids);
+    $events = getEventsForProfiles($profile_ids, $user['gender']);
 
     // formatear los eventos en grupos de perfiles de arrays
     $parsedEvents = parseEvents($events,
@@ -91,14 +91,15 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user) {
         'navigation' => $breadcrumb, 'search' => true, 'detail' => $detail, 'sidebar' => $sidebar, 'events' => $parsedEvents));
 })->name('activities');
 
-function getEventsForProfiles($profile_ids) {
-    return ORM::for_table('event')->
+function getEventsForProfiles($profile_ids, $gender) {
+    $genderChoice = array ('display_name_neutral', 'display_name_male', 'display_name_female');
+    $data = ORM::for_table('event')->
             select('event.*')->
             select('activity_profile.*')->
             select('activity.display_name', 'activity_display_name')->
             select('activity.description', 'activity_description')->
             select('profile.display_name', 'profile_display_name')->
-            select('profile_group.display_name_neutral', 'profile_group_display_name')->
+            select('profile_group.' . $genderChoice[$gender], 'profile_group_display_name')->
             inner_join('activity_event', array('activity_event.event_id', '=', 'event.id'))->
             inner_join('activity_profile', array('activity_profile.activity_id', '=', 'activity_event.activity_id'))->
             inner_join('activity', array('activity.id', '=', 'activity_event.activity_id'))->
@@ -107,8 +108,13 @@ function getEventsForProfiles($profile_ids) {
             group_by('activity_profile.profile_id')->
             group_by('activity_event.event_id')->
             order_by_asc('activity_event.activity_id')->
-            order_by_asc('activity_event.order_nr')->
-            where_in('profile_id', $profile_ids)->find_array();
+            order_by_asc('activity_event.order_nr');
+    
+    if ($profile_ids) {
+        $data = $data->where_in('profile_id', $profile_ids);
+    }
+    
+    return $data->find_array();
 }
 
 function addDataInfo($data, $info = array(), $fields = array()) {
