@@ -51,6 +51,16 @@ $view->parserExtensions = array(
 $twig = $view->getInstance();
 $twig->addExtension(new Twig_Extension_Debug());
 
+// Leer configuración global
+$config = array(
+    'appname' => $preferences['appname'],
+    'base_url' => $app->request()->getUrl() . $app->request()->getRootUri() . '/');
+
+$app->setName($preferences['appname']);
+
+$data = ORM::for_table('configuration')->where_not_null('content_type')->
+        where_null('organization_id')->find_array();
+
 // Leer datos de la organización
 $organization = NULL;
 if (isset($_SESSION['organization_id'])) {
@@ -76,16 +86,6 @@ if (isset($_SESSION['organization_id'])) {
         }
     }
 }
-
-// Leer configuración global
-$config = array(
-    'appname' => $preferences['appname'],
-    'base_url' => $app->request()->getUrl() . $app->request()->getRootUri() . '/');
-
-$app->setName($preferences['appname']);
-
-$data = ORM::for_table('configuration')->where_not_null('content_type')->
-        where_null('organization_id')->find_array();
 
 // Leer configuración local de la organización
 if (NULL != $organization) {
