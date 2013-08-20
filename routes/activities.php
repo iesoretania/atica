@@ -61,18 +61,18 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user) {
 
     array_push($sidebar, $profile_bar);
 
-    // añadir barra lateral de navegación
-    array_push($sidebar, array(
-        array('caption' => 'Navegación', 'icon' => 'compass'),
-        array('caption' => 'Portada', 'target' => $app->urlFor('frontpage')),
-        array('caption' => 'Árbol de documentos', 'target' => $app->urlFor('frontpage'))
-    ));
-
     // barra superior de navegación
-    $breadcrumb = array(
-        array('display_name' => 'Actividades', 'target' => $app->urlFor('activities')),
-        array('display_name' => $detail, 'target' => '#')
-    );
+    if ($id != NULL) {
+        $breadcrumb = array(
+            array('display_name' => 'Actividades', 'target' => $app->urlFor('activities')),
+            array('display_name' => $detail)
+        );
+    }
+    else {
+        $breadcrumb = array(
+            array('display_name' => 'Actividades')
+        );        
+    }
 
     if ($id) {
         $profile_ids = array( $id );

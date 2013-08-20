@@ -15,7 +15,7 @@
     along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
 
 {% extends "layout.html.twig" %}
-            
+
 {% block maincontent %}
                     <div class="well well-sm">
                         <h1>Actividades{% if detail %}: {{ detail }}{% endif %}</h1>
@@ -33,22 +33,18 @@
                             <table class="table table-striped table-condensed table-hover">
                                 <thead>
                                     <tr>
-                                        <th>Calendario</th>
-                                        <th>Actividad</th>
-                                        <th>Documentos</th>
-                                        <th>Entrega</th>
-                                        <th></th>
+                                        <th class="col-md-2">Calendario</th>
+                                        <th class="col-md-7">Actividad</th>
+                                        <th class="col-md-3">Documentos</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for event in activity.data %}
                                     <tr>
-                                        <td class="center">{{ event.period_description }}</td>
-                                        <td>{{ event.display_name }}</td>
+                                        <td><a href="{{ urlFor('event', event) }}">{{ event.period_description }}</a></td>
+                                        <td><a href="{{ urlFor('event', event) }}">{{ event.display_name }}</a></td>
                                         <td></td>
-                                        <td></td>
-                                        <td class="center"><span class="icon-edit"> <span class="icon-remove"></span></td>
-                                    </tr>                            
+                                    </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>

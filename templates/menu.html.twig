@@ -17,6 +17,8 @@
 {% extends "base.html.twig" %}
 
 {% block navbar %}
+                {% block navbaritems %}
+                {% endblock %}
                 <ul class="nav navbar-nav navbar-right">
                 {% if user %}
                     <li class="login">
