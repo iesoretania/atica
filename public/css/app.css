@@ -27,7 +27,7 @@
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3991c3', endColorstr='#6aa4cc',GradientType=0 ); /* IE6-9 */
 }
 
-.navbar-brand {
+.navbar-brand#main {
     width: 100%;
     margin-left: auto;
     margin-right: auto;
