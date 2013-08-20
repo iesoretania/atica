@@ -54,7 +54,7 @@ $app->post('/entrar', function () use ($app, $preferences) {
     if (!isset($_SESSION['organization_id'])) {
         $app->redirect($app->urlFor('organization'));
     }
-    $username = trim($_POST['username']);
+    $username = strtolower(trim($_POST['username']));
 
     // comprobar si el usuario está bloqueado
     $now = date('Y-m-d H:i:s');
