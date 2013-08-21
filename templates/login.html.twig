@@ -29,7 +29,7 @@
                     {% if flash['login_error'] == 'not found' %}
                     <strong>No se puede acceder.</strong> Compruebe el nombre de usuario y/o la contraseña e inténtelo de nuevo.
                     {% elseif flash['login_error'] == 'no organization' %}
-                    <strong>Usuario no asociado a organización.</strong> Por favor, seleccione <a href="{{ urlFor('organization') }}" class="alert-link">una organización a la que pertenezca</a>.
+                    <strong>Usuario no asociado a esta organización.</strong> Por favor, <a href="{{ urlFor('organization') }}" class="alert-link">seleccione una organización</a> a la que pertenezca antes de entrar.
                     {% elseif flash['login_error'] == 'blocked' %}
                     <strong>Usuario bloqueado.</strong> Ha superado el límite de intentos sin éxito para entrar. Por favor espere hasta las {{ flash['login_blocked_for'] }}.
                     {% elseif flash['login_error'] == 'not active' %}
