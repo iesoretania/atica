@@ -76,7 +76,7 @@
             {% endif %}
         {% endblock %}
             <main role="main">
-            {% block content %}        
+            {% block content %}
             {% endblock %}
             </main>
         </div>
@@ -92,5 +92,8 @@
         <!--[if lt IE 9]>
           <script src="lib/respond/respond.min.js"></script>
         <![endif]-->
+        <script type="text/javascript">
+            $(function() { $('.showjs').css('display', 'block'); });
+        </script>
     </body>
 </html>

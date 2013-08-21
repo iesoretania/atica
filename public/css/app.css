@@ -153,6 +153,19 @@ footer {
     text-align: center;
 }
 
+.print {
+    display: none;
+}
+
+.print a {
+    color: #000;
+}
+
+.print a:hover {
+    color: #3991c3;
+    text-decoration: none;
+}
+
 @keyframes flashing {
     from {
         opacity: 1;
