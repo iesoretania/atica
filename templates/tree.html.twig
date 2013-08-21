@@ -1,0 +1,59 @@
+{#  ATICA - Web application for supporting Quality Management Systems
+    Copyright (C) 2009-2013: Luis-Ramón López López
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
+
+{% extends "layout.html.twig" %}
+{% block sidebar %}
+{% if sidebar %}
+    <nav>
+        <div class="panel-group" id="sidelist">
+            {% for group in sidebar %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a class="accordion-toggle" data-toggle="collapse" data-parent="#sidelist" href="#item{{ loop.index }}">
+                            {{ group.caption }}
+                        </a>
+                    </h4>
+                </div>
+                <div id="item{{ loop.index }}" class="panel-collapse collapse">
+                    <div class="list-group list-group-isolated">
+
+                        {% for element in group.data %}
+                        <a class="list-group-item{% if not element.target %} list-group-item-text{% endif %}{% if element.active %} active{% endif %}"{% if element.target %} href="{{ element.target }}"{% endif %}>
+                            {% if element.icon %}<span class="icon-{{ element.icon }}"></span> {% endif %}
+                            {% if element.badge %}<span class="badge">{{ element.badge }}{% if element.badge_icon %} <span class="icon-{{ element.badge_icon }}"></span>{% endif %}</span>{% endif %}
+                            {{ element.caption }}
+                        </a>
+                        {% endfor %}
+
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+            {# for element in group %}
+            <a class="list-group-item{% if not element.target %} list-group-item-text{% endif %}{% if element.active %} active{% endif %}"{% if element.target %} href="{{ element.target }}"{% endif %}>
+                {% if element.icon %}<span class="icon-{{ element.icon }}"></span> {% endif %}
+                {% if element.badge %}<span class="badge">{{ element.badge }}{% if element.badge_icon %} <span class="icon-{{ element.badge_icon }}"></span>{% endif %}</span>{% endif %}
+                {{ element.caption }}
+            </a>
+            {% endfor %}
+        </div>#}
+    </nav>
+{% endif %}
+{% endblock %}
+{% block maincontent %}
+{% endblock %}

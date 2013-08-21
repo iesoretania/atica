@@ -54,7 +54,8 @@ class EventTest extends PHPUnit_Framework_TestCase {
 	{
             $app = new \Slim\Slim();
             $user = array();
-
+            $config = array();
+            
             include 'routes/activities.php';
             
             $event = array(

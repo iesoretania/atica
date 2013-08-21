@@ -166,6 +166,11 @@ footer {
     text-decoration: none;
 }
 
+.list-group-isolated {
+    margin: 0;
+    padding: 0;
+}
+
 @keyframes flashing {
     from {
         opacity: 1;
