@@ -19,7 +19,8 @@
 {% block maincontent %}
                     <div class="panel">
                         <div class="panel-body">
-                            Bienvenido a la plataforma
+                            <h1>Le damos la bienvenida a la plataforma</h1>
+                            {{ config['guest.welcome'] | raw }}
                         </div>
                     </div>
 {% endblock %}
