@@ -79,19 +79,19 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user) {
     }
 
     // obtener actividades
-    $events = getEventsForProfiles($profile_ids, $user['gender']);
+    $events = getEventsForProfiles($profile_ids, $user);
 
     // formatear los eventos en grupos de perfiles de arrays
     $parsedEvents = parseEvents($events,
             'profile_id', array('profile_display_name', 'profile_group_display_name'),
             'activity_id', array('activity_display_name', 'activity_description'));
     
-// generar página
+    // generar página
     $app->render('activities.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true, 'detail' => $detail, 'sidebar' => $sidebar, 'events' => $parsedEvents));
 })->name('activities');
 
-function getEventsForProfiles($profile_ids, $gender) {
+function getEventsForProfiles($profile_ids, $user) {
     $genderChoice = array ('display_name_neutral', 'display_name_male', 'display_name_female');
     $data = ORM::for_table('event')->
             select('event.*')->
@@ -99,12 +99,14 @@ function getEventsForProfiles($profile_ids, $gender) {
             select('activity.display_name', 'activity_display_name')->
             select('activity.description', 'activity_description')->
             select('profile.display_name', 'profile_display_name')->
-            select('profile_group.' . $genderChoice[$gender], 'profile_group_display_name')->
+            select('profile_group.' . $genderChoice[$user['gender']], 'profile_group_display_name')->
+            select('completed_event.completed_date')->
             inner_join('activity_event', array('activity_event.event_id', '=', 'event.id'))->
             inner_join('activity_profile', array('activity_profile.activity_id', '=', 'activity_event.activity_id'))->
             inner_join('activity', array('activity.id', '=', 'activity_event.activity_id'))->
             inner_join('profile', array('profile.id', '=', 'activity_profile.profile_id'))->
             inner_join('profile_group', array('profile_group.id', '=', 'profile.profile_group_id'))->
+            left_outer_join('completed_event', 'completed_event.event_id = event.id AND completed_event.person_id = ' . $user['id'])->
             group_by('activity_profile.profile_id')->
             group_by('activity_event.event_id')->
             order_by_asc('activity_event.activity_id')->

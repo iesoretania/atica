@@ -36,14 +36,12 @@
 }
 
 .navbar-nav {
-    margin-left: 5px;
-    margin-right: 5px;
+    margin-left: 0px;
+    margin-right: 0px;
 }
 
-.navbar ul li:hover {
+/*.navbar ul li:hover {
     background-color: #2a2a66;
-    /*border-top: solid 1px #ddd;
-    border-bottom: solid 1px #ddd;*/
 }
 
 .navbar ul li.login:hover {
@@ -61,15 +59,15 @@
     -webkit-transition: border-color ease-in-out .1s,
                 box-shadow ease-in-out .1s,
                 background-color ease-in-out .1s;
-}
+}*/
 
 .navbar ul li.login a.login {
     margin-top: 6px;
     border-radius: 4px;
     padding-top: 8px;
     padding-bottom: 8px;
-    background-color: #3c7fa6;
-    border-color: #3c7fa6;
+    /*background-color: #3c7fa6;
+    border-color: #3c7fa6;*/
     width: 100%;
 }
 

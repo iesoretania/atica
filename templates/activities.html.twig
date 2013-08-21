@@ -40,8 +40,8 @@
                                 </thead>
                                 <tbody>
                                     {% for event in activity.data %}
-                                    <tr>
-                                        <td><a href="{{ urlFor('event', event) }}">{{ event.period_description }}</a></td>
+                                    <tr {% if event.completed_date %}class="success"{% endif %}>
+                                        <td>{{ event.period_description }} {{ parsePeriod(event.from_week, event.to_week) }}</td>
                                         <td><a href="{{ urlFor('event', event) }}">{{ event.display_name }}</a></td>
                                         <td></td>
                                     </tr>
