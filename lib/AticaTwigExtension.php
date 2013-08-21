@@ -32,15 +32,12 @@ class AticaTwigExtension extends \Twig_Extension
         );
     }
     
-    public function parsePeriod($from, $to, $base = 0) {
+    public function parsePeriod($from, $to, $strings) {
 
-        $strings = array(
-            'months' => array('enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-                'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'),
-            'weeks' => array('1ª sem. ', '2ª sem. ', '3ª sem. ', '4ª sem. '),
-            'halfmonths' => array('1ª quincena ', '2ª quincena ')
-        );
-
+        if (($from === NULL) || ($to === NULL)) {
+            return "";
+        }
+        
         $return = "";
 
         // Mes(es) completo
@@ -55,8 +52,10 @@ class AticaTwigExtension extends \Twig_Extension
         }
         else {
             $return = $strings['weeks'][$from % 4] . $strings['months'][floor($from / 4)];
-            $return .= ' a ';
-            $return .= $strings['weeks'][$to % 4] . $strings['months'][floor($to / 4)];
+            if ($from != $to) {
+                $return .= ' a ';
+                $return .= $strings['weeks'][$to % 4] . $strings['months'][floor($to / 4)];
+            }
         }
 
         return $return;

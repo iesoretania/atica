@@ -15,7 +15,14 @@
     along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
 
 {% extends "menu.html.twig" %}
-
+{%
+    set period_labels = {
+        'months' : ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+                     'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'],
+        'weeks': ['1ª sem. ', '2ª sem. ', '3ª sem. ', '4ª sem. '],
+        'halfmonths': ['1ª quincena ', '2ª quincena ']
+    }
+%}
 {% block content %}
             {% if flash['home_info'] %}
             <div class="alert alert-info col-lg-12 alert-dismissable">

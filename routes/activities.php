@@ -16,7 +16,7 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see [http://www.gnu.org/licenses/]. */
 
-$app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user) {
+$app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config) {
     if (!$user) {
         $app->redirect($app->urlFor('login'));
     }
@@ -79,7 +79,7 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user) {
     }
 
     // obtener actividades
-    $events = getEventsForProfiles($profile_ids, $user);
+    $events = getEventsForProfiles($profile_ids, $user, $config['calendar.base_week']);
 
     // formatear los eventos en grupos de perfiles de arrays
     $parsedEvents = parseEvents($events,
@@ -91,7 +91,7 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user) {
         'navigation' => $breadcrumb, 'search' => true, 'detail' => $detail, 'sidebar' => $sidebar, 'events' => $parsedEvents));
 })->name('activities');
 
-function getEventsForProfiles($profile_ids, $user) {
+function getEventsForProfiles($profile_ids, $user, $base = 33) {
     $genderChoice = array ('display_name_neutral', 'display_name_male', 'display_name_female');
     $data = ORM::for_table('event')->
             select('event.*')->
@@ -101,6 +101,8 @@ function getEventsForProfiles($profile_ids, $user) {
             select('profile.display_name', 'profile_display_name')->
             select('profile_group.' . $genderChoice[$user['gender']], 'profile_group_display_name')->
             select('completed_event.completed_date')->
+            select_expr('(event.from_week+48-' . $base . ') % 48', 'n_from_week')->
+            select_expr('(event.to_week+48-' . $base . ') % 48', 'n_to_week')->
             inner_join('activity_event', array('activity_event.event_id', '=', 'event.id'))->
             inner_join('activity_profile', array('activity_profile.activity_id', '=', 'activity_event.activity_id'))->
             inner_join('activity', array('activity.id', '=', 'activity_event.activity_id'))->
@@ -110,7 +112,9 @@ function getEventsForProfiles($profile_ids, $user) {
             group_by('activity_profile.profile_id')->
             group_by('activity_event.event_id')->
             order_by_asc('activity_event.activity_id')->
-            order_by_asc('activity_event.order_nr');
+            order_by_asc('activity_event.order_nr')->
+            order_by_asc('n_from_week')->
+            order_by_asc('n_to_week');
     
     if ($profile_ids) {
         $data = $data->where_in('profile_id', $profile_ids);
