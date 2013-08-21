@@ -170,3 +170,7 @@ footer {
         opacity: 0;
     }
 }
+
+@media print {
+    a:link:after, a:visited:after { content:"" }
+}
