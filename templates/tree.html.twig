@@ -69,7 +69,7 @@
             <tbody>
                 {% for delivery in folder.data %}
                 <tr>
-                    <td><a href="#">{{ delivery.display_name }}</a></td>
+                    <td><a href="#">{{ delivery.display_name | replace({'_':' '})}}</a></td>
                     <td>{{ delivery.upload_date | date("Y-m-d") }}</td>
                     <td><a href="#">{{ delivery.person_display_name }}</a></td>
                 </tr>

@@ -20,24 +20,30 @@ $app->get('/arbol(/:id)', function ($id = NULL) use ($app, $user, $organization)
     if (!$user) {
         $app->redirect($app->urlFor('login'));
     }
-    $breadcrumb = array(
-        array('display_name' => 'Portada', 'target' => '#')
-    );
 
-    $sidebar = getTree($organization['id'], $app, $id);
+    $category = array();
+    
+    $sidebar = getTree($organization['id'], $app, $id, $category);
     
     if (NULL !== $id) {
         $folders = getFolders($id);
+        $breadcrumb = array(
+            array('display_name' => 'Árbol', 'target' => $app->urlFor('tree')),
+            array('display_name' => $category['display_name'])
+        );
     }
     else {
         $folders = array();
+        $breadcrumb = array(
+            array('display_name' => 'Árbol', 'target' => '#')
+        );
     }
     $app->render('tree.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar,
         'folders' => $folders));
 })->name('tree');
 
-function getTree($org_id, $app, $id) {
+function getTree($org_id, $app, $id, &$matchedCategory) {
     $return = array();
     $currentData = array();
     $currentCategory = NULL;
@@ -69,6 +75,9 @@ function getTree($org_id, $app, $id) {
                 'active' => $localMatch,
                 'target' => $app->urlFor('tree', array('id' => $category['id']))
             );
+            if ($localMatch) {
+                $matchedCategory = $category;
+            }
             $match = $match || $localMatch;
         }
     }
