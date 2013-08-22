@@ -19,8 +19,13 @@
 {% block maincontent %}
                     <div class="panel">
                         <div class="panel-body">
-                            <h1>Le damos la bienvenida a la plataforma</h1>
-                            {{ config['guest.welcome'] | raw }}
+                            {% if user %}
+                                <h1>¡Bienvenid{{ ['o/a', 'o', 'a'][user.gender] }} {{ user.first_name }}!</h1>
+                                {{ config['user.welcome'] | raw }}
+                            {% else %}
+                                <h1>Le damos la bienvenida a la plataforma</h1>
+                                {{ config['guest.welcome'] | raw }}
+                            {% endif %}
                         </div>
                     </div>
 {% endblock %}

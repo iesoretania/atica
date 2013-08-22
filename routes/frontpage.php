@@ -41,5 +41,6 @@ $app->get('/(portada)', function () use ($app, $user) {
         ));
     }
     $app->render('frontpage.html.twig', array(
-        'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar));
+        'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar,
+        'user' => $user));
 })->name('frontpage');
