@@ -186,6 +186,13 @@ footer {
     padding: 0;
 }
 
+.profile {
+    text-align: right;
+    background-color: #ddd !important;
+    text-transform: uppercase;
+    font-size: 90%;
+}
+
 @keyframes flashing {
     from {
         opacity: 1;

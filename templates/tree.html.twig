@@ -49,10 +49,11 @@
 {% endblock %}
 {% block maincontent %}
 <div class="well well-sm">
-    <h1>Contenido{% if detail %}: {{ detail }}{% endif %}</h1>
+    <h1>{{ category.display_name }}</h1>
+    {% if category.description %}<small>{{ category.description }}</small>{% endif %}
 </div>
-{% if folders %}
-{% for folder in folders %}
+{% if data %}
+{% for folder in data %}
 <div class="panel panel-info">
     <div class="panel-heading">
         <h2>{{ folder.caption }}</h2>
@@ -67,11 +68,22 @@
                 </tr>
             </thead>
             <tbody>
+                {% set lastProfile = -1 %}
                 {% for delivery in folder.data %}
+                    {% set profile = profiles[delivery.profile_id] %}
+                    {% set personId = delivery['uploader_person_id'] %}
+                    {% if lastProfile != delivery.profile_id %}
+                    <tr>
+                        <td colspan="3" class="profile">
+                            {{ [profile.display_name_neutral, profile.display_name_male, profile.display_name_female][profileGender[delivery.profile_id]] }} {{ profile.display_name }}
+                        </td>
+                    </tr>
+                    {% set lastProfile = delivery.profile_id %}
+                    {% endif %}
                 <tr>
-                    <td><a href="#">{{ delivery.display_name | replace({'_':' '})}}</a></td>
+                    <td><a href="#{{ delivery.id }}">{{ delivery.display_name | replace({'_':' '})}}</a></td>
                     <td>{{ delivery.upload_date | date("Y-m-d") }}</td>
-                    <td><a href="#">{{ delivery.person_display_name }}</a></td>
+                    <td><a href="#{{ personId }}">{{ persons[personId]['display_name']}}</a></td>
                 </tr>
                 {% endfor %}
             </tbody>

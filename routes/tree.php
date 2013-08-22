@@ -21,25 +21,38 @@ $app->get('/arbol(/:id)', function ($id = NULL) use ($app, $user, $organization)
         $app->redirect($app->urlFor('login'));
     }
 
+    $data = array();
     $category = array();
+    $persons = array();
+    $profiles = array();
+    $profileGender = array();
     
     $sidebar = getTree($organization['id'], $app, $id, $category);
     
     if (NULL !== $id) {
+        $data = getParsedFolders($id, $profileGender);
         $folders = getFolders($id);
+        $persons = getFolderPersons($id);
+        $profiles = getProfiles($id);
+        
         $breadcrumb = array(
             array('display_name' => 'Árbol', 'target' => $app->urlFor('tree')),
             array('display_name' => $category['display_name'])
         );
     }
     else {
-        $folders = array();
         $breadcrumb = array(
             array('display_name' => 'Árbol', 'target' => '#')
         );
     }
+    //var_dump($data); die();
     $app->render('tree.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar,
+        'category' => $category,
+        'data' => $data,
+        'persons' => $persons,
+        'profiles' => $profiles,
+        'profileGender' => $profileGender,
         'folders' => $folders));
 })->name('tree');
 
@@ -92,8 +105,63 @@ function getTree($org_id, $app, $id, &$matchedCategory) {
     return $return;
 }
 
-function getFolders($category_id) {
+function getFolderPersons($category_id) {
+    $data = ORM::for_table('person')->distinct()->
+            select('person.*')->
+            inner_join('revision', array('person.id', '=', 'revision.uploader_person_id'))->
+            inner_join('delivery', array('delivery.current_revision_id', '=', 'revision.id'))->
+            inner_join('folder_delivery', array('folder_delivery.delivery_id','=','delivery.id'))->
+            inner_join('folder', array('folder.id','=','folder_delivery.folder_id'))->
+            where('folder.category_id', $category_id)->
+            find_array();
     
+    $return = array();
+    
+    foreach($data as $item) {
+        $return[$item['id']] = $item;
+    }
+    
+    return $return;
+}
+
+function getFolders($category_id) {
+    $data = ORM::for_table('folder')->
+            where('folder.category_id', $category_id)->
+            find_array();   
+    
+    $return = array();
+    
+    foreach($data as $item) {
+        $return[$item['id']] = $item;
+    }
+    
+    return $return;
+}
+
+function getProfiles($category_id) {
+    $data = ORM::for_table('profile')->distinct()->
+            select('profile_group.*')->
+            select('profile.*')->
+            inner_join('profile_group', array('profile_group.id', '=', 'profile.profile_group_id'))->
+            inner_join('delivery', array('delivery.profile_id', '=', 'profile.id'))->
+            inner_join('folder_delivery', array('folder_delivery.delivery_id','=','delivery.id'))->
+            inner_join('folder', array('folder.id','=','folder_delivery.folder_id'))->
+            where('folder.category_id', $category_id)->
+            order_by_asc('profile_group_id')->
+            order_by_asc('profile.id')->
+            find_array();   
+    
+    $return = array();
+    
+    foreach($data as $item) {
+        $return[$item['id']] = $item;
+    }
+    
+    return $return;
+}
+
+function getParsedFolders($category_id, &$profileGender) {
+
     $data = ORM::for_table('delivery')->
             select('delivery.*')->
             select('folder.id', 'folder_id')->
@@ -101,9 +169,10 @@ function getFolders($category_id) {
             select('folder.category_id')->
             select('folder.order_nr')->
             select('revision.upload_date')->
-            select('person.display_name', 'person_display_name')->
+            select('revision.uploader_person_id')->
+            select('person.gender')->
             inner_join('folder_delivery', array('folder_delivery.delivery_id','=','delivery.id'))->
-            inner_join('folder', array('folder.id','=','folder_delivery.folder_id'))->
+            inner_join('folder', array('folder.id', '=', 'folder_delivery.folder_id'))->
             inner_join('revision', array('delivery.current_revision_id', '=', 'revision.id'))->
             inner_join('person', array('person.id', '=', 'revision.uploader_person_id'))->
             order_by_asc('folder.order_nr')->
@@ -130,7 +199,15 @@ function getFolders($category_id) {
             $currentFolderDisplayName = $delivery['folder_display_name'];
         }
         else {
-            $currentData[] = $delivery;
+            $currentData[] = $delivery->as_array();
+            if (isset($profileGender[$delivery['profile_id']])) {
+                if ($profileGender[$delivery['profile_id']] != $delivery['gender']) {
+                    $profileGender[$delivery['profile_id']] = 0;
+                }
+            }
+            else {
+                $profileGender[$delivery['profile_id']] = $delivery['gender'];
+            }
         }
     }
     if ($currentData != NULL) {
