@@ -24,7 +24,7 @@ $app->get('/bienvenida', function () use ($app, $user) {
     $app->render('welcome.html.twig', array('navigation' => $breadcrumb));
 })->name('welcome');
 
-$app->get('/personal', function () use ($app, $user) {
+$app->get('/personal(/:id)', function ($id = NULL) use ($app, $user) {
     if (!$user) {
         $app->redirect($app->urlFor('login'));
     }

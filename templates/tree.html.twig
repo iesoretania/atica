@@ -48,9 +48,11 @@
 {% endif %}
 {% endblock %}
 {% block maincontent %}
-<div class="well well-sm">
-    <h1>{{ category.display_name }}</h1>
-    {% if category.description %}<h4>{{ category.description }}</h4>{% endif %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+    <h1>{{ category ? category['display_name'] : 'Árbol de documentos' }}</h1>
+    </div>
+    {% if category.description %}<div class="panel-body"><h4>{{ category.description }}</h4></div>{% endif %}
 </div>
 {% if data %}
 {% for folder in data %}
@@ -85,7 +87,7 @@
                 <tr>
                     <td><a href="#{{ delivery.id }}">{{ delivery.display_name | replace({'_':' '})}}</a></td>
                     <td>{{ delivery.upload_date | date("Y-m-d") }}</td>
-                    <td><a href="#{{ personId }}">{{ persons[personId]['display_name']}}</a></td>
+                    <td><a href="{{ urlFor('personal', { 'id': personId }) }}">{{ persons[personId]['display_name']}}</a></td>
                 </tr>
                 {% endfor %}
             </tbody>
