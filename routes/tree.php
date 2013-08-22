@@ -22,6 +22,7 @@ $app->get('/arbol(/:id)', function ($id = NULL) use ($app, $user, $organization)
     }
 
     $data = array();
+    $folders = array();
     $category = array();
     $persons = array();
     $profiles = array();
