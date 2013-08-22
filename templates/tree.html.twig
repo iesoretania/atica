@@ -44,16 +44,44 @@
             </div>
             {% endfor %}
         </div>
-            {# for element in group %}
-            <a class="list-group-item{% if not element.target %} list-group-item-text{% endif %}{% if element.active %} active{% endif %}"{% if element.target %} href="{{ element.target }}"{% endif %}>
-                {% if element.icon %}<span class="icon-{{ element.icon }}"></span> {% endif %}
-                {% if element.badge %}<span class="badge">{{ element.badge }}{% if element.badge_icon %} <span class="icon-{{ element.badge_icon }}"></span>{% endif %}</span>{% endif %}
-                {{ element.caption }}
-            </a>
-            {% endfor %}
-        </div>#}
     </nav>
 {% endif %}
 {% endblock %}
 {% block maincontent %}
+<div class="well well-sm">
+    <h1>Contenido{% if detail %}: {{ detail }}{% endif %}</h1>
+</div>
+{% if folders %}
+{% for folder in folders %}
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <h2>{{ folder.caption }}</h2>
+    </div>
+    <div class="panel-body">
+        <table class="table table-striped table-condensed table-hover">
+            <thead>
+                <tr>
+                    <th class="col-md-7">Documento</th>
+                    <th class="col-md-1">Fecha</th>
+                    <th class="col-md-2">Enviado por</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for delivery in folder.data %}
+                <tr>
+                    <td><a href="#">{{ delivery.display_name }}</a></td>
+                    <td>{{ delivery.upload_date | date("Y-m-d") }}</td>
+                    <td><a href="#">{{ delivery.person_display_name }}</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="alert alert-danger">
+    No hay ninguna actividad para mostrar
+</div>
+{% endif %}
 {% endblock %}
