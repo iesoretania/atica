@@ -144,6 +144,21 @@ footer {
     color: #3991c3;
 }
 
+.treebar {
+    margin-bottom: 20px;
+    font-weight: 300;   
+}
+
+.treebar a:hover {
+    transition: background-color ease-in-out .1s;
+    -webkit-transition: background-color ease-in-out .1s;
+    color: #286588;
+}
+
+.treebar a {
+    color: #3991c3;
+}
+
 .flashing {
     animation: flashing 0.5s infinite ease-in-out alternate;
     -webkit-animation: flashing 0.5s infinite ease-in-out alternate;
