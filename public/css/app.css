@@ -164,10 +164,6 @@ footer {
     -webkit-animation: flashing 0.5s infinite ease-in-out alternate;
 }
 
-.center {
-    text-align: center;
-}
-
 .print {
     display: none;
 }

@@ -143,3 +143,13 @@ require('../routes/tree.php');
 
 // Ejecutar aplicación
 $app->run();
+
+function parseArray($data) {
+    $return = array();
+    
+    foreach($data as $item) {
+        $return[$item['id']] = $item;
+    }
+    
+    return $return;
+}

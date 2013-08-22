@@ -50,15 +50,17 @@
 {% block maincontent %}
 <div class="well well-sm">
     <h1>{{ category.display_name }}</h1>
-    {% if category.description %}<small>{{ category.description }}</small>{% endif %}
+    {% if category.description %}<h4>{{ category.description }}</h4>{% endif %}
 </div>
 {% if data %}
 {% for folder in data %}
+{% set info = folders[folder.id] %}
 <div class="panel panel-info">
     <div class="panel-heading">
-        <h2>{{ folder.caption }}</h2>
+        <h2>{{ info['display_name'] }}</h2>
     </div>
     <div class="panel-body">
+        {% if info['description'] %}<blockquote><p>{{ info['description'] }}</p></blockquote>{% endif %}
         <table class="table table-striped table-condensed table-hover">
             <thead>
                 <tr>
@@ -72,7 +74,7 @@
                 {% for delivery in folder.data %}
                     {% set profile = profiles[delivery.profile_id] %}
                     {% set personId = delivery['uploader_person_id'] %}
-                    {% if lastProfile != delivery.profile_id %}
+                    {% if (lastProfile != delivery.profile_id) and (delivery.profile_id != NULL) %}
                     <tr>
                         <td colspan="3" class="profile">
                             {{ [profile.display_name_neutral, profile.display_name_male, profile.display_name_female][profileGender[delivery.profile_id]] }} {{ profile.display_name }}
