@@ -16,7 +16,7 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see [http://www.gnu.org/licenses/]. */
 
-$app->get('/arbol(:/id)', function ($id = NULL) use ($app, $user, $organization) {
+$app->get('/arbol(/:id)', function ($id = NULL) use ($app, $user, $organization) {
     if (!$user) {
         $app->redirect($app->urlFor('login'));
     }
@@ -24,17 +24,24 @@ $app->get('/arbol(:/id)', function ($id = NULL) use ($app, $user, $organization)
         array('display_name' => 'Portada', 'target' => '#')
     );
 
-    $sidebar = getTree($organization['id']);
-    $folders = getFolders(26);
+    $sidebar = getTree($organization['id'], $app, $id);
+    
+    if (NULL !== $id) {
+        $folders = getFolders($id);
+    }
+    else {
+        $folders = array();
+    }
     $app->render('tree.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar,
         'folders' => $folders));
 })->name('tree');
 
-function getTree($org_id) {
+function getTree($org_id, $app, $id) {
     $return = array();
     $currentData = array();
     $currentCategory = NULL;
+    $match = false;
 
     $data = ORM::for_table('category')->
             order_by_asc('category_left')->
@@ -47,22 +54,28 @@ function getTree($org_id) {
             if ($currentCategory != NULL) {
                 $return[] = array(
                     'caption' => $currentCategory['display_name'],
+                    'active' => $match,
                     'data' => $currentData
                 );
             }
             $currentData = array();
             $currentCategory = $category;
+            $match = false;
         }
         else {
+            $localMatch = ($id == $category['id']);
             $currentData[] = array(
                 'caption' => $category['display_name'],
-                'target' => '#'
+                'active' => $localMatch,
+                'target' => $app->urlFor('tree', array('id' => $category['id']))
             );
+            $match = $match || $localMatch;
         }
     }
     if ($currentCategory != NULL) {
         $return[] = array(
             'caption' => $currentCategory['display_name'],
+            'active' => $match,
             'data' => $currentData
         );
     }

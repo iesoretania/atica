@@ -28,7 +28,7 @@
                         </a>
                     </h4>
                 </div>
-                <div id="item{{ loop.index }}" class="panel-collapse collapse">
+                <div id="item{{ loop.index }}" class="panel-collapse collapse{% if group.active %} in{% endif %}">
                     <div class="list-group list-group-isolated">
 
                         {% for element in group.data %}
@@ -81,7 +81,7 @@
 {% endfor %}
 {% else %}
 <div class="alert alert-danger">
-    No hay ninguna actividad para mostrar
+    No hay ningún documento que mostrar. Seleccione un proceso de la lista de la izquierda.
 </div>
 {% endif %}
 {% endblock %}
