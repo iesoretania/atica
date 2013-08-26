@@ -85,7 +85,7 @@
                     {% set lastProfile = delivery.profile_id %}
                     {% endif %}
                 <tr>
-                    <td><a href="#{{ delivery.id }}">{{ delivery.display_name | replace({'_':' '})}}</a></td>
+                    <td class="thin"><a href="#{{ delivery.id }}">{{ delivery.display_name | replace({'_':' '})}}</a></td>
                     <td>{{ delivery.upload_date | date("Y-m-d") }}</td>
                     <td><a href="{{ urlFor('personal', { 'id': personId }) }}">{{ persons[personId]['display_name']}}</a></td>
                 </tr>
