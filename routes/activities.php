@@ -22,15 +22,11 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config)
     }
 
     // obtener perfiles
-    $profiles = ORM::for_table('person_profile')->
-            inner_join('profile', array('person_profile.profile_id','=','profile.id'))->
-            inner_join('profile_group', array('profile_group.id','=','profile.profile_group_id'))->
-            where('person_id', $user['id'])->
-            order_by_asc('profile_group.display_name_neutral')->find_many();
+    $profiles = getUserProfiles($user['id']);
 
     // barra lateral de perfiles
     $profile_bar = array(
-        array('caption' => 'Actividades', 'icon' => 'list'),
+        array('caption' => 'Actividades', 'icon' => 'calendar'),
         array('caption' => 'Ver todas', 'active' => ($id == NULL), 'target' => $app->urlFor('activities'))
     );
     $current = NULL;
@@ -90,6 +86,14 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config)
     $app->render('activities.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true, 'detail' => $detail, 'sidebar' => $sidebar, 'events' => $parsedEvents));
 })->name('activities');
+
+function getUserProfiles($user_id) {
+    return ORM::for_table('person_profile')->
+            inner_join('profile', array('person_profile.profile_id','=','profile.id'))->
+            inner_join('profile_group', array('profile_group.id','=','profile.profile_group_id'))->
+            where('person_id', $user_id)->
+            order_by_asc('profile_group.display_name_neutral')->find_many();
+}
 
 function getEventsForProfiles($profile_ids, $user, $base = 33) {
     $genderChoice = array ('display_name_neutral', 'display_name_male', 'display_name_female');
