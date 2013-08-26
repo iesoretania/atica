@@ -57,7 +57,37 @@ $app->get('/arbol(/:id)', function ($id = NULL) use ($app, $user, $organization)
         'folders' => $folders));
 })->name('tree');
 
-function getTree($org_id, $app, $id, &$matchedCategory) {
+$app->get('/descargar/:cid/:id/', function ($cid, $id) use ($app, $user, $organization) {
+    if (!$user) {
+        $app->redirect($app->urlFor('login'));
+    }
+
+    $delivery = getDelivery($id, $user['id']);
+    if (!$delivery) {
+       $app->flash('home_error', 'no_delivery');
+       $app->redirect($app->urlFor('tree', array('id' => $cid)));
+    }
+    $file = '../data/' . $delivery['download_path'];
+    
+    if (!file_exists($file)) {
+       $app->flash('home_error', 'no_document');
+       $app->redirect($app->urlFor('tree', array('id' => $cid)));
+    }
+    
+    $res = $app->response();
+    $res['Content-Description'] = 'File Transfer';
+    $res['Content-Type'] = ($delivery['download_path'] == NULL) ?
+            'application/octet-stream' : $delivery['download_path'];
+    $res['Content-Disposition'] ='attachment; filename=' . basename($delivery['download_filename']);
+    $res['Content-Transfer-Encoding'] = 'binary';
+    $res['Expires'] = '0';
+    $res['Cache-Control'] = 'must-revalidate';
+    $res['Pragma'] = 'public';
+    $res['Content-Length'] = $delivery['download_filesize'];
+    readfile($file);
+})->name('download');
+
+function getTree($orgId, $app, $id, &$matchedCategory) {
     $return = array();
     $currentData = array();
     $currentCategory = NULL;
@@ -65,7 +95,7 @@ function getTree($org_id, $app, $id, &$matchedCategory) {
 
     $data = ORM::for_table('category')->
             order_by_asc('category_left')->
-            where('organization_id', $org_id)->
+            where('organization_id', $orgId)->
             where_gt('category_level', 0)->
             find_many();
 
@@ -106,14 +136,14 @@ function getTree($org_id, $app, $id, &$matchedCategory) {
     return $return;
 }
 
-function getFolderPersons($category_id) {
+function getFolderPersons($categoryId) {
     return parseArray(ORM::for_table('person')->distinct()->
             select('person.*')->
             inner_join('revision', array('person.id', '=', 'revision.uploader_person_id'))->
             inner_join('delivery', array('delivery.current_revision_id', '=', 'revision.id'))->
             inner_join('folder_delivery', array('folder_delivery.delivery_id','=','delivery.id'))->
             inner_join('folder', array('folder.id','=','folder_delivery.folder_id'))->
-            where('folder.category_id', $category_id)->
+            where('folder.category_id', $categoryId)->
             find_array());
 }
 
@@ -137,7 +167,7 @@ function getProfiles($category_id) {
             find_array());
 }
 
-function getParsedFolders($category_id, &$profileGender) {
+function getParsedFolders($categoryId, &$profileGender) {
 
     $data = ORM::for_table('delivery')->
             select('delivery.*')->
@@ -152,7 +182,7 @@ function getParsedFolders($category_id, &$profileGender) {
             order_by_asc('folder.order_nr')->
             order_by_asc('delivery.profile_id')->
             order_by_asc('revision.upload_date')->
-            where('folder.category_id', $category_id)->
+            where('folder.category_id', $categoryId)->
             find_many();
             
     $return = array();
@@ -190,4 +220,18 @@ function getParsedFolders($category_id, &$profileGender) {
     }
 
     return $return;
+}
+
+function getDelivery($deliveryId) {
+    return ORM::for_table('delivery')->
+            select('document.download_filename')->
+            select('file_extension.mime')->
+            select('document_data.download_path')->
+            select('document_data.download_filesize')->
+            inner_join('revision', array('delivery.current_revision_id', '=', 'revision.id'))->
+            inner_join('document', array('document.id', '=', 'revision.id'))->
+            inner_join('file_extension', array('file_extension.id', '=', 'document.extension_id'))->
+            inner_join('document_data', array('document_data.id', '=', 'document.document_data_id'))->
+            where('delivery.id', $deliveryId)->
+            find_one();
 }
