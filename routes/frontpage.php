@@ -33,13 +33,6 @@ $app->get('/(portada)', function () use ($app, $user) {
         array('caption' => 'Programaciones didácticas', 'target' => '#')
     ));
 
-    if ($user) {
-        array_push($sidebar, array(
-            array('caption' => 'Navegación', 'icon' => 'compass'),
-            array('caption' => 'Actividades', 'target' => $app->urlFor('activities')),
-            array('caption' => 'Árbol de documentos', 'target' => $app->urlFor('tree'))
-        ));
-    }
     $app->render('frontpage.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar,
         'user' => $user));

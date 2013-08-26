@@ -17,10 +17,12 @@
 {% extends "base.html.twig" %}
 
 {% block navbar %}
+                <ul class="nav navbar-nav navbar-right">
                 {% block navbaritems %}
                 {% endblock %}
-                <ul class="nav navbar-nav navbar-right">
                 {% if user %}
+                    <li><a href="{{ urlFor('activities') }}" title="Actividades asociadas a cada perfil">Actividades</a></li>
+                    <li><a href="{{ urlFor('tree') }}" title="Árbol de documentos del sistema">Árbol</a></li>
                     <li class="login">
                         <div class="dropdown">
                             <a class="btn btn-info login" id="usermenu" role="button" data-toggle="dropdown" data-target="#" href="{{ urlFor('personal') }}">
