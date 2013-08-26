@@ -229,7 +229,7 @@ function getDelivery($deliveryId) {
             select('document_data.download_path')->
             select('document_data.download_filesize')->
             inner_join('revision', array('delivery.current_revision_id', '=', 'revision.id'))->
-            inner_join('document', array('document.id', '=', 'revision.id'))->
+            inner_join('document', array('document.id', '=', 'revision.original_document_id'))->
             inner_join('file_extension', array('file_extension.id', '=', 'document.extension_id'))->
             inner_join('document_data', array('document_data.id', '=', 'document.document_data_id'))->
             where('delivery.id', $deliveryId)->

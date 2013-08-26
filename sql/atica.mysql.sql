@@ -25,14 +25,14 @@ CREATE TABLE "action" (
   KEY action_organization_id_fk (organization_id),
   KEY action_non_conformance_id_fk (non_conformance_id),
   KEY action_action_type_id (action_type_id)
-) AUTO_INCREMENT=1 ;
+);
 
 CREATE TABLE action_type (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
   display_name varchar(255) NOT NULL,
   description text,
   PRIMARY KEY (id)
-) AUTO_INCREMENT=1 ;
+);
 
 CREATE TABLE activity (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -41,7 +41,7 @@ CREATE TABLE activity (
   description text,
   PRIMARY KEY (id),
   KEY activity_organization_id_fk (organization_id)
-) AUTO_INCREMENT=3 ;
+);
 
 CREATE TABLE activity_event (
   activity_id int(11) unsigned NOT NULL,
@@ -71,7 +71,7 @@ CREATE TABLE category (
   description text,
   PRIMARY KEY (id),
   KEY category_organization_id_fk (organization_id)
-) AUTO_INCREMENT=68 ;
+);
 
 CREATE TABLE completed_event (
   event_id int(11) unsigned NOT NULL,
@@ -96,7 +96,7 @@ CREATE TABLE configuration (
   PRIMARY KEY (id),
   UNIQUE KEY configuration_item_id_organization_id_uk (item_id,organization_id),
   KEY configuration_organization_id_fk (organization_id)
-) AUTO_INCREMENT=10 ;
+);
 
 CREATE TABLE delivery (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -111,7 +111,7 @@ CREATE TABLE delivery (
   KEY delivery_current_revision_id_fk (current_revision_id),
   KEY delivery_profile_id_fk (profile_id),
   KEY delivery_item_id_fk (item_id)
-) AUTO_INCREMENT=2205 ;
+);
 
 CREATE TABLE document (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -123,7 +123,7 @@ CREATE TABLE document (
   KEY document_revision_id_fk (revision_id),
   KEY document_extension_fk (extension_id),
   KEY document_document_data_fk (document_data_id)
-) AUTO_INCREMENT=2370 ;
+);
 
 CREATE TABLE document_data (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -132,7 +132,7 @@ CREATE TABLE document_data (
   data_hash char(40) DEFAULT NULL,
   binary_data longblob,
   PRIMARY KEY (id)
-) AUTO_INCREMENT=2288 ;
+);
 
 CREATE TABLE "event" (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -147,7 +147,7 @@ CREATE TABLE "event" (
   is_visible tinyint(1) unsigned NOT NULL DEFAULT '1',
   PRIMARY KEY (id),
   KEY event_organization_id_fk (organization_id)
-) AUTO_INCREMENT=252 ;
+);
 
 CREATE TABLE event_delivery (
   event_id int(11) unsigned NOT NULL,
@@ -204,7 +204,7 @@ CREATE TABLE folder (
   public_token varchar(45) DEFAULT NULL,
   PRIMARY KEY (id),
   KEY folder_category_id_fk_idx (category_id)
-) AUTO_INCREMENT=123 ;
+);
 
 CREATE TABLE folder_delivery (
   folder_id int(11) unsigned NOT NULL,
@@ -238,7 +238,7 @@ CREATE TABLE folder_profile_delivery_item (
   KEY folder_profile_delivery_item_folder_id_fk (folder_id),
   KEY folder_profile_delivery_item_profile_id_fk_idx (id),
   KEY folder_profile_delivery_item_folder_id_fk_idx (id)
-) AUTO_INCREMENT=1 ;
+);
 
 CREATE TABLE grouping (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -252,7 +252,7 @@ CREATE TABLE grouping (
   guest_access tinyint(1) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (id),
   KEY grouping_organization_id_fk (organization_id)
-) AUTO_INCREMENT=11 ;
+);
 
 CREATE TABLE grouping_folder (
   grouping_id int(11) unsigned NOT NULL,
@@ -289,14 +289,14 @@ CREATE TABLE non_conformance (
   KEY non_conformance_opened_by_fk (opened_by),
   KEY non_conformance_closed_by_fk (closed_by),
   KEY non_conformance_type_fk (non_conformance_type_id)
-) AUTO_INCREMENT=1 ;
+);
 
 CREATE TABLE non_conformance_type (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
   display_name varchar(255) NOT NULL,
   description text,
   PRIMARY KEY (id)
-) AUTO_INCREMENT=1 ;
+);
 
 CREATE TABLE organization (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -305,7 +305,7 @@ CREATE TABLE organization (
   "code" varchar(45) NOT NULL,
   url_prefix varchar(255) DEFAULT NULL,
   PRIMARY KEY (id)
-) AUTO_INCREMENT=4 ;
+);
 
 CREATE TABLE person (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -328,7 +328,7 @@ CREATE TABLE person (
   retry_count int(11) NOT NULL DEFAULT '0',
   blocked_access datetime DEFAULT NULL,
   PRIMARY KEY (id)
-) AUTO_INCREMENT=97 ;
+);
 
 CREATE TABLE person_organization (
   person_id int(11) unsigned NOT NULL,
@@ -364,7 +364,7 @@ CREATE TABLE "profile" (
   description text,
   PRIMARY KEY (id),
   KEY profile_profile_group_id_fk (profile_group_id)
-) AUTO_INCREMENT=69 ;
+);
 
 CREATE TABLE profile_group (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -377,24 +377,25 @@ CREATE TABLE profile_group (
   description text,
   PRIMARY KEY (id),
   KEY profile_group_organization_id_fk_idx (organization_id)
-) AUTO_INCREMENT=18 ;
+);
 
 CREATE TABLE revision (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
   delivery_id int(11) unsigned NOT NULL,
   revision_nr int(11) unsigned NOT NULL,
   uploader_person_id int(11) unsigned NOT NULL,
+  original_document_id int(11) unsigned NOT NULL,
   "status" int(11) unsigned DEFAULT NULL,
   upload_date datetime NOT NULL,
   upload_comment text,
-  original_document int(11) unsigned DEFAULT NULL,
   autogenerated_date datetime DEFAULT NULL,
   template int(11) unsigned DEFAULT NULL,
   template_instance int(11) unsigned DEFAULT NULL,
   PRIMARY KEY (id),
   KEY revision_delivery_id_fk (delivery_id),
-  KEY revision_uploader_person_id_fk (uploader_person_id)
-) AUTO_INCREMENT=2370 ;
+  KEY revision_uploader_person_id_fk (uploader_person_id),
+  KEY revision_original_document_id_fk (original_document_id)
+);
 
 CREATE TABLE revision_comment (
   person_id int(11) unsigned NOT NULL,
@@ -425,7 +426,7 @@ CREATE TABLE "snapshot" (
   visible tinyint(1) unsigned NOT NULL DEFAULT '1',
   PRIMARY KEY (id),
   KEY snapshot_organization_id_fk (organization_id)
-) AUTO_INCREMENT=1 ;
+);
 
 
 ALTER TABLE `action`
@@ -531,6 +532,7 @@ ALTER TABLE `profile_group`
 
 ALTER TABLE `revision`
   ADD CONSTRAINT revision_delivery_id_fk FOREIGN KEY (delivery_id) REFERENCES delivery (id) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT revision_document_id_fk FOREIGN KEY (original_document_id) REFERENCES document (id) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT revision_uploader_person_id_fk FOREIGN KEY (uploader_person_id) REFERENCES person (id) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `revision_comment`
