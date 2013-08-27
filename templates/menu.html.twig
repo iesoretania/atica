@@ -17,12 +17,18 @@
 {% extends "base.html.twig" %}
 
 {% block navbar %}
+                <ul class="nav navbar-nav navbar-left navlinks">
+                {% block navbaritemsleft %}
+                {% if user %}
+                    <li{% if matchesRoute('activities') %} class="active"{% endif %}><a href="{{ urlFor('activities') }}" title="Actividades asociadas a cada perfil"><span class="icon-calendar"></span>&nbsp;Actividades</a></li>
+                    <li{% if matchesRoute('tree') %} class="active"{% endif %}><a href="{{ urlFor('tree') }}" title="Árbol de documentos del sistema"><span class="icon-folder-open-alt"></span>&nbsp;Árbol</a></li>
+                {% endif %}
+                {% endblock %}
+                </ul>
                 <ul class="nav navbar-nav navbar-right">
-                {% block navbaritems %}
+                {% block navbaritemsright %}
                 {% endblock %}
                 {% if user %}
-                    <li><a href="{{ urlFor('activities') }}" title="Actividades asociadas a cada perfil">Actividades</a></li>
-                    <li><a href="{{ urlFor('tree') }}" title="Árbol de documentos del sistema">Árbol</a></li>
                     <li class="login">
                         <div class="dropdown">
                             <a class="btn btn-info login" id="usermenu" role="button" data-toggle="dropdown" data-target="#" href="{{ urlFor('personal') }}">

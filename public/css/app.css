@@ -40,15 +40,26 @@
     margin-right: 0px;
 }
 
-/*.navbar ul li:hover {
-    background-color: #2a2a66;
+.navbar ul.navlinks li:hover > a {
+    background-color: #1c4861;
+    color: #fff;
+}
+
+.navbar ul.navlinks li.active > a{
+    background-color: #3382af;
+    color: #fff;
+}
+
+.navbar ul.navlinks li.active:hover > a{
+    background-color: #1c4861;
+    color: #fff;
 }
 
 .navbar ul li.login:hover {
     background-color: transparent;
 }
 
-.navbar ul li.login a.login:hover {
+/*.navbar ul li.login a.login:hover {
     background-color: #46b8da;
     border-color: #46b8da;
     color: #fff;

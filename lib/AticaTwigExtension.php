@@ -28,7 +28,8 @@ class AticaTwigExtension extends \Twig_Extension
     public function getFunctions()
     {
         return array(
-            new \Twig_SimpleFunction('parsePeriod', array($this, 'parsePeriod'))
+            new \Twig_SimpleFunction('parsePeriod', array($this, 'parsePeriod')),
+            new \Twig_SimpleFunction('matchesRoute', array($this, 'matchesRoute'))
         );
     }
     
@@ -59,5 +60,10 @@ class AticaTwigExtension extends \Twig_Extension
         }
 
         return $return;
+    }
+    
+    public function matchesRoute($route, $appName = 'default')
+    {
+        return (Slim::getInstance($appName)->router()->getCurrentRoute()->getName() == $route);
     }
 }
