@@ -20,8 +20,9 @@
                 <ul class="nav navbar-nav navbar-left navlinks">
                 {% block navbaritemsleft %}
                 {% if user %}
-                    <li{% if matchesRoute('activities') %} class="active"{% endif %}><a href="{{ urlFor('activities') }}" title="Actividades asociadas a cada perfil"><span class="icon-calendar"></span>&nbsp;Actividades</a></li>
-                    <li{% if matchesRoute('tree') %} class="active"{% endif %}><a href="{{ urlFor('tree') }}" title="Árbol de documentos del sistema"><span class="icon-folder-open-alt"></span>&nbsp;Árbol</a></li>
+                    <li{% if matchesRoute('frontpage') %} class="active"{% endif %}><a href="{{ urlFor('frontpage') }}" title="Portada"><span class="visible-sm"><span class="icon-home"></span></span><span class="hidden-sm"><span class="icon-home"></span>&nbsp;Portada</span></a></li>
+                    <li{% if matchesRoute('activities') %} class="active"{% endif %}><a href="{{ urlFor('activities') }}" title="Actividades asociadas a cada perfil"><span class="visible-sm"><span class="icon-calendar"></span></span><span class="hidden-sm"><span class="icon-calendar"></span>&nbsp;Actividades</span></a></li>
+                    <li{% if matchesRoute('tree') %} class="active"{% endif %}><a href="{{ urlFor('tree') }}" title="Árbol de documentos del sistema"><span class="visible-sm"><span class="icon-folder-open-alt"></span></span><span class="hidden-sm"><span class="icon-folder-open-alt"></span>&nbsp;Árbol</span></a></li>
                 {% endif %}
                 {% endblock %}
                 </ul>

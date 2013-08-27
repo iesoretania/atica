@@ -76,8 +76,8 @@ $app->get('/descargar/:cid/:id/', function ($cid, $id) use ($app, $user, $organi
     
     $res = $app->response();
     $res['Content-Description'] = 'File Transfer';
-    $res['Content-Type'] = ($delivery['download_path'] == NULL) ?
-            'application/octet-stream' : $delivery['download_path'];
+    $res['Content-Type'] = ($delivery['mime'] == NULL) ?
+            'application/octet-stream' : $delivery['mime'];
     $res['Content-Disposition'] ='attachment; filename=' . basename($delivery['download_filename']);
     $res['Content-Transfer-Encoding'] = 'binary';
     $res['Expires'] = '0';
