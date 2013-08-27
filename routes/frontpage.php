@@ -24,9 +24,10 @@ $app->get('/(portada)', function () use ($app, $user) {
         array('display_name' => 'Portada', 'target' => '#')
     );
     
+    $parentGrouping = array();
     $matchedGrouping = array();
 
-    $sidebar = getGroupings($_SESSION['organization_id'], $app, NULL, $matchedGrouping);
+    $sidebar = getGroupings($_SESSION['organization_id'], $app, NULL, $matchedGrouping, $parentGrouping);
     
     $app->render('frontpage.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar,
@@ -38,13 +39,20 @@ $app->get('/portada/:id', function ($id) use ($app, $user) {
     if (!isset($_SESSION['organization_id'])) {
         $app->redirect($app->urlFor('organization'));
     }
-    $breadcrumb = array(
-        array('display_name' => 'Portada', 'target' => '#')
-    );
+    $matchedGrouping = NULL;
+    $parentGrouping = NULL;
     
-    $matchedGrouping = array();
-
-    $sidebar = getGroupings($_SESSION['organization_id'], $app, $id, $matchedGrouping);
+    $sidebar = getGroupings($_SESSION['organization_id'], $app, $id, $matchedGrouping, $parentGrouping);
+    
+    if ($matchedGrouping == NULL) {
+        $app->redirect($app->urlFor('frontpage'));
+    }
+    
+    $breadcrumb = array(
+            array('display_name' => 'Portada', 'target' => $app->urlFor('frontpage')),
+            array('display_name' => $parentGrouping['display_name'], 'target' => $app->urlFor('grouping', array('id' => $id))),
+            array('display_name' => $matchedGrouping['display_name'])
+    );
     
     $folders = getGroupingFolders($id);
     
@@ -58,7 +66,7 @@ $app->get('/portada/:id', function ($id) use ($app, $user) {
         'user' => $user));
 })->name('grouping');
 
-function getGroupings($orgId, $app, $id, &$matchedGrouping) {
+function getGroupings($orgId, $app, $id, &$matchedGrouping, &$parentGrouping) {
     $return = array();
     $currentData = array();
     $currentGrouping = NULL;
@@ -78,6 +86,9 @@ function getGroupings($orgId, $app, $id, &$matchedGrouping) {
                             'caption' => $currentGrouping['display_name']
                         ));
                 $return[] = $currentData;
+                if ($match) {
+                    $parentGrouping = $currentGrouping;
+                }
             }
             $currentData = array();
             $currentGrouping = $grouping;
@@ -97,11 +108,14 @@ function getGroupings($orgId, $app, $id, &$matchedGrouping) {
         }
     }
     if ($currentGrouping != NULL) {
-          array_unshift($currentData,
-                  array(
-                      'caption' => $currentGrouping['display_name']
-                  ));
-          $return[] = $currentData;
+        array_unshift($currentData,
+                array(
+                    'caption' => $currentGrouping['display_name']
+                ));
+        $return[] = $currentData;
+        if ($match) {
+            $parentGrouping = $currentGrouping;
+        }
     }
 
     return $return;

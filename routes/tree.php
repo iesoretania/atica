@@ -24,11 +24,12 @@ $app->get('/arbol(/:id)', function ($id = NULL) use ($app, $user, $organization)
     $data = array();
     $folders = array();
     $category = array();
+    $parent = array();
     $persons = array();
     $profiles = array();
     $profileGender = array();
     
-    $sidebar = getTree($organization['id'], $app, $id, $category);
+    $sidebar = getTree($organization['id'], $app, $id, $category, $parent);
     
     if (NULL !== $id) {
         $data = getParsedFolders($id, $profileGender);
@@ -38,6 +39,7 @@ $app->get('/arbol(/:id)', function ($id = NULL) use ($app, $user, $organization)
         
         $breadcrumb = array(
             array('display_name' => 'Árbol', 'target' => $app->urlFor('tree')),
+            array('display_name' => $parent['display_name'], 'target' => $app->urlFor('tree')),
             array('display_name' => $category['display_name'])
         );
     }
@@ -87,7 +89,7 @@ $app->get('/descargar/:cid/:id/', function ($cid, $id) use ($app, $user, $organi
     readfile($file);
 })->name('download');
 
-function getTree($orgId, $app, $id, &$matchedCategory) {
+function getTree($orgId, $app, $id, &$matchedCategory, &$parentCategory) {
     $return = array();
     $currentData = array();
     $currentCategory = NULL;
@@ -107,6 +109,9 @@ function getTree($orgId, $app, $id, &$matchedCategory) {
                     'active' => $match,
                     'data' => $currentData
                 );
+                if ($match) {
+                    $parentCategory = $currentCategory;
+                }
             }
             $currentData = array();
             $currentCategory = $category;
@@ -131,6 +136,9 @@ function getTree($orgId, $app, $id, &$matchedCategory) {
             'active' => $match,
             'data' => $currentData
         );
+        if ($match) {
+            $parentCategory = $currentCategory;
+        }
     }
 
     return $return;
