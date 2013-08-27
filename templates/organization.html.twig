@@ -29,7 +29,7 @@
                         <div class="radio">
                             <label>
                                 <input type="radio" name="organization_id" id="org{{ loop.n }}" value="{{ org.id }}" {% if org.id == organization.id %}checked autofocus="true"{% endif %}>
-                                <strong>{{ org.display_name }}</strong>{% if org.additional_info %} &mdash; {{ org.additional_info }}{% endif %}
+                                <strong>{{ org.display_name }}</strong>{% if org.additional_info %} &mdash; {{ org.additional_info }}{% endif %}{% if org['logo'] %}&nbsp;<img src="{{org['logo']}}" width="16" height="16"></img>{% endif %}
                             </label>
                         </div>
                         {% endfor %}
