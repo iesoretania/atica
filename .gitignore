@@ -16,6 +16,7 @@ templates/cache/??
 
 ## uploaded documents
 data/*
+public/local
 
 ## external components
 vendor/*

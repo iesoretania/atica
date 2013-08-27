@@ -1,5 +1,4 @@
 SET FOREIGN_KEY_CHECKS=0;
-SET time_zone = "+00:00";
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -304,6 +303,7 @@ CREATE TABLE organization (
   additional_info varchar(65) DEFAULT NULL,
   "code" varchar(45) NOT NULL,
   url_prefix varchar(255) DEFAULT NULL,
+  logo varchar(255) DEFAULT NULL,
   PRIMARY KEY (id)
 );
 
@@ -394,7 +394,7 @@ CREATE TABLE revision (
   PRIMARY KEY (id),
   KEY revision_delivery_id_fk (delivery_id),
   KEY revision_uploader_person_id_fk (uploader_person_id),
-  KEY revision_original_document_id_fk (original_document_id)
+  KEY revision_original_document_id (original_document_id)
 );
 
 CREATE TABLE revision_comment (
@@ -532,7 +532,7 @@ ALTER TABLE `profile_group`
 
 ALTER TABLE `revision`
   ADD CONSTRAINT revision_delivery_id_fk FOREIGN KEY (delivery_id) REFERENCES delivery (id) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT revision_document_id_fk FOREIGN KEY (original_document_id) REFERENCES document (id) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT revision_ibfk_1 FOREIGN KEY (original_document_id) REFERENCES document (id) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT revision_uploader_person_id_fk FOREIGN KEY (uploader_person_id) REFERENCES person (id) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `revision_comment`
