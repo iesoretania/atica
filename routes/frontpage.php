@@ -16,7 +16,7 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see [http://www.gnu.org/licenses/]. */
 
-$app->get('/(portada)(/:id)', function ($id = NULL) use ($app, $user) {
+$app->get('/(portada)', function () use ($app, $user) {
     if (!isset($_SESSION['organization_id'])) {
         $app->redirect($app->urlFor('organization'));
     }
@@ -25,13 +25,38 @@ $app->get('/(portada)(/:id)', function ($id = NULL) use ($app, $user) {
     );
     
     $matchedGrouping = array();
-    
-    $sidebar = getGroupings($_SESSION['organization_id'], $app, $id, $matchedGrouping);
+
+    $sidebar = getGroupings($_SESSION['organization_id'], $app, NULL, $matchedGrouping);
     
     $app->render('frontpage.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar,
         'user' => $user));
+    
 })->name('frontpage');
+
+$app->get('/portada/:id', function ($id) use ($app, $user) {
+    if (!isset($_SESSION['organization_id'])) {
+        $app->redirect($app->urlFor('organization'));
+    }
+    $breadcrumb = array(
+        array('display_name' => 'Portada', 'target' => '#')
+    );
+    
+    $matchedGrouping = array();
+
+    $sidebar = getGroupings($_SESSION['organization_id'], $app, $id, $matchedGrouping);
+    
+    $folders = getGroupingFolders($id);
+    
+    $data = getParsedGroupingFolders($id);
+    
+    $app->render('grouping.html.twig', array(
+        'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar,
+        'data' => $data,
+        'folders' => $folders,
+        'grouping' => $matchedGrouping,
+        'user' => $user));
+})->name('grouping');
 
 function getGroupings($orgId, $app, $id, &$matchedGrouping) {
     $return = array();
@@ -63,7 +88,7 @@ function getGroupings($orgId, $app, $id, &$matchedGrouping) {
             $currentData[] = array(
                 'caption' => $grouping['display_name'],
                 'active' => $localMatch,
-                'target' => $app->urlFor('frontpage', array('id' => $grouping['id']))
+                'target' => $app->urlFor('grouping', array('id' => $grouping['id']))
             );
             if ($localMatch) {
                 $matchedGrouping = $grouping;
@@ -77,6 +102,60 @@ function getGroupings($orgId, $app, $id, &$matchedGrouping) {
                       'caption' => $currentGrouping['display_name']
                   ));
           $return[] = $currentData;
+    }
+
+    return $return;
+}
+
+function getGroupingFolders($groupingId) {
+    return parseArray(ORM::for_table('folder')->
+        inner_join('grouping_folder', array('grouping_folder.folder_id', '=', 'folder.id'))->
+        where('grouping_folder.grouping_id', $groupingId)->
+        order_by_asc('grouping_folder.order_nr')->
+        find_array());
+}
+
+
+function getParsedGroupingFolders($groupingId) {
+
+    $data = ORM::for_table('delivery')->
+            select('delivery.*')->
+            select('folder.id', 'folder_id')->
+            select('revision.upload_date')->
+            inner_join('folder_delivery', array('folder_delivery.delivery_id','=','delivery.id'))->
+            inner_join('folder', array('folder.id', '=', 'folder_delivery.folder_id'))->
+            inner_join('revision', array('delivery.current_revision_id', '=', 'revision.id'))->
+            inner_join('grouping_folder', array('grouping_folder.folder_id', '=', 'folder.id'))->
+            where('grouping_folder.grouping_id', $groupingId)->
+            order_by_asc('grouping_folder.order_nr')->
+            order_by_asc('delivery.profile_id')->
+            order_by_asc('revision.upload_date')->
+            find_many();
+    
+    $return = array();
+    $currentData = array();
+    $currentFolderId = NULL;
+
+    foreach ($data as $delivery) {
+        if ($delivery['folder_id'] !== $currentFolderId) {
+            if ($currentData != NULL) {
+                $return[] = array(
+                    'id' => $currentFolderId,
+                    'data' => $currentData
+                );
+            }
+            $currentData = array();
+            $currentFolderId = $delivery['folder_id'];
+        }
+        else {
+            $currentData[] = $delivery->as_array();
+        }
+    }
+    if ($currentData != NULL) {
+        $return[] = array(
+            'id' => $currentFolderId,
+            'data' => $currentData
+        );
     }
 
     return $return;

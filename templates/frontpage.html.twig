@@ -17,7 +17,7 @@
 {% extends "layout.html.twig" %}
             
 {% block maincontent %}
-                    <div class="panel">
+                    <div class="panel panel-default">
                         <div class="panel-body">
                             {% if user %}
                                 <h1>¡Bienvenid{{ ['o/a', 'o', 'a'][user.gender] }} {{ user.first_name }}!</h1>
