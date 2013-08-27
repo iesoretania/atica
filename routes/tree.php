@@ -32,7 +32,7 @@ $app->get('/arbol(/:id)', function ($id = NULL) use ($app, $user, $organization)
     
     if (NULL !== $id) {
         $data = getParsedFolders($id, $profileGender);
-        $folders = getFolders($id);
+        $folders = getFolders($id, $user);
         $persons = getFolderPersons($id);
         $profiles = getProfiles($id);
         
@@ -147,9 +147,17 @@ function getFolderPersons($categoryId) {
             find_array());
 }
 
-function getFolders($category_id) {
+function getFolders($category_id, $user) {
     return parseArray(ORM::for_table('folder')->
+            select('folder.*')->
+            select_expr('sum(folder_permission.permission=0)','manage_permission')->
+            select_expr('sum(folder_permission.permission=1)','upload_permission')->
+            inner_join('folder_permission', array('folder_permission.folder_id', '=', 'folder.id'))->
+            inner_join('profile', array('profile.id', '=', 'folder_permission.profile_id'))->
+            inner_join('person_profile', array('person_profile.profile_id', '=', 'profile.id'))->
+            where('person_profile.person_id', $user['id'])->
             where('folder.category_id', $category_id)->
+            group_by('folder.id')->
             find_array());
 }
 
