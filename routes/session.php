@@ -88,7 +88,6 @@ $app->post('/entrar', function () use ($app, $preferences) {
             if ($membership) {
                 if ($membership['is_active']) {
                     $_SESSION['person_id'] = $user['id'];
-                    $req = $app->request();
                     $app->redirect($app->urlFor('activities'));
                 }
                 else {

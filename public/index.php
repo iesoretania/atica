@@ -123,7 +123,7 @@ if (isset($_SESSION['person_id'])) {
     else {
         // comprobar si es administrador local (siempre lo será si es
         // administrador global)
-        $user['is_local_administrator'] = $user['is_global_administrator'] ||
+        $user['is_admin'] = $user['is_global_administrator'] ||
                 $membership['is_local_administrator'];
     }
 }

@@ -93,11 +93,11 @@
             {% endfor %}
         </tbody>
     </table>
-    {% if info['manage_permission'] or info['upload_permission'] %}
+    {% if user['is_admin'] or info['manage_permission'] or info['upload_permission'] %}
     <div class="panel-footer">
         <form class="form-inline" role="form">
-            <button class="btn btn-info">Subir nuevo documento</button>
-            {% if info['manage_permission'] %} <button class="btn btn-warning">Gestionar carpeta</button>{% endif %}
+            {% if info['upload_permission'] %} <button class="btn btn-info">Subir nuevo documento</button>{% endif %}
+            {% if info['manage_permission'] or user['is_admin'] %} <button class="btn btn-warning">Gestionar carpeta</button>{% endif %}
         </form>
     </div>
     {% endif %}
