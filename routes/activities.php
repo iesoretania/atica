@@ -16,7 +16,7 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see [http://www.gnu.org/licenses/]. */
 
-$app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config) {
+$app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config, $organization) {
     if (!$user) {
         $app->redirect($app->urlFor('login'));
     }
@@ -26,12 +26,16 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config)
 
     // barra lateral de perfiles
     $profile_bar = array(
-        array('caption' => 'Actividades', 'icon' => 'calendar'),
-        array('caption' => 'Ver todas', 'active' => ($id == NULL), 'target' => $app->urlFor('activities'))
+        array('caption' => 'Mis actividades', 'icon' => 'calendar'),
     );
+    if (count($profiles, COUNT_NORMAL)>1) {
+       $profile_bar[] = array('caption' => 'Ver todas', 'active' => ($id == NULL), 'target' => $app->urlFor('activities'));
+    }
     $current = NULL;
     $detail = '';
     $profile_ids = array();
+    $profile_group_ids = array();
+    $profile_group_ids_text = '';
     foreach ($profiles as $profile) {
         $gender = array ($profile['display_name_neutral'], $profile['display_name_male'], $profile['display_name_female']);
         $caption = $gender[$user['gender']] . " " . $profile['display_name'];
@@ -44,19 +48,50 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config)
             $active = false;
         }
         array_push($profile_ids, $profile['id']);
+        if (!in_array($profile['profile_group_id'], $profile_group_ids)) {
+            $profile_group_ids[] = $profile['profile_group_id'];
+            if ($profile_group_ids_text) {
+                $profile_group_ids_text .= ',';
+            }
+            
+            $profile_group_ids_text .= $profile['profile_group_id'];
+        }
         array_push($profile_bar, array('caption' => $caption,
             'active' => $active, 'target' => $app->urlFor('activities', array('id' => $profile['id']))));
     }
 
-    // si hay un perfil como parámetro que no está asociado al usuario, redirigir
+    /*// si hay un perfil como parámetro que no está asociado al usuario, redirigir
     if ((NULL != $id) && (NULL == $current)) {
         $app->redirect($app->urlFor('activities'));
-    }
+    }*/
 
     $sidebar = array();
 
     array_push($sidebar, $profile_bar);
+    
+    // obtener otros perfiles
+    $otherProfiles = getUserOtherProfiles($user['id'], $organization['id'], $profile_group_ids);
+    if (count($otherProfiles, COUNT_NORMAL)>0) {
+       $other_profile_bar = array(
+           array('caption' => 'Otras actividades', 'icon' => 'calendar-empty')
+        );
 
+        $currentOther = NULL;
+        foreach ($otherProfiles as $profile) {
+            $captionOther = $profile['display_name_neutral'] . " " . $profile['display_name'];
+            if ($profile['id'] == $id) {
+                $currentOther = $profile;
+                $activeOther = true;
+            }
+            else {
+                $activeOther = false;
+            }
+            array_push($other_profile_bar, array('caption' => $captionOther,
+                'active' => $activeOther, 'target' => $app->urlFor('activities', array('id' => $profile['id']))));
+        }
+        array_push($sidebar, $other_profile_bar);
+    }
+    
     // barra superior de navegación
     if ($id != NULL) {
         $breadcrumb = array(
@@ -93,6 +128,16 @@ function getUserProfiles($user_id) {
             inner_join('profile_group', array('profile_group.id','=','profile.profile_group_id'))->
             where('person_id', $user_id)->
             order_by_asc('profile_group.display_name_neutral')->find_many();
+}
+
+function getUserOtherProfiles($user_id, $org_id, $current) {
+    $data = ORM::for_table('profile_group')->
+            select('profile_group.*')->
+            where_not_in('profile_group.id', $current)->
+            where('profile_group.organization_id', $org_id)->
+            order_by_asc('profile_group.display_name_neutral')->find_many();
+    
+    return $data;
 }
 
 function getEventsForProfiles($profile_ids, $user, $base = 33) {

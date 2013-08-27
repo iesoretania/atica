@@ -38,7 +38,7 @@
             <div class="navbar-header">
                 <a class="navbar-brand" id="main" href="{{ urlFor('frontpage') }}"><span class="icon-cloud"></span> {{ config['appname'] }}</a>
             </div><!--/.container -->
-            <p class="navbar-text thin hidden-xs">{% if organization['logo'] %}<img src="{{organization['logo']}}" width="16" height="16"></img>&nbsp;{% endif %}{{ organization['display_name'] }}</p>
+            <p class="navbar-text thin hidden-xs">{% if organization['logo'] %}<img src="{{organization['logo']}}" width="16" height="16"></img>&nbsp;{% endif %}{% if not user %}<a href="{{ urlFor('organization') }}" class="navbar-link">{% endif %}{{ organization['display_name'] }}{% if not user %}</a>{% endif %}</p>
             {% block navbar %}
             {% endblock %}
             </div>
