@@ -77,7 +77,7 @@
             {% for delivery in folder.data %}
                 {% set profile = profiles[delivery.profile_id] %}
                 {% set personId = delivery['uploader_person_id'] %}
-                {% if (lastProfile != delivery.profile_id) and (delivery.profile_id != NULL) %}
+                {% if (info.is_divided) and (lastProfile != delivery.profile_id) and (delivery.profile_id != NULL) %}
                 <tr>
                     <td colspan="3" class="profile">
                         {{ [profile.display_name_neutral, profile.display_name_male, profile.display_name_female][profileGender[delivery.profile_id]] }} {{ profile.display_name }}
@@ -86,7 +86,7 @@
                 {% set lastProfile = delivery.profile_id %}
                 {% endif %}
             <tr>
-                <td class="thin"><a href="{{ urlFor('download', { 'id': delivery.id, 'cid': category.id, 'kind': 1 }) }}">{{ delivery.display_name | replace({'_':' '})}}</a></td>
+                <td class="thin"><a href="{{ urlFor('download', { 'id': delivery.id, 'cid': category.id, 'kind': 1 }) }}">{{ delivery.display_name | replace({'_':' '})}}</a> <span class="icon-pencil" style="color: #ddd"></span></td>
                 <td>{{ delivery.upload_date | date("Y-m-d") }}</td>
                 <td><a href="{{ urlFor('personal', { 'id': personId }) }}">{{ persons[personId]['display_name']}}</a></td>
             </tr>

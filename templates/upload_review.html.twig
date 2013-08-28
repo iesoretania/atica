@@ -1,0 +1,107 @@
+{#  ATICA - Web application for supporting Quality Management Systems
+    Copyright (C) 2009-2013: Luis-Ramón López López
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
+
+{% extends "tree.html.twig" %}
+{% block stylesheets %}
+ <link rel="stylesheet" href="lib/select2/select2.css">
+{% endblock %}
+{% block scripts %}
+<script src="lib/select2/select2.min.js"></script>
+<script src="lib/select2/select2_locale_es.js"></script>
+<script>
+    $(document).ready(function() { $(".select").select2(); });
+</script>
+{% endblock %}
+{% block maincontent %}
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <h1>Revisión de documentos enviados</h1>
+    </div>
+    <div class="panel-body">
+        <h2>Carpeta: {{ folder['display_name'] }}</h2>
+        {% if folder.description %}<h4>{{ folder.description }}</h4>{% endif %}
+    </div>
+</div>
+<div class="alert alert-danger">
+    <strong>¡Atención!</strong> El envío no quedará registrado hasta que complete este paso.
+</div>
+<div class="panel panel-default">
+    <div class="panel-body">
+        {% if deliveries %}
+        <h3>Estado actual de entregas</h3>
+        {% set sum_c = 0 %}{% set sum_total = 0 %}
+        <table class="table table-condensed table-hover">
+            <thead>
+                <tr>
+                    <th>Entrega</th><th>Fecha</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in deliveries %}
+                {% set complete = (item['c'] > 0) %}
+                <tr class="{{ complete ? 'success' : 'warning' }}">
+                    <td>
+                        <span class="icon-{{ complete ? 'ok' : 'remove'}}"></span>
+                        {{ item['display_name'] }}
+                    </td>
+                    <td>
+                        {{ (item['creation_date'] is null) ? "---" : item['creation_date'] | date('Y/m/d') }}
+                    </td>
+                </tr>
+                {% set sum_c = complete ? 1 : 0 %}{% set sum_total = sum_total + 1 %}
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th></th><th>{{ sum_c }}/{{ sum_total }} ({{ (100*sum_c/sum_total) | number_format }}%)</th>
+                </tr>
+            </tfoot>
+        </table>
+        {% endif %}
+        <h3>Envío{% if profile %} como &ldquo;{{ [profile['display_name_neutral'], profile['display_name_male'], profile['display_name_female']][user['gender']] }}{% if profile['display_name'] %} ({{ profile['display_name'] }}){% endif %}&rdquo;{% endif %}</h3>
+        <form class="form" role="form" method="post" action="{{ urlFor('confirm', {'id': folder.id}) }}">
+            <input type="hidden" name="profile" value="{{ profile['id'] }}">
+            {% for item in data %}
+            <div class="row form-group">           
+                <div class="col-lg-6">
+                    <input type="hidden" name="hash{{ loop.index }}" value="{{ item['hash'] }}">
+                    {% if items %}<input type="hidden" name="filename{{ loop.index }}" value="{{ item.name }}">{% endif %}
+                    <input class="form-control" name="{{ items ? 'no_ ' }}filename{{ loop.index }}" type="text" {{ items ? 'disabled ' }} value="{{item.name}}">
+                </div>
+                {% if items %}
+                <div class="col-lg-6">
+                    <select class="form-control select" name="element{{ loop.index }}">
+                    <option value="0">No entregar, descartar este documento</option>
+                    {% for i in deliveries %}
+                        {% if i.c == 0 %}<option value="{{ i.id }}">{{ i.display_name }}</option>{% endif %}
+                    {% endfor %}
+                    </select>
+                </div>
+                {% else %}
+                <div class="col-lg-6">
+                    <label><input type="checkbox" name="confirm{{ loop.index }}" checked> Entregar</label>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Confirmar la entrega</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

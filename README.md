@@ -37,6 +37,7 @@ This application uses the following libraries and frameworks:
   * [Twig], a template engine.
   * [Idiorm], a database toolkit.
   * [Bootstrap], a collection of HTML, CSS and JS design templates.
+  * [Select2], a jQuery based replacement for select boxes.
   * [TinyMCE], a WYSIWYG HTML editor.
 
 Special care has been taken to ensure that their respectives licenses are being respected. Should you find any uncompliance, don't hesitate
@@ -50,4 +51,5 @@ This application is licensed under [AGPL version 3].
 [Idiorm]: http://j4mie.github.io/idiormandparis/
 [Bootstrap]: http://getbootstrap.com/
 [Twig]: http://twig.sensiolabs.org/
+[Select2]: http://ivaynberg.github.io/select2/
 [AGPL version 3]: http://www.gnu.org/licenses/agpl.htmlu.org/licenses/agpl.html

@@ -15,10 +15,42 @@
     along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
 
 {% extends "tree.html.twig" %}
+{% block stylesheets %}
+ <link rel="stylesheet" href="lib/select2/select2.css">
+{% endblock %}
+{% block scripts %}
+<script src="lib/select2/select2.min.js"></script>
+<script src="lib/select2/select2_locale_es.js"></script>
+<script>
+    $(document).ready(function() { $(".select").select2(); });
+</script>
+{% endblock %}
 {% block maincontent %}
+{% if flash['upload'] %}
+{% for i in 1..flash['upload'] %}
+<div class="alert alert-{{ flash['upload_status_' ~ loop.index0] }} alert-dismissable">
+    {% set error = flash['upload_error_' ~ loop.index0] %}
+    {% set name = flash['upload_name_' ~ loop.index0] %}
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    {% if error == 'ignored' %}
+    <strong>{{ name }}.</strong> El documento ha sido ignorado.
+    {% elseif error == 'already exists' %}
+    <strong>Ha ocurrido un error al registrar '{{ name }}'.</strong> Ya existe un elemento registrado con el mismo tipo.
+    {% elseif error == 'invalid item' %}
+    <strong>Ha ocurrido un error al registrar '{{ name }}'.</strong> El elemento escogido es desconocido.
+    {% elseif error == 'cannot register' %}
+    <strong>Ha ocurrido un error al registrar '{{ name }}'.</strong> No se puede almacenar la entrega en la base de datos.
+    {% elseif error == 'cannot move' %}
+    <strong>Ha ocurrido un error al registrar '{{ name }}'.</strong> No se puede almacenar el documento en el archivo.
+    {% else %}
+    <strong>Ha ocurrido un error al registrar '{{ name }}'.</strong> No se ha identificado la causa. Póngase en contacto con el coordinador de calidad.
+    {% endif %}
+</div>
+{% endfor %}
+{% endif %}
 <div class="panel panel-info">
     <div class="panel-heading">
-        <h1>Enviar documento nuevo</h1>
+        <h1>Envío de nuevos documentos</h1>
     </div>
     <div class="panel-body">
         <h2>Carpeta: {{ folder['display_name'] }}</h2>
@@ -27,22 +59,69 @@
 </div>
 <div class="panel panel-default">
     <div class="panel-body">
+        <h3>Más información</h3>
         <dl class="dl-horizontal">
             <dt>Responsable:</dt>
             <dd>
-            {% for profile in manager_profiles %}{% if not loop.first %}, {% endif %}{% if user_profiles[profile.id] %}<strong>{% endif %}{{ profile.display_name_neutral }}{% if profile.display_name is not null %} ({{ profile.display_name }}){% endif %}{% if user_profiles[profile.id] %}</strong>{% endif %}{% endfor %}
+            {% for profile in manager_profiles %}{% if not loop.first %}, {% endif %}{% if user_profiles[profile.id] %}<u>{% endif %}{{ profile.display_name_neutral }}{% if profile.display_name is not null %} ({{ profile.display_name }}){% endif %}{% if user_profiles[profile.id] %}</u>{% endif %}{% endfor %}
             </dd>
             <dt>Pueden enviar:</dt>
             <dd>
-            {% for profile in upload_profiles %}{% if not loop.first %}, {% endif %}{% if user_profiles[profile.id] %}<strong>{% endif %}{{ profile.display_name_neutral }}{% if profile.display_name is not null %} ({{ profile.display_name }}){% endif %}{% if user_profiles[profile.id] %}</strong>{% endif %}{% endfor %}
+            {% for profile in upload_profiles %}{% if not loop.first %}, {% endif %}{% if user_profiles[profile.id] %}<u>{% endif %}{{ profile.display_name_neutral }}{% if profile.display_name is not null %} ({{ profile.display_name }}){% endif %}{% if user_profiles[profile.id] %}</u>{% endif %}{% endfor %}
             </dd>
         </dl>
+        {% if stats %}
+        <h3>Cuadro de entregas</h3>
+        {% set sum_c = 0 %}{% set sum_total = 0 %}
+        <table class="table table-condensed table-hover">
+            <thead>
+                <tr>
+                    <th>Perfil</th><th>Entregas realizadas</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in stats %}
+                {% set complete = (item['c'] == item['total']) %}
+                <tr class="{{ complete ? 'success' : 'warning' }}">
+                    <td>
+                        <span class="icon-{{ complete ? 'ok' : 'remove'}}"></span>
+                        {{ item['display_name_neutral'] }}{% if item['display_name'] %} ({{ item['display_name'] }}){% endif %}
+                    </td>
+                    <td>
+                        {{ item['c'] }}/{{ item['total'] }} ({{ (100*item['c']/item['total']) | number_format }}%)
+                    </td>
+                </tr>
+                {% set sum_c = sum_c + item['c'] %}{% set sum_total = sum_total + item['total'] %}
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th></th><th>{{ sum_c }}/{{ sum_total }} ({{ (100*sum_c/sum_total) | number_format }}%)</th>
+                </tr>
+            </tfoot>
+        </table>
+        {% endif %}
     </div>
 </div>
 <div class="panel panel-default">
     <div class="panel-body">
-        <form class="form-horizontal" role="form">
+        <h3>Envío</h3>
+        <form class="form" enctype="multipart/form-data" role="form" method="post" action="{{ urlFor('upload', {'id': folder.id}) }}">
+            {% if folder['is_divided'] %}
             <div class="form-group">
+                <label for="profileSelect">Enviar como</label>
+                <select class="form-control select" name="profile">
+                    {% for profile in upload_as %}<option value="{{ profile['id'] }}">{{ [profile['display_name_neutral'], profile['display_name_male'], profile['display_name_female']][user['gender']] }}{% if profile['display_name'] %} ({{ profile['display_name'] }}){% endif %}</option>{% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            <div class="form-group">
+                <label for="document">Documento(s) a enviar</label>
+                <input type="file" multiple class="form-control" name="document[]">
+                </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Enviar a la plataforma</button>
             </div>
         </form>
     </div>
