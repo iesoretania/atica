@@ -205,6 +205,7 @@ function getFolderPersons($categoryId) {
             inner_join('folder_delivery', array('folder_delivery.delivery_id','=','delivery.id'))->
             inner_join('folder', array('folder.id','=','folder_delivery.folder_id'))->
             where('folder.category_id', $categoryId)->
+            where('folder.is_visible', 1)->
             find_array());
 }
 
@@ -218,6 +219,7 @@ function getFolders($category_id, $user) {
             inner_join('person_profile', array('person_profile.profile_id', '=', 'profile.id'))->
             where('person_profile.person_id', $user['id'])->
             where('folder.category_id', $category_id)->
+            where('folder.is_visible', 1)->
             group_by('folder.id')->
             find_array());
 }
@@ -252,6 +254,7 @@ function getParsedFolders($categoryId, &$profileGender) {
             order_by_asc('delivery.profile_id')->
             order_by_asc('revision.upload_date')->
             where('folder.category_id', $categoryId)->
+            where('folder.is_visible', 1)->
             find_many();
 
     $return = array();
