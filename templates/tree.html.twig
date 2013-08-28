@@ -96,8 +96,8 @@
     {% if user['is_admin'] or info['manage_permission'] or info['upload_permission'] %}
     <div class="panel-footer">
         <form class="form-inline" role="form">
-            {% if info['upload_permission'] %} <button class="btn btn-info">Subir nuevo documento</button>{% endif %}
-            {% if info['manage_permission'] or user['is_admin'] %} <button class="btn btn-warning">Gestionar carpeta</button>{% endif %}
+            {% if info['upload_permission'] %} <a class="btn btn-info" href="{{ urlFor('frontpage') }}">Subir nuevo documento</a>{% endif %}
+            {% if info['manage_permission'] or user['is_admin'] %} <a class="btn btn-warning" href="{{ urlFor('frontpage') }}">Gestionar carpeta</a>{% endif %}
         </form>
     </div>
     {% endif %}
