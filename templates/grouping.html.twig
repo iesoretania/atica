@@ -43,7 +43,7 @@
             <tbody>
                 {% for delivery in folder.data %}
                 <tr>
-                    <td class="thin"><a href="{{ urlFor('download', { 'id': delivery.id, 'cid': category.id }) }}">{{ delivery.display_name | replace({'_':' '})}}</a></td>
+                    <td class="thin"><a href="{{ urlFor('download', { 'id': delivery.id, 'cid': grouping.id, 'kind': 2 }) }}">{{ delivery.display_name | replace({'_':' '})}}</a></td>
                     <td>{{ delivery.upload_date | date("Y-m-d") }}</td>
                 </tr>
                 {% endfor %}

@@ -59,21 +59,36 @@ $app->get('/arbol(/:id)', function ($id = NULL) use ($app, $user, $organization)
         'folders' => $folders));
 })->name('tree');
 
-$app->get('/descargar/:cid/:id/', function ($cid, $id) use ($app, $user, $organization) {
-    if (!$user) {
-        $app->redirect($app->urlFor('login'));
+$app->get('/descargar/:kind/:cid/:id/', function ($kind, $cid, $id) use ($app, $user, $organization) {
+    
+    // $kind =
+    // 1 -> la descarga se produce desde una carpeta del árbol, $cid = category.id
+    // 2 -> la descarga se produce desde un agrupamiento, $cid = grouping.id
+    switch($kind) {
+        case 1:
+            // sólo usuarios autenticados
+            if (!$user) {
+                $app->redirect($app->urlFor('login'));
+            }  
+            $errorUrl = $app->urlFor('tree', array('id' => $cid));
+            break;
+        case 2:
+            $errorUrl = $app->urlFor('grouping', array('id' => $cid));
+            break;
+        default:
+            $app-redirect($app->urlFor('frontpage'));
     }
-
+    
     $delivery = getDelivery($id, $user['id']);
     if (!$delivery) {
        $app->flash('home_error', 'no_delivery');
-       $app->redirect($app->urlFor('tree', array('id' => $cid)));
+       $app->redirect($errorUrl);
     }
     $file = '../data/' . $delivery['download_path'];
 
     if (!file_exists($file)) {
        $app->flash('home_error', 'no_document');
-       $app->redirect($app->urlFor('tree', array('id' => $cid)));
+       $app->redirect($errorUrl);
     }
 
     $res = $app->response();
