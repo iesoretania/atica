@@ -44,9 +44,11 @@
                     </li>
                 {% else %}
                     <li class="login">
-                        <a class="btn btn-info login"  role="button" href="{{ urlFor('login') }}">
-                            <span class="icon-signin"></span>&nbsp;<span class="thin">Entrar en la aplicación</span></span>
-                        </a>
+                        <div class="no-dropdown">
+                            <a class="btn btn-info login" id="usermenu" role="button" href="{{ urlFor('login') }}">
+                                <span class="icon-signin"></span>&nbsp;<span class="thin">Entrar en la aplicación</span></span>
+                            </a>
+                        </div>
                     </li>
                 {% endif %}
                 </ul>
