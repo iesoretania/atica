@@ -54,27 +54,22 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config,
             'active' => $active, 'target' => $app->urlFor('activities', array('id' => $profile['id']))));
     }
 
-    /*// si hay un perfil como parámetro que no está asociado al usuario, redirigir
-    if ((NULL != $id) && (NULL == $current)) {
-        $app->redirect($app->urlFor('activities'));
-    }*/
-
     $sidebar = array();
 
     array_push($sidebar, $profile_bar);
     
     // obtener otros perfiles
     $otherProfiles = getUserOtherProfiles($user['id'], $organization['id'], $profile_group_ids);
-    if (count($otherProfiles, COUNT_NORMAL)>0) {
+    if (count($otherProfiles, COUNT_NORMAL) > 0) {
        $other_profile_bar = array(
            array('caption' => 'Otras actividades', 'icon' => 'calendar-empty')
         );
 
-        $currentOther = NULL;
         foreach ($otherProfiles as $profile) {
             $captionOther = $profile['display_name_neutral'] . " " . $profile['display_name'];
             if ($profile['id'] == $id) {
-                $currentOther = $profile;
+                $current = $profile;
+                $detail = $captionOther;
                 $activeOther = true;
             }
             else {
@@ -86,8 +81,13 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config,
         array_push($sidebar, $other_profile_bar);
     }
     
+    // si hay un perfil como parámetro que no está asociado al usuario, redirigir
+    if ((NULL != $id) && (NULL == $current)) {
+        $app->redirect($app->urlFor('activities'));
+    }
+    
     // barra superior de navegación
-    if ($id != NULL) {
+    if (NULL != $id) {
         $breadcrumb = array(
             array('display_name' => 'Actividades', 'target' => $app->urlFor('activities')),
             array('display_name' => $detail)
@@ -113,7 +113,10 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config,
     
     // generar página
     $app->render('activities.html.twig', array(
-        'navigation' => $breadcrumb, 'search' => true, 'detail' => $detail, 'sidebar' => $sidebar, 'events' => $parsedEvents));
+        'navigation' => $breadcrumb, 'search' => true,
+        'detail' => $detail,
+        'sidebar' => $sidebar,
+        'events' => $parsedEvents));
 })->name('activities');
 
 function getUserProfiles($user_id) {
