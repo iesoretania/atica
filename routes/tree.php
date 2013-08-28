@@ -105,6 +105,41 @@ $app->get('/descargar/:kind/:cid/:id/', function ($kind, $cid, $id) use ($app, $
 })->name('download');
 
 $app->get('/enviar/:id', function ($id) use ($app, $user, $config, $organization) {
+    if (!$user) {
+        $app->redirect($app->urlFor('login'));
+    }
+
+    $data = array();
+    $folders = array();
+    $category = array();
+    $parent = array();
+    $persons = array();
+    $profiles = array();
+    $profileGender = array();
+
+    $folder = getFolder($id);
+    $uploadProfiles = getPermissionProfiles($id, 1);
+    $managerProfiles = getPermissionProfiles($id, 0);
+    $userProfiles = parseArray(getUserProfiles($user['id'], $organization['id'], true));
+    
+    $sidebar = getTree($organization['id'], $app, $folder['category_id'], $category, $parent);
+    $data = array();
+    
+    $breadcrumb = array(
+        array('display_name' => 'Árbol', 'target' => $app->urlFor('tree')),
+        array('display_name' => $parent['display_name'], 'target' => $app->urlFor('tree')),
+        array('display_name' => $category['display_name'], 'target' => $app->urlFor('tree', array('id' => $category['id']))),
+        array('display_name' => 'Enviar documento')
+    );
+    
+    $app->render('upload.html.twig', array(
+        'navigation' => $breadcrumb, 'search' => false, 'sidebar' => $sidebar,
+        'category' => $category,
+        'folder' => $folder,
+        'upload_profiles' => $uploadProfiles,
+        'manager_profiles' => $managerProfiles,
+        'user_profiles' => $userProfiles,
+        'data' => $data));    
 })->name('upload');
 
 function getTree($orgId, $app, $id, &$matchedCategory, &$parentCategory) {
@@ -268,4 +303,23 @@ function getDelivery($deliveryId) {
             inner_join('document_data', array('document_data.id', '=', 'document.document_data_id'))->
             where('delivery.id', $deliveryId)->
             find_one();
+}
+
+function getFolder($folderId) {
+    return ORM::for_table('folder')->
+            where('folder.id', $folderId)->
+            find_one();    
+}
+
+function getPermissionProfiles($folderId, $permission) {
+    return ORM::for_table('profile')->
+            select('profile.*')->
+            select('profile_group.display_name_male')->
+            select('profile_group.display_name_female')->
+            select('profile_group.display_name_neutral')->
+            inner_join('folder_permission', array('folder_permission.profile_id', '=', 'profile.id'))->
+            inner_join('profile_group', array('profile_group.id', '=', 'profile.profile_group_id'))->
+            where('folder_permission.folder_id', $folderId)->
+            where('folder_permission.permission', $permission)->
+            find_many();    
 }

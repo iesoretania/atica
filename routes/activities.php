@@ -22,7 +22,7 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config,
     }
 
     // obtener perfiles
-    $profiles = getUserProfiles($user['id']);
+    $profiles = getUserProfiles($user['id'], $organization['id'], false);
 
     // barra lateral de perfiles
     $profile_bar = array(
@@ -119,12 +119,41 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config,
         'events' => $parsedEvents));
 })->name('activities');
 
-function getUserProfiles($user_id) {
-    return ORM::for_table('person_profile')->
+function getUserProfiles($user_id, $org_id, $extended) {
+    // $extended indica si queremos recibir también los perfiles generales
+    $data = ORM::for_table('person_profile')->
+            select('profile.*')->
+            select('profile_group.display_name_neutral')->
+            select('profile_group.display_name_male')->
+            select('profile_group.display_name_female')->
             inner_join('profile', array('person_profile.profile_id','=','profile.id'))->
             inner_join('profile_group', array('profile_group.id','=','profile.profile_group_id'))->
             where('person_id', $user_id)->
-            order_by_asc('profile_group.display_name_neutral')->find_many();
+            where('profile_group.organization_id', $org_id)->
+            order_by_asc('profile_group.display_name_neutral')->
+            order_by_asc('profile.order_nr')->find_array();
+    
+    if ($extended) {
+        $data = array_merge($data,
+            ORM::for_table('person_profile')->
+                select('profile.profile_group_id')->
+                select_expr('NULL', 'display_name')->
+                select('profile.order_nr')->
+                select('profile_group.id', 'id')->
+                select('profile_group.display_name_neutral')->
+                select('profile_group.display_name_male')->
+                select('profile_group.display_name_female')->
+                inner_join('profile', array('person_profile.profile_id','=','profile.id'))->
+                inner_join('profile_group', array('profile_group.id','=','profile.profile_group_id'))->
+                where('person_id', $user_id)->
+                where_not_null('profile.display_name')->
+                where('profile_group.organization_id', $org_id)->
+                order_by_asc('profile_group.display_name_neutral')->
+                order_by_asc('profile.order_nr')->find_array()
+        );
+    }
+    
+    return $data;
 }
 
 function getUserOtherProfiles($user_id, $org_id, $current) {

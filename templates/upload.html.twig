@@ -16,4 +16,35 @@
 
 {% extends "tree.html.twig" %}
 {% block maincontent %}
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <h1>Enviar documento nuevo</h1>
+    </div>
+    <div class="panel-body">
+        <h2>Carpeta: {{ folder['display_name'] }}</h2>
+        {% if folder.description %}<h4>{{ folder.description }}</h4>{% endif %}
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-body">
+        <dl class="dl-horizontal">
+            <dt>Responsable:</dt>
+            <dd>
+            {% for profile in manager_profiles %}{% if not loop.first %}, {% endif %}{% if user_profiles[profile.id] %}<strong>{% endif %}{{ profile.display_name_neutral }}{% if profile.display_name is not null %} ({{ profile.display_name }}){% endif %}{% if user_profiles[profile.id] %}</strong>{% endif %}{% endfor %}
+            </dd>
+            <dt>Pueden enviar:</dt>
+            <dd>
+            {% for profile in upload_profiles %}{% if not loop.first %}, {% endif %}{% if user_profiles[profile.id] %}<strong>{% endif %}{{ profile.display_name_neutral }}{% if profile.display_name is not null %} ({{ profile.display_name }}){% endif %}{% if user_profiles[profile.id] %}</strong>{% endif %}{% endfor %}
+            </dd>
+        </dl>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-body">
+        <form class="form-horizontal" role="form">
+            <div class="form-group">
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
