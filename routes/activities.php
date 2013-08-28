@@ -35,7 +35,6 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config,
     $detail = '';
     $profile_ids = array();
     $profile_group_ids = array();
-    $profile_group_ids_text = '';
     foreach ($profiles as $profile) {
         $gender = array ($profile['display_name_neutral'], $profile['display_name_male'], $profile['display_name_female']);
         $caption = $gender[$user['gender']] . " " . $profile['display_name'];
@@ -50,11 +49,6 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config,
         array_push($profile_ids, $profile['id']);
         if (!in_array($profile['profile_group_id'], $profile_group_ids)) {
             $profile_group_ids[] = $profile['profile_group_id'];
-            if ($profile_group_ids_text) {
-                $profile_group_ids_text .= ',';
-            }
-            
-            $profile_group_ids_text .= $profile['profile_group_id'];
         }
         array_push($profile_bar, array('caption' => $caption,
             'active' => $active, 'target' => $app->urlFor('activities', array('id' => $profile['id']))));
