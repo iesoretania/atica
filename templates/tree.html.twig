@@ -96,16 +96,26 @@
     {% if user['is_admin'] or info['manage_permission'] or info['upload_permission'] %}
     <div class="panel-footer">
         <form class="form-inline" role="form">
-            {% if info['upload_permission'] %} <a class="btn btn-info" href="{{ urlFor('frontpage') }}">Subir nuevo documento</a>{% endif %}
+            {% if info['upload_permission'] %} <a class="btn btn-info" href="{{ urlFor('upload', { 'id': folder.id }) }}">Subir nuevo documento</a>{% endif %}
             {% if info['manage_permission'] or user['is_admin'] %} <a class="btn btn-warning" href="{{ urlFor('frontpage') }}">Gestionar carpeta</a>{% endif %}
         </form>
     </div>
     {% endif %}
 </div>
 {% endfor %}
+{% elseif not content %}
+<div class="panel panel-default">
+    <div class="panel-body">
+        <p>Desde aquí podrá examinar todos los documentos que componen el sistema
+        de gestión de la calidad y enviar nuevos documentos a la plataforma en
+        los lugares donde esté autorizado.</p>
+        
+        <p>Seleccione el capítulo y el proceso que desea examinar.</p>
+    </div>
+</div>
 {% else %}
 <div class="alert alert-danger">
-    No hay ningún documento que mostrar. Seleccione un proceso de la lista de la izquierda.
+    No hay ningún documento que mostrar. Seleccione otro proceso de la lista.
 </div>
 {% endif %}
 {% endblock %}
