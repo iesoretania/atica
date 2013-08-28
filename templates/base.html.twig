@@ -45,6 +45,7 @@
         </nav><!--/.navbar -->
 
         <div class="container">
+        <a class="sr-only" href="#content">Ir al contenido</a>
         {% block breadcrumb %}
             {% if search %}
             <nav role="search">
@@ -75,7 +76,7 @@
             </nav>
             {% endif %}
         {% endblock %}
-            <main role="main">
+            <main role="main" id="content">
             {% block content %}
             {% endblock %}
             </main>
