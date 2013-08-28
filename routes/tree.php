@@ -28,15 +28,15 @@ $app->get('/arbol(/:id)', function ($id = NULL) use ($app, $user, $organization)
     $persons = array();
     $profiles = array();
     $profileGender = array();
-    
+
     $sidebar = getTree($organization['id'], $app, $id, $category, $parent);
-    
+
     if (NULL !== $id) {
         $data = getParsedFolders($id, $profileGender);
         $folders = getFolders($id, $user);
         $persons = getFolderPersons($id);
         $profiles = getProfiles($id);
-        
+
         $breadcrumb = array(
             array('display_name' => 'Árbol', 'target' => $app->urlFor('tree')),
             array('display_name' => $parent['display_name'], 'target' => $app->urlFor('tree')),
@@ -48,7 +48,7 @@ $app->get('/arbol(/:id)', function ($id = NULL) use ($app, $user, $organization)
             array('display_name' => 'Árbol', 'target' => '#')
         );
     }
-    //var_dump($data); die();
+
     $app->render('tree.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar,
         'category' => $category,
@@ -70,12 +70,12 @@ $app->get('/descargar/:cid/:id/', function ($cid, $id) use ($app, $user, $organi
        $app->redirect($app->urlFor('tree', array('id' => $cid)));
     }
     $file = '../data/' . $delivery['download_path'];
-    
+
     if (!file_exists($file)) {
        $app->flash('home_error', 'no_document');
        $app->redirect($app->urlFor('tree', array('id' => $cid)));
     }
-    
+
     $res = $app->response();
     $res['Content-Description'] = 'File Transfer';
     $res['Content-Type'] = ($delivery['mime'] == NULL) ?
@@ -88,6 +88,9 @@ $app->get('/descargar/:cid/:id/', function ($cid, $id) use ($app, $user, $organi
     $res['Content-Length'] = $delivery['download_filesize'];
     readfile($file);
 })->name('download');
+
+$app->get('/enviar/:id', function ($id) use ($app, $user, $config, $organization) {
+})->name('upload');
 
 function getTree($orgId, $app, $id, &$matchedCategory, &$parentCategory) {
     $return = array();
@@ -200,7 +203,7 @@ function getParsedFolders($categoryId, &$profileGender) {
             order_by_asc('revision.upload_date')->
             where('folder.category_id', $categoryId)->
             find_many();
-            
+
     $return = array();
     $currentData = array();
     $currentFolderId = NULL;
