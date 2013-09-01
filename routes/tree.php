@@ -573,14 +573,16 @@ function getFolderProfileDeliveryItems($profileId, $folderId) {
     $data = ORM::for_table('folder_profile_delivery_item')->
             where('folder_id', $folderId)->
             where('profile_id', $profileId)->
+            where('is_enabled', 1)->
             order_by_asc('order_nr')->
             find_many();
     if ($data == false) {
         $data = ORM::for_table('folder_profile_delivery_item')->
                 select('folder_profile_delivery_item.*')->
                 inner_join('profile', array('folder_profile_delivery_item.profile_id', '=', 'profile.profile_group_id'))->
-                where('folder_id', $folderId)->
+                where('folder_profile_delivery_item.folder_id', $folderId)->
                 where('profile.id', $profileId)->
+                where('folder_profile_delivery_item.is_enabled', 1)->
                 order_by_asc('folder_profile_delivery_item.order_nr')->
                 find_many();
     }
@@ -599,6 +601,7 @@ function getFolderProfileDeliveryStats($folderId) {
             inner_join('profile_group', array('profile_group.id', '=', 'profile.profile_group_id'))->
             left_outer_join('delivery', array('delivery.item_id', '=', 'folder_profile_delivery_item.id'))->
             where('folder_id', $folderId)->
+            where('folder_profile_delivery_item.is_enabled', 1)->
             group_by('folder_profile_delivery_item.profile_id')->
             group_by('delivery.item_id')->
             order_by_asc('folder_profile_delivery_item.id')->
@@ -618,6 +621,7 @@ function getFolderProfileDeliveredItems($profileId, $folderId) {
             left_outer_join('delivery', array('delivery.item_id', '=', 'folder_profile_delivery_item.id'))->
             where('folder_id', $folderId)->
             where('folder_profile_delivery_item.profile_id', $profileId)->
+            where('folder_profile_delivery_item.is_enabled', 1)->
             group_by('folder_profile_delivery_item.id')->
             order_by_asc('folder_profile_delivery_item.order_nr')->
             find_array();
@@ -721,10 +725,6 @@ function createDelivery($folderId, $userId, $profileId, $displayName, $descripti
     
     $delivery->set('current_revision_id', $revision['id']);
     $delivery->save();
-    
-    // TODO: crear 'document', 'revision' y 'delivery'
-    
-    ORM::get_db()->commit();
-    
-    return true;
+   
+    return ORM::get_db()->commit();
 }
