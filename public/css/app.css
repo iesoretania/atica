@@ -200,6 +200,14 @@ footer {
     font-size: 90%;
 }
 
+.delivery-tools {
+    color: #eee;
+}
+
+.delivery-tools:hover {
+    text-decoration: none;
+}
+
 @keyframes flashing {
     from {
         opacity: 1;

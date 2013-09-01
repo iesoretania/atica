@@ -113,7 +113,7 @@ if (isset($_SESSION['person_id'])) {
     // comprobar si pertenece a la organización
     $membership = ORM::for_table('person_organization')->
             where('organization_id', $_SESSION['organization_id'])->
-            where('person_id', $_SESSION['person_id'])->find_one();
+            where('person_id', $_SESSION['person_id'])->find_one()->as_array();
 
     // si no pertenece, sacar al usuario porque no debería ocurrir
     if (!$membership) {
