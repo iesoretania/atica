@@ -93,7 +93,11 @@ $app->post('/enviar/:id', function ($id) use ($app, $user, $preferences, $organi
     if (!$user) {
         $app->redirect($app->urlFor('login'));
     }
-
+    if ((! isset($_FILES['document']['name'][0])) || (strlen($_FILES['document']['name'][0]) == 0)) {
+        // no hay archivos enviados
+        $app->redirect($app->urlFor('upload', array('id' => $id)));
+    }
+    
     $items = array();
 
     // TODO: Comprobar si la carpeta es válida
@@ -108,7 +112,7 @@ $app->post('/enviar/:id', function ($id) use ($app, $user, $preferences, $organi
             parseArray(getFolderProfileDeliveryItems($profileId, $id)) :
             array();
 
-    $loop = 0;
+    $loop = 0;  
     while (isset($_FILES['document']['name'][$loop])) {
         if ( is_uploaded_file($_FILES['document']['tmp_name'][$loop]) ) {
             $hash = sha1_file($_FILES['document']['tmp_name'][$loop]);
@@ -170,6 +174,16 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
     // TODO: Comprobar si la carpeta es válida
     $folder = getFolder($id);
     
+    if (isset($_POST['discard'])) {
+        // descartar envío: borrar archivos temporales
+        $loop = 1;
+        while (isset($_POST['hash' . $loop])) {
+            $tempDestination = $preferences['upload.folder'] . "temp/" . $_POST['hash' . $loop];
+            @unlink($tempDestination);
+        }
+        $app->redirect($app->urlFor('tree', array('id' => $folder['category_id'])));
+    }
+    
     // TODO: Comprobar perfil
     $profileIsSet = $folder['is_folder_divided'];
     $profileId = $profileIsSet ? $_POST['profile'] : NULL;
@@ -183,6 +197,10 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
     $success = 0;
     $failed = 0;
     
+    if (! isset($_POST['hash' . $loop])) {
+        // no hay archivos enviados
+        $app->redirect($app->urlFor('upload', array('id' => $id)));
+    }
     // TODO: comprobar que $hash es realmente un hash
     // TODO: comprobar que 'profile' es correcto
     
