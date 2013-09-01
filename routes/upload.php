@@ -435,8 +435,6 @@ function createDelivery($folderId, $userId, $profileId, $displayName, $descripti
             
     $extension = getExtension($ext);
     if (false === $extension) {
-        // TODO: Cuidado:
-        die($ext);
         $extension = ORM::for_table('file_extension')->create();
         $extension->set('id', $ext);
         $extension->set('mime', 'application/octet-stream');
