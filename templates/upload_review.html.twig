@@ -35,7 +35,7 @@
         {% if folder.description %}<h4>{{ folder.description }}</h4>{% endif %}
     </div>
 </div>
-<div class="alert alert-danger">
+<div class="alert alert-warning">
     <strong>¡Atención!</strong> El envío no quedará registrado hasta que complete este paso.
 </div>
 <div class="panel panel-default">
@@ -62,7 +62,7 @@
                         {{ (item['creation_date'] is null) ? "---" : item['creation_date'] | date('Y/m/d') }}
                     </td>
                 </tr>
-                {% set sum_c = complete ? 1 : 0 %}{% set sum_total = sum_total + 1 %}
+                {% set sum_c = sum_c + complete ? 1 : 0 %}{% set sum_total = sum_total + 1 %}
                 {% endfor %}
             </tbody>
             <tfoot>
@@ -79,7 +79,8 @@
             <div class="row form-group">           
                 <div class="col-lg-6">
                     <input type="hidden" name="hash{{ loop.index }}" value="{{ item['hash'] }}">
-                    {% if items %}<input type="hidden" name="filename{{ loop.index }}" value="{{ item.name }}">{% endif %}
+                    <input type="hidden" name="filename{{ loop.index }}" value="{{ item['name'] }}">
+                    {% if items %}<input type="hidden" name="description{{ loop.index }}" value="{{ item['description'] }}">{% endif %}
                     <input class="form-control" name="{{ items ? 'no_ ' }}filename{{ loop.index }}" type="text" {{ items ? 'disabled ' }} value="{{item.name}}">
                 </div>
                 {% if items %}

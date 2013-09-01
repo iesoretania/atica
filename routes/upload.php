@@ -104,7 +104,7 @@ $app->post('/enviar/:id', function ($id) use ($app, $user, $preferences, $organi
     $folder = getFolder($id);
     
     // TODO: Comprobar perfil
-    $profileIsSet = $folder['is_folder_divided'];
+    $profileIsSet = $folder['is_divided'];
     $profileId = $profileIsSet ? $_POST['profile'] : NULL;
 
     // buscar si hay una lista de entrega
@@ -123,8 +123,11 @@ $app->post('/enviar/:id', function ($id) use ($app, $user, $preferences, $organi
             $tempDestination = $preferences['upload.folder'] . "temp/" . $hash;
             move_uploaded_file($_FILES['document']['tmp_name'][$loop], $tempDestination);
 
+            $filename = $_FILES['document']['name'][$loop];
+            $description = preg_replace("/\\.[^.\\s]{2,3,4}$/", "", $filename);
             $items[] = array(
-                'name' => $_FILES['document']['name'][$loop],
+                'name' => $filename,
+                'description' => $description,
                 'hash' => $hash,
                 'filesize' => $filesize
             );
@@ -180,12 +183,13 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
         while (isset($_POST['hash' . $loop])) {
             $tempDestination = $preferences['upload.folder'] . "temp/" . $_POST['hash' . $loop];
             @unlink($tempDestination);
+            $loop++;
         }
         $app->redirect($app->urlFor('tree', array('id' => $folder['category_id'])));
     }
     
     // TODO: Comprobar perfil
-    $profileIsSet = $folder['is_folder_divided'];
+    $profileIsSet = $folder['is_divided'];
     $profileId = $profileIsSet ? $_POST['profile'] : NULL;
 
     // buscar si hay una lista de entrega
@@ -207,6 +211,9 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
     while (isset($_POST['hash' . $loop])) {
         $ok = true;
         $hash = $_POST['hash' . $loop];
+        $filename = $_POST['filename'. $loop];
+        $description = $_POST['description'. $loop];
+        
         $tempDestination = $preferences['upload.folder'] . "temp/" . $hash;
         
         $itemId = NULL;
@@ -225,7 +232,7 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
                     // ¿pertenece el elemento a la lista?
                     if (isset($list[$_POST['element' . $loop]])) {
                         // sí
-                        if ($profileId && (getDeliveryItemCount($profileId, $id) > 0)) {
+                        if ($profileId && (getDeliveryItemCount($profileId, $id, $_POST['element' . $loop]) > 0)) {
                             // error, ya existe un ítem de ese tipo
                             $ok = false;
                             $type = 'danger';
@@ -234,6 +241,7 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
                         else {
                             // correcto
                             $itemId = $_POST['element' . $loop];
+                            $description = $list[$itemId]['display_name'];
                         }
                     }
                     else {
@@ -257,7 +265,7 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
                 $filesize = filesize($tempDestination);
                 $documentDestination = createDocumentFolder($preferences['upload.folder'], $hash);
                 if (rename($tempDestination, $preferences['upload.folder'] . $documentDestination)) {
-                    if (false == createDelivery($id, $user['id'], $profileId, $_POST['filename'. $loop], NULL, $itemId, $documentDestination, $hash, $filesize)) {
+                    if (false == createDelivery($id, $user['id'], $profileId, $filename, $description, NULL, $itemId, $documentDestination, $hash, $filesize)) {
                         $ok = false;
                         $type = 'danger';
                         $message = 'cannot register';
@@ -375,11 +383,9 @@ function getFolderProfileDeliveryStats($folderId) {
             where('folder_id', $folderId)->
             where('folder_profile_delivery_item.is_visible', 1)->
             group_by('folder_profile_delivery_item.profile_id')->
-            group_by('delivery.item_id')->
             order_by_asc('folder_profile_delivery_item.id')->
             order_by_asc('folder_profile_delivery_item.order_nr')->
             find_array();
-
     return $data;
 }
 
@@ -413,11 +419,12 @@ function getProfile($profileId) {
             find_one($profileId);
 }
 
-function getDeliveryItemCount($profileId, $folderId) {
+function getDeliveryItemCount($profileId, $folderId, $itemId) {
     return ORM::for_table('delivery')->
             inner_join('folder_delivery', array('folder_delivery.delivery_id', '=', 'delivery.id'))->
             where('folder_delivery.folder_id', $folderId)->
             where('delivery.profile_id', $profileId)->
+            where('delivery.item_id', $itemId)->
             count();
 }
 
@@ -432,7 +439,7 @@ function getExtension($ext) {
             find_one($ext);
 }
 
-function createDelivery($folderId, $userId, $profileId, $displayName, $description, $itemId, $dataPath, $dataHash, $filesize, $revision = 0) {
+function createDelivery($folderId, $userId, $profileId, $displayName, $deliveryName, $description, $itemId, $dataPath, $dataHash, $filesize, $revision = 0) {
     
     $documentData = getDocumentDataByHash($dataHash);
     $order = ORM::for_table('folder_delivery')->
@@ -451,7 +458,6 @@ function createDelivery($folderId, $userId, $profileId, $displayName, $descripti
     }
     
     $ext = pathinfo($displayName, PATHINFO_EXTENSION);
-    $name = preg_replace("/\\.[^.\\s]{2,3,4}$/", "", $displayName);
             
     $extension = getExtension($ext);
     if (false === $extension) {
@@ -466,7 +472,7 @@ function createDelivery($folderId, $userId, $profileId, $displayName, $descripti
     $delivery = ORM::for_table('delivery')->create();
     $delivery->set('profile_id', $profileId);
     $delivery->set('item_id', $itemId);
-    $delivery->set('display_name', $name);
+    $delivery->set('display_name', $deliveryName);
     $delivery->set('description', $description);
     $delivery->set('creation_date', date('c'));
     $delivery->save();

@@ -87,7 +87,7 @@
                 {% endif %}
             <tr>
                 <td class="thin"><a href="{{ urlFor('download', { 'id': delivery.id, 'cid': category.id, 'kind': 1 }) }}">{{ delivery.display_name | replace({'_':' '})}}</a> 
-                {% if user['is_admin'] or info['manage_permission'] or delivery['uploader_person_id'] == user['id'] %}<a class="delivery-tools" title="Modificar envío"><span class="icon-pencil"></span></a>{% endif %}</td>
+                {% if user['is_admin'] or info['manage_permission'] or delivery['uploader_person_id'] == user['id'] %}<a class="delivery-tools hidden-print" title="Modificar envío"><span class="icon-pencil"></span></a>{% endif %}</td>
                 <td>{{ delivery.upload_date | date("Y-m-d") }}</td>
                 <td><a href="{{ urlFor('personal', { 'id': personId }) }}">{{ persons[personId]['display_name']}}</a></td>
             </tr>
