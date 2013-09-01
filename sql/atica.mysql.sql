@@ -1,5 +1,3 @@
-SET FOREIGN_KEY_CHECKS=0;
-
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
@@ -232,6 +230,7 @@ CREATE TABLE folder_profile_delivery_item (
   folder_id int(11) unsigned NOT NULL,
   display_name varchar(255) NOT NULL,
   order_nr int(11) unsigned NOT NULL,
+  is_visible tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (id),
   KEY folder_profile_delivery_item_profile_id_fk (profile_id),
   KEY folder_profile_delivery_item_folder_id_fk (folder_id),
@@ -367,7 +366,7 @@ CREATE TABLE "profile" (
 );
 
 CREATE TABLE profile_group (
-  id int(11) unsigned NOT NULL AUTO_INCREMENT,
+  id int(11) unsigned NOT NULL,
   organization_id int(11) unsigned NOT NULL,
   display_name_male varchar(255) NOT NULL,
   display_name_female varchar(255) NOT NULL,
@@ -376,7 +375,8 @@ CREATE TABLE profile_group (
   is_manager tinyint(1) unsigned NOT NULL DEFAULT '0',
   description text,
   PRIMARY KEY (id),
-  KEY profile_group_organization_id_fk_idx (organization_id)
+  KEY profile_group_organization_id_fk_idx (organization_id),
+  KEY profile_group_id_fk_idx (id)
 );
 
 CREATE TABLE revision (
@@ -384,7 +384,7 @@ CREATE TABLE revision (
   delivery_id int(11) unsigned NOT NULL,
   revision_nr int(11) unsigned NOT NULL,
   uploader_person_id int(11) unsigned NOT NULL,
-  original_document_id int(11) unsigned NOT NULL,
+  original_document_id int(11) unsigned DEFAULT NULL,
   "status" int(11) unsigned DEFAULT NULL,
   upload_date datetime NOT NULL,
   upload_comment text,
@@ -528,6 +528,7 @@ ALTER TABLE `profile`
   ADD CONSTRAINT profile_profile_group_id_fk FOREIGN KEY (profile_group_id) REFERENCES profile_group (id) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `profile_group`
+  ADD CONSTRAINT profile_group_id_fk FOREIGN KEY (id) REFERENCES profile (id) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT profile_group_organization_id_fk FOREIGN KEY (organization_id) REFERENCES organization (id) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 ALTER TABLE `revision`
@@ -544,7 +545,6 @@ ALTER TABLE `session`
 
 ALTER TABLE `snapshot`
   ADD CONSTRAINT snapshot_organization_id_fk FOREIGN KEY (organization_id) REFERENCES organization (id) ON DELETE CASCADE ON UPDATE CASCADE;
-SET FOREIGN_KEY_CHECKS=1;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
