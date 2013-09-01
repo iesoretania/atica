@@ -48,6 +48,12 @@
 </div>
 {% endfor %}
 {% endif %}
+{% if flash['upload_ok'] %}
+<div class="alert alert-success alert-dismissable">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>   
+    <strong>Entrega correcta.</strong> {{ flash['upload_ok'] == 1 ? 'Un documento ha sido registrado' : flash['upload_ok'] ~ ' documentos han sido registrados' }}.
+</div>
+{% endif %}
 <div class="panel panel-info">
     <div class="panel-heading">
         <h1>Envío de nuevos documentos</h1>
@@ -122,6 +128,7 @@
                 </div>
             <div class="form-group">
                 <button type="submit" class="btn btn-primary">Enviar a la plataforma</button>
+                <a class="btn btn-info" href="{{ urlFor('tree', { 'id': category.id } ) }}">Volver sin enviar</a>
             </div>
         </form>
     </div>

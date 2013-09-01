@@ -272,7 +272,9 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
         $loop++;
     }
     $app->flash('upload', $failed);
-    
+    if ($success>0) {
+        $app->flash('upload_ok', $success);
+    }
     $app->redirect($app->urlFor('upload', array('id' => $id)));
 
 })->name('confirm');
