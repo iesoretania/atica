@@ -32,13 +32,13 @@ $app->map('/evento/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $user, 
     // marcar evento como no completado
     if ($event['is_manual'] && ($event['completed_date'] != NULL) && isset($_POST['unmark'])) {
         deleteCompletedEvent($id, $user['id']);
-        $event = getActivityEvent($id, $aid, $user)->as_array();
+        $app->redirect($app->urlFor('activities', array('id' => $pid)));
     }
     
     // marcar evento como completado
     if ($event['is_manual'] && ($event['completed_date'] == NULL) && isset($_POST['mark'])) {
         addCompletedEvent($id, $user['id']);
-        $event = getActivityEvent($id, $aid, $user)->as_array();
+        $app->redirect($app->urlFor('activities', array('id' => $pid)));
     }
     
     // obtener carpeta
