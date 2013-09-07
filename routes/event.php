@@ -16,7 +16,7 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see [http://www.gnu.org/licenses/]. */
 
-$app->get('/evento/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $user, $organization) {
+$app->map('/evento/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $user, $organization) {
     if (!$user) {
         $app->redirect($app->urlFor('login'));
     }
@@ -27,6 +27,18 @@ $app->get('/evento/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $user, 
     
     if (!$event) {
         $app->redirect($app->urlFor('frontpage'));
+    }
+    
+    // marcar evento como no completado
+    if ($event['is_manual'] && ($event['completed_date'] != NULL) && isset($_POST['unmark'])) {
+        deleteCompletedEvent($id, $user['id']);
+        $event = getActivityEvent($id, $aid, $user)->as_array();
+    }
+    
+    // marcar evento como completado
+    if ($event['is_manual'] && ($event['completed_date'] == NULL) && isset($_POST['mark'])) {
+        addCompletedEvent($id, $user['id']);
+        $event = getActivityEvent($id, $aid, $user)->as_array();
     }
     
     // obtener carpeta
@@ -138,11 +150,7 @@ $app->get('/evento/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $user, 
         'data' => $data,
         'deliveries' => $deliveries,
         'event' => $event));
-})->name('event');
-
-$app->post('/event/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $user, $organization) {
-
-});
+})->name('event')->via('GET', 'POST');
 
 function getActivityEvent($eventId, $activityId, $user) {
     return ORM::for_table('event')->
@@ -200,4 +208,20 @@ function getProfilesByFolderId($folderId) {
     return parseArray(getProfiles()->
             where('folder.id', $folderId)->
             find_array());
+}
+
+function deleteCompletedEvent($eventId, $personId) {
+    return ORM::for_table('completed_event')->
+            where('event_id', $eventId)->
+            where('person_id', $personId)->
+            delete_many();
+}
+
+function addCompletedEvent($eventId, $personId) {
+    $completedEvent = ORM::for_table('completed_event')->create();
+    $completedEvent->set('event_id', $eventId);
+    $completedEvent->set('person_id', $personId);
+    $completedEvent->set('completed_date', date('c'));
+    
+    return $completedEvent->save();
 }

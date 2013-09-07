@@ -36,9 +36,9 @@
         <p>La actividad puede marcarse como completada <strong>de forma manual</strong>. Use los botones para indicar cuando se haya completado.<p>
         <form class="form-inline" role="form" method="post" action="{{ url }}">
             {% if not event.completed_date %}
-                <button type="submit" class="btn btn-success">Marcar como completada</button>
+                <button type="submit" name="mark" class="btn btn-success">Marcar como completada</button>
             {% else %}
-                <button type="submit" class="btn btn-danger">Marcar como no completada</button>
+                <button type="submit" name="unmark" class="btn btn-danger">Marcar como no completada</button>
             {% endif %}
         </form>
         {% endif %}
