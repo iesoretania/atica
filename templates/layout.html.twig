@@ -40,9 +40,9 @@
             <div class="alert alert-danger col-md-12 alert-dismissable">
                 <button type="button" class="close" data-dismiss="alert">&times;</button>
                 {% if flash['home_error'] == 'no_delivery' %}
-                <strong>No se puede descargar la entrega.</strong> El documento solicitado no existe o bien no tiene permiso para acceder a él.
+                <strong>No se puede descargar el documento.</strong> El documento solicitado no existe o bien no tiene permiso para acceder a él.
                 {% elseif flash['home_error'] == 'no_document' %}
-                <strong>No se puede descargar la entrega.</strong> El documento no se encuentra en la base de datos. Consulte con el coordinador de calidad.
+                <strong>No se puede descargar el documento.</strong> El documento no se encuentra en la base de datos. Consulte con el coordinador de calidad.
                 {% else %}
                 <strong>{{ flash['home_error_summary'] }}</strong> {{ flash['home_error_detail'] }}
                 {% endif %}

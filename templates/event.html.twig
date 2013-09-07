@@ -26,8 +26,8 @@
     {% if event.is_manual or event.is_automatic %}
     <div class="panel-footer">
         <p>
-            <strong>Completada:</strong>
-            <span>{{ event.completed_date ? event.completed_date | date('Y-m-d') : 'Pendiente' }}</span>
+            <strong>Estado:</strong>
+            <span>{{ event.completed_date ? 'Completada el ' ~(event.completed_date | date('Y-m-d')) : 'Pendiente' }}</span>
         </p>
         {% if event.is_automatic %}
             <p>La actividad se marcará como completada <strong>de forma automática</strong> al realizar el envío indicado.<p>

@@ -35,7 +35,7 @@
     {% if error == 'ignored' %}
     <strong>{{ name }}.</strong> El documento ha sido ignorado.
     {% elseif error == 'already exists' %}
-    <strong>Ha ocurrido un error al registrar '{{ name }}'.</strong> Ya existe un elemento registrado con el mismo tipo.
+    <strong>Ha ocurrido un error al registrar '{{ name }}'.</strong> Ya existe una entrada registrada con el mismo tipo.
     {% elseif error == 'invalid item' %}
     <strong>Ha ocurrido un error al registrar '{{ name }}'.</strong> El elemento escogido es desconocido.
     {% elseif error == 'cannot register' %}
@@ -56,7 +56,7 @@
 {% endif %}
 <div class="panel panel-info">
     <div class="panel-heading">
-        <h1>Envío de nuevos documentos</h1>
+        <h1>Entrega de nuevos documentos</h1>
     </div>
     <div class="panel-body">
         <h2>Carpeta: {{ folder['display_name'] }}</h2>
@@ -123,12 +123,12 @@
             </div>
             {% endif %}
             <div class="form-group">
-                <label for="document">Documento(s) a enviar</label>
+                <label for="document">Documento(s) a entregar</label>
                 <input type="file" multiple class="form-control" name="document[]">
                 </div>
             <div class="form-group">
-                <button type="submit" class="btn btn-primary">Enviar a la plataforma</button>
-                <a class="btn btn-info" href="{{ urlFor('tree', { 'id': category.id } ) }}">Volver sin enviar</a>
+                <button type="submit" class="btn btn-primary">Entregar en la plataforma</button>
+                <a class="btn btn-info" href="{{ urlFor('tree', { 'id': category.id } ) }}">Volver sin entregar</a>
             </div>
         </form>
     </div>
