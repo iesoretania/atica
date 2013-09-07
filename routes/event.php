@@ -16,7 +16,7 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see [http://www.gnu.org/licenses/]. */
 
-$app->get('/event/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $user, $organization) {
+$app->get('/evento/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $user, $organization) {
     if (!$user) {
         $app->redirect($app->urlFor('login'));
     }

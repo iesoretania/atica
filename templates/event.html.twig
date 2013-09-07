@@ -33,7 +33,7 @@
             <p>La actividad se marcará como completada <strong>de forma automática</strong> al realizar el envío indicado.<p>
         {% endif %}
         {% if event.is_manual %}
-        <p>La actividad puede marcarse como completada de forma manual. Use los botones para indicar cuando se haya completado.<p>
+        <p>La actividad puede marcarse como completada <strong>de forma manual</strong>. Use los botones para indicar cuando se haya completado.<p>
         <form class="form-inline" role="form" method="post" action="{{ url }}">
             {% if not event.completed_date %}
                 <button type="submit" class="btn btn-success">Marcar como completada</button>
