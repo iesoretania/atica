@@ -138,7 +138,7 @@ require('../routes/session.php');
 require('../routes/personal.php');
 require('../routes/frontpage.php');
 require('../routes/activities.php');
-require('../routes/events.php');
+require('../routes/event.php');
 require('../routes/tree.php');
 require('../routes/upload.php');
 

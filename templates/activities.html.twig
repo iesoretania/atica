@@ -17,48 +17,52 @@
 {% extends "layout.html.twig" %}
 
 {% block maincontent %}
-                    <div class="panel panel-info">
-                        <div class="panel-heading">
-                            <h1>Actividades{% if detail %}: {{ detail }}{% endif %}</h1>
-                        </div>
-                    </div>
-                    {% if events %}
-                    {% for profile in events %}
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h2>{{ profile.info.profile_group_display_name }} {{ profile.info.profile_display_name }}</h2>
-                        </div>
-                        {% for activity in profile.data %}
-                        <div class="panel-body">
-                            <h3>{{ activity.info.activity_display_name }}</h3>
-                            {% if activity.info.activity_description %}<small>{{ activity.info.activity_description }}</small>{% endif %}
-                        </div>
-                        
-                        <table class="table table-striped table-condensed table-hover">
-                            <thead>
-                                <tr>
-                                    <th class="col-md-2">Calendario</th>
-                                    <th class="col-md-7">Actividad</th>
-                                    <th class="col-md-3">Documentos</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for event in activity.data %}
-                                <tr {% if event.completed_date %}class="success"{% endif %}>
-                                    <td>{{ event.period_description }} {{ parsePeriod(event.from_week, event.to_week, period_labels) }}</td>
-                                    <td><a href="{{ urlFor('event', event) }}">{{ event.display_name }}</a></td>
-                                    <td></td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                        {% endfor %}
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <h1>Actividades{% if detail %}: {{ detail }}{% endif %}</h1>
+    </div>
+</div>
+{% if events %}
+{% for profile in events %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h2>{{ profile.info.profile_group_display_name }} {{ profile.info.profile_display_name }}</h2>
+    </div>
+    {% for activity in profile.data %}
+    <div class="panel-body">
+        <h3>{{ activity.info.activity_display_name }}</h3>
+        {% if activity.info.activity_description %}<small>{{ activity.info.activity_description }}</small>{% endif %}
+    </div>
 
-                    </div>
-                    {% endfor %}
-                    {% else %}
-                    <div class="alert alert-danger">
-                        No hay ninguna actividad para mostrar
-                    </div>
-                    {% endif %}
+    <table class="table table-striped table-condensed table-hover">
+        <thead>
+            <tr>
+                <th class="col-md-2">Calendario</th>
+                <th class="col-md-8">Actividad</th>
+                <th class="col-md-2">Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for event in activity.data %}
+            <tr {% if event.completed_date %}class="success"{% endif %}>
+                <td>{{ event.period_description }} {{ parsePeriod(event.from_week, event.to_week, period_labels) }}</td>
+                <td><a href="{{ urlFor('event', { 'id': event.id, 'aid': activity.info.activity_id, 'pid': profile.info.profile_id }) }}">{{ event.display_name }}</a></td>
+                <td>
+                {% if (event.is_automatic or event.is_manual) %}
+                {{ event.completed_date ? event.completed_date | date('Y-m-d') : 'Pendiente' }}
+                {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endfor %}
+
+</div>
+{% endfor %}
+{% else %}
+<div class="alert alert-danger">
+    No hay ninguna actividad para mostrar
+</div>
+{% endif %}
 {% endblock %}

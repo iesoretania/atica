@@ -1,0 +1,83 @@
+{#  ATICA - Web application for supporting Quality Management Systems
+    Copyright (C) 2009-2013: Luis-Ramón López López
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
+
+{% extends "layout.html.twig" %}
+
+{% block maincontent %}
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <h1>{{ event.display_name }}</h1>
+    </div>
+    
+    {% if event.description %}<div class="panel-body"><h4>{{ event.description }}</h4></div>{% endif %}
+    {% if event.is_manual or event.is_automatic %}
+    <div class="panel-footer">
+        <p>
+            <strong>Completada:</strong>
+            <span>{{ event.completed_date ? event.completed_date | date('Y-m-d') : 'Pendiente' }}</span>
+        </p>
+        {% if event.is_automatic %}
+            <p>La actividad se marcará como completada <strong>de forma automática</strong> al realizar el envío indicado.<p>
+        {% endif %}
+        {% if event.is_manual %}
+        <p>La actividad puede marcarse como completada de forma manual. Use los botones para indicar cuando se haya completado.<p>
+        <form class="form-inline" role="form" method="post" action="{{ url }}">
+            {% if not event.completed_date %}
+                <button type="submit" class="btn btn-success">Marcar como completada</button>
+            {% else %}
+                <button type="submit" class="btn btn-danger">Marcar como no completada</button>
+            {% endif %}
+        </form>
+        {% endif %}
+    </div>
+    {% endif %}
+
+</div>
+{% if deliveries %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h2>Documentos asociados</h2>
+    </div>
+    <table class="table table-striped table-condensed table-hover">
+        <thead>
+            <tr>
+                <th class="col-md-4">Documento</th>
+                <th class="col-md-6">Descripción</th>
+                <th class="col-md-2">Fecha</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for delivery in deliveries %}
+            <tr>
+                <td class="thin"><a href="{{ urlFor('download', { 'id': delivery.id, 'cid': category.id, 'kind': 1 }) }}">{{ delivery.display_name | replace({'_':' '})}}</a> 
+                {% if user['is_admin'] or info['manage_permission'] or delivery['uploader_person_id'] == user['id'] %}<a class="delivery-tools hidden-print" title="Modificar envío"><span class="icon-pencil"></span></a>{% endif %}</td>
+                <td>{{ delivery.event_delivery_description }}</td>
+                <td>{{ delivery.upload_date | date("Y-m-d") }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% if data %}
+<div class="panel panel-default">
+    {% set top_buttons = true %}
+    {% if data %}
+    {% include 'folder.html.twig' %}
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

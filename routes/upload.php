@@ -328,7 +328,7 @@ function getPermissionProfiles($folderId, $permission) {
             inner_join('profile_group', array('profile_group.id', '=', 'profile.profile_group_id'))->
             where('folder_permission.folder_id', $folderId)->
             where('folder_permission.permission', $permission)->
-            find_many();
+            find_array();
 }
 
 function getSubprofiles($profileGroupId) {
@@ -340,7 +340,7 @@ function getSubprofiles($profileGroupId) {
             inner_join('profile_group', array('profile_group.id', '=', 'profile.profile_group_id'))->
             where('profile.profile_group_id', $profileGroupId)->
             order_by_asc('profile.order_nr')->
-            find_many();
+            find_array();
 }
 
 function createDocumentFolder($prefix, $hash) {

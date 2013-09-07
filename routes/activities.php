@@ -108,8 +108,8 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config,
 
     // formatear los eventos en grupos de perfiles de arrays
     $parsedEvents = parseEvents($events,
-            'profile_id', array('profile_display_name', 'profile_group_display_name'),
-            'activity_id', array('activity_display_name', 'activity_description'));
+            'profile_id', array('profile_display_name', 'profile_group_display_name', 'profile_id'),
+            'activity_id', array('activity_display_name', 'activity_description', 'activity_id'));
     
     // generar página
     $app->render('activities.html.twig', array(
