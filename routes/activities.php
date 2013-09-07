@@ -111,10 +111,15 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config,
             'profile_id', array('profile_display_name', 'profile_group_display_name', 'profile_id'),
             'activity_id', array('activity_display_name', 'activity_description', 'activity_id'));
     
+    $now = getdate();
+    $currentWeek = ($now['mon']-1)*4 + floor(($now['mday']-1)/7);
+    
     // generar página
     $app->render('activities.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true,
         'detail' => $detail,
+        'base' => $config['calendar.base_week'],
+        'current' => $currentWeek,
         'sidebar' => $sidebar,
         'events' => $parsedEvents));
 })->name('activities');

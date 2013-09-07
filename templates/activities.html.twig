@@ -23,6 +23,7 @@
     </div>
 </div>
 {% if events %}
+{% set now = (current-base+48) % 48 %}
 {% for profile in events %}
 <div class="panel panel-default">
     <div class="panel-heading">
@@ -43,8 +44,11 @@
             </tr>
         </thead>
         <tbody>
+
             {% for event in activity.data %}
-            <tr {% if event.completed_date %}class="success"{% endif %}>
+            {% set from = (event.from_week-base+48) % 48 %}
+            {% set to = (event.to_week-base+48) % 48 %}
+            <tr {% if event.completed_date %}class="success"{% elseif (now>=from) and (now<=to) %}class="warning"{% elseif (now>=from) and (now>to) %}class="danger"{% endif %}>
                 <td>{{ event.period_description }} {{ parsePeriod(event.from_week, event.to_week, period_labels) }}</td>
                 <td><a href="{{ urlFor('event', { 'id': event.id, 'aid': activity.info.activity_id, 'pid': profile.info.profile_id }) }}">{{ event.display_name }}</a></td>
                 <td>
