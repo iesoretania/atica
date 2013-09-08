@@ -16,10 +16,153 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see [http://www.gnu.org/licenses/]. */
 
-$app->get('/personal(/:id)', function ($id = NULL) use ($app, $user) {
+$app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $organization) {
     if (!$user) {
         $app->redirect($app->urlFor('login'));
     }
-    $breadcrumb = array(array('display_name' => 'Datos personales', 'target' => '#'));
-    $app->render('personal.html.twig', array('navigation' => $breadcrumb));
-})->name('personal');
+    
+    // ¿se busca la información del usuario activo?
+    $itsMe = ($id == NULL) || ($id == $user['id']);
+    
+    // si es así, asignar sus datos
+    if ($itsMe) {
+        $id = $user['id'];
+        $userData = $user;
+    }
+    else {
+        // cargar los datos del usuario indicado como parámetro
+        $userData = getUserById($id, $organization['id']);
+        if (!$userData) {
+            // ¿no existe en la organización? Salir de aquí
+            $app->redirect($app->urlFor('frontpage'));
+        }        
+    }
+    
+    // comprobar si se están cambiando datos
+    if (isset($_POST['savepersonal']) && ($user['is_admin'] || $itsMe)) {
+        $local = getUserObjectById($id);
+        if (isset($_POST['displayname'])) {
+            $local->set('display_name', $_POST['displayname']);
+        }
+        if (isset($_POST['firstname'])) {
+            $local->set('first_name', $_POST['firstname']);
+        }
+        if (isset($_POST['lastname'])) {
+            $local->set('last_name', $_POST['lastname']);
+        }
+        if (isset($_POST['initials'])) {
+            $local->set('initials', $_POST['initials']);
+        }
+        if (isset($_POST['gender'])) {
+            $local->set('gender', $_POST['gender']);
+        }
+        if (isset($_POST['email'])) {
+            $local->set('email', $_POST['email']);
+        }
+        if (isset($_POST['notify'])) {
+            $local->set('email_enabled', $_POST['notify']);
+        }
+        if ($user['is_admin']) {
+            if (isset($_POST['username'])) {
+                $local->set('user_name', $_POST['username']);
+            }
+            if (isset($_POST['description'])) {
+                $local->set('description', strlen($_POST['description'])>0 ? $_POST['description'] : NULL);
+            }
+            // permitir cambiar opción de administrador global si ya lo somos
+            // y el usuario activo no somos nosotros (para evitar accidentes)
+            if ($user['is_global_administrator'] && isset($_POST['globaladmin']) && !$itsMe) {
+                $local->set('is_global_administrator', $_POST['globaladmin']);
+            }
+        }
+        if ($local->save()) {
+            $app->flash('save_ok','ok');
+        }
+        else {
+            $app->flash('save_error','error');
+        }
+        $app->redirect($app->urlFor('personal', array('id' => $id, 'section' => $section)));
+    }
+    
+    // menú lateral de secciones
+    $menu = array(
+            array('caption' => ($itsMe ? 'Mis datos' : $userData['display_name']), 'icon' => 'user')
+    );
+    
+    // las secciones vienen en este array
+    $options = array(
+        0 => array('caption' => 'Personal', 'template' => 'personal'),
+        1 => array('caption' => 'Perfiles', 'template' => 'profiles'),
+        2 => array('caption' => 'Envíos realizados', 'template' => 'personal')
+    );
+    
+    // si el usuario es él mismo o es administrador, permitir cambiar la contraseña
+    // y ver el informe de actividad
+    if ($itsMe || $user['is_admin']) {
+        $options[3] = array('caption' => 'Registro de actividad', 'template' => 'personal');
+        $options[4] = array('caption' => 'Cambiar contraseña', 'template' => 'personal');
+    }
+    
+    // comprobar que la sección existe
+    if (! isset($options[$section])) {
+        $app->redirect($app->urlFor('frontpage'));
+    }
+    
+    // generar menú
+    foreach ($options as $key => $i) {
+        $menu[] = array('caption' => $i['caption'], 'active' => ($section == $key), 'target' => $app->urlFor('personal', array('id' => $id, 'section' => $key)));
+    }
+    
+    $sidebar = array (
+        $menu
+    );
+    
+    // lista perfiles del usuario
+    $profiles = getProfilesByUser($id);
+    
+    // generar barra de navegación
+    $breadcrumb = array(
+        array('display_name' => 'Usuarios', 'target' => $app->urlFor('personal', array('id' => $user['id'], 'section' => 0))),
+        array('display_name' => $userData['display_name'], 'target' => $app->urlFor('personal', array('id' => $id, 'section' => 0))),
+        array('display_name' => $options[$section]['caption'])
+    );
+    // lanzar plantilla
+    $app->render($options[$section]['template'] . '.html.twig', array(
+        'navigation' => $breadcrumb,
+        'sidebar' => $sidebar,
+        'url' => $app->request()->getPathInfo(),
+        'userData' => $userData,
+        'profiles' => $profiles,
+        'local' => $itsMe
+    ));
+})->name('personal')->via('GET', 'POST');
+
+function getUserById($personId, $orgId) {
+    return ORM::for_table('person')->
+            select('person.*')->
+            select('person_organization.is_local_administrator')->
+            select('person_organization.is_active')->
+            inner_join('person_organization', array('person_organization.person_id', '=', 'person.id'))->
+            where('person_organization.person_id', $personId)->
+            where('person_organization.organization_id', $orgId)->
+            find_one()->as_array();
+}
+
+function getUserObjectById($personId) {
+    return ORM::for_table('person')->
+            find_one($personId);
+}
+
+function getProfilesByUser($personId) {
+    return ORM::for_table('profile')->
+            select('profile.*')->
+            select('profile_group.display_name_neutral')->
+            select('profile_group.display_name_male')->
+            select('profile_group.display_name_female')->
+            select('profile_group.description', 'profile_group_description')->
+            inner_join('profile_group', array('profile_group.id', '=', 'profile.profile_group_id'))->
+            inner_join('person_profile', array('person_profile.profile_id', '=', 'profile.id'))->
+            where('person_profile.person_id', $personId)->
+            order_by_asc('profile_group.display_name_neutral')->
+            find_array();
+}

@@ -36,9 +36,9 @@
                                 <span class="icon-{{ user['is_admin'] ? 'cogs' : 'user' }}"></span>&nbsp;<span class="thin">{{ user.display_name }}</span></span> <span class="icon-caret-down"></span>
                             </a>
                             <ul class="dropdown-menu" role="menu" aria-labelledby="usermenu">
-                                <li role="presentation"><a href="personal">Datos personales</a></li>
+                                <li role="presentation"><a href="{{ urlFor('personal', {'id': user['id'], 'section': 0 }) }}">Datos personales</a></li>
                                 <li role="presentation" class="divider"></li>
-                                <li role="presentation"><a href="salir">Salir</a></li>
+                                <li role="presentation"><a href="{{ urlFor('logout') }}">Salir</a></li>
                             </ul>
                         </div>
                     </li>

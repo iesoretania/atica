@@ -69,7 +69,27 @@
                     {% endblock %}
                 </div>
                 <div class="col-md-10">
-                    <div class="print showjs pull-right hidden-print hidden-xs"><a href="#" onclick="window.print(); return false" title="Imprimir contenido"><span class="icon-print icon"></span></a>&nbsp;</div>
+                    {% if flash['save_ok'] %}
+                    <div class="alert alert-success col-md-12 alert-dismissable">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        {% if flash['save_ok'] == 'ok' %}
+                        <strong>Cambios guardados con éxito.</strong> La información se ha almacenado en la base de datos.
+                        {% else %}
+                        <strong>{{ flash['save_ok_summary'] }}</strong> {{ flash['save_ok_detail'] }}
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    {% if flash['save_error'] %}
+                    <div class="alert alert-danger col-md-12 alert-dismissable">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        {% if flash['save_error'] == 'error' %}
+                        <strong>Ocurrió un error guardando los cambios.</strong> La información no se ha almacenado en la base de datos.
+                        {% else %}
+                        <strong>{{ flash['save_error_summary'] }}</strong> {{ flash['save_error_detail'] }}
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                     <div class="print showjs pull-right hidden-print hidden-xs"><a href="#" onclick="window.print(); return false" title="Imprimir contenido"><span class="icon-print icon"></span></a>&nbsp;</div>
                     {% block maincontent %}
                     {% endblock %}
                 </div>

@@ -95,7 +95,12 @@ $app->post('/entrar', function () use ($app, $preferences) {
                     $_SESSION['person_id'] = $user['id'];
                     // si es la primera conexión, enviar a su página de datos
                     // personales
-                    $app->redirect($app->urlFor($firstLogin ? 'personal' : 'activities'));
+                    if ($firstLogin) {
+                        $app->redirect($app->urlFor('personal', array('id' => $user['id'], 'section' => 0)));
+                    }
+                    else {
+                        $app->redirect($app->urlFor('activities'));
+                    }
                 }
                 else {
                     $app->flash('login_error', 'not active');

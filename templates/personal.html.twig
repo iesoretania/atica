@@ -14,11 +14,102 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
 
-{% extends "menu.html.twig" %}
-            
-{% block content %}
-            <div class="jumbotron">
-                <h1>¡Bienvenid{{ ['o/a', 'o', 'a'][user.gender] }} {{ user.first_name }}!</h1>
-                <p>Por favor, tómese unos minutos para asegurarse de que los datos de la aplicación son correctos</p>
+{% extends "layout.html.twig" %}
+
+{% block maincontent %}
+{% set edit = local or user['is_admin'] %}
+{% set email_enabled = (userData['email_enabled'] == 1) %}
+{% set male = (userData['gender'] == 1) %}
+{% set female = (userData['gender'] == 2) %}
+{% set global_admin = (userData['is_global_administrator'] == 1) %}
+<div class="panel panel-info">
+    <div class="panel-heading">
+{% if local %}
+        <h1>¡Bienvenid{{ ['o/a', 'o', 'a'][user.gender] }} {{ user.first_name }}!</h1>
+{% else %}
+        <h1>Datos personales: {{ userData.display_name }}</h1>
+{% endif %}
+    </div>
+    <div class="panel-body">
+{% if local %}
+        <h3>Por favor, tómate unos minutos para asegurarte de que los datos de la aplicación son correctos</h3>
+{% endif %}
+        <form class="form-horizontal" role="form" method="post" action="{{ url }}">
+            {% if user.is_admin %}
+            <div class="form-group">
+                <label for="username" class="col-md-2 control-label">Nombre de usuario</label>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" name="username" id="username" placeholder="Nombre de usuario para entrar en la plataforma" value="{{ userData.user_name }}">
+                </div>
             </div>
+            {% endif %}
+            <div class="form-group">
+                <label for="displayname" class="col-md-2 control-label">Nombre visible</label>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" name="displayname" id="displayname" placeholder="Nombre con el que aparecerá en la plataforma" value="{{ userData.display_name }}"{{ edit ? '' : ' disabled' }}>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="firstname" class="col-md-2 control-label">Nombre</label>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" name="firstname" id="firstname" placeholder="Nombre completo sin abreviaturas" value="{{ userData.first_name }}"{{ edit ? '' : ' disabled' }}>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="lastname" class="col-md-2 control-label">Apellidos</label>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" name="lastname" id="lastname" placeholder="Apellidos completos" value="{{ userData.last_name }}"{{ edit ? '' : ' disabled' }}>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="initials" class="col-md-2 control-label">Iniciales</label>
+                <div class="col-md-5">
+                    <input type="text" maxlength="5" class="form-control" name="initials" id="initials" placeholder="Iniciales en mayúsculas sin espacios ni puntos" value="{{ userData.initials }}"{{ edit ?: ' disabled' }}>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label">Sexo</label>
+                <div class="col-md-10">
+                    <label class="radio-inline"><input type="radio" name="gender" id="male" value="1" {{male ? ' checked="checked"' }}{{ edit ? '' : ' disabled' }}> Hombre</label>
+                    <label class="radio-inline"><input type="radio" name="gender" id="female" value="2" {{female ? ' checked="checked"' : ''}}{{ edit ? '' : ' disabled' }}> Mujer</label>
+                </div>
+            </div>
+            {% if edit %}
+            <div class="form-group">
+                <label for="email" class="col-md-2 control-label">Correo electrónico</label>
+                <div class="col-md-6">
+                    <input type="text" class="form-control" name="email" id="email" placeholder="Correo electrónico donde recibir las notificaciones" value="{{ userData.email }}"{{ edit ? '' : ' disabled' }}>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label">Notificaciones por correo</label>
+                <div class="col-md-10">
+                    <label class="radio-inline"><input type="radio" name="notify" id="dont_notify" value="0"{{email_enabled ? '' : ' checked="checked"' }}> No quiero recibir notificaciones</label>
+                    <label class="radio-inline"><input type="radio" name="notify" id="do_notify" value="1"{{email_enabled ? ' checked="checked"' }}> Sí, quiero recibirlas</label>
+                </div>
+            </div>
+            {% endif %}
+            {% if user.is_admin %}
+            {% if user.is_global_administrator %}
+            <div class="form-group text-danger">
+                <label class="col-md-2 control-label">Administración global</label>
+                <div class="col-md-10">
+                    <label class="radio-inline"><input type="radio" name="globaladmin" value="0"{{global_admin ? '' : ' checked="checked"' }}{{ local ? ' disabled' }}> No</label>
+                    <label class="radio-inline"><input type="radio" name="globaladmin" value="1"{{global_admin ? ' checked="checked"' }}{{ local ? ' disabled' }}> Sí, puede administrar la plataforma</label>
+                </div>
+            </div>
+            {% endif %}
+            <div class="form-group">
+                <label for="description" class="col-md-2 control-label">Otra información</label>
+                <div class="col-md-10">
+                    <textarea class="form-control" name="description" id="description" rows="3" placeholder="Notas internas para los administradores"></textarea>
+                </div>
+            </div>
+            {% endif %}
+            {% if edit %}
+                <button type="submit" name="savepersonal" class="btn btn-success">Guardar cambios</button>
+            {% endif %}
+        </form>
+    </div>
+</div>
 {% endblock %}
