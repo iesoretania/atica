@@ -22,9 +22,9 @@
 {% block content %}
         <div class="panel panel-primary atica-panel-login">
             <div class="panel-body">
-                <form method="post" action="organizacion">
+                <form method="post" action="{{ urlFor('organization') }}">
                     <fieldset>
-                        <legend>Seleccione la organización a la que desea acceder</legend>
+                        <legend>Seleccione el centro al que desea acceder</legend>
                         {% for org in organizations %}
                         <div class="radio">
                             <label>
@@ -33,7 +33,7 @@
                             </label>
                         </div>
                         {% endfor %}
-                        <button type="submit" class="btn btn-primary btn-block">Seleccionar organización</button>
+                        <button type="submit" class="btn btn-primary btn-block">Seleccionar centro</button>
                     </fieldset>
                 </form>
             </div>

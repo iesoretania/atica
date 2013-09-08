@@ -16,7 +16,7 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see [http://www.gnu.org/licenses/]. */
 
-$app->get('/organizacion', function () use ($app, $user) {
+$app->get('/centros', function () use ($app, $user) {
     if (isset($user)) {
         $app->redirect($app->urlFor('activities'));
     }
@@ -27,7 +27,7 @@ $app->get('/organizacion', function () use ($app, $user) {
         'organizations' => $organizations));
 })->name('organization');
 
-$app->post('/organizacion', function () use ($app, $user) {
+$app->post('/centros', function () use ($app, $user) {
     if (isset($user)) {
         $app->redirect($app->urlFor('activities'));
     }
