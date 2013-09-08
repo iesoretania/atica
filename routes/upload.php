@@ -212,7 +212,7 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
         $ok = true;
         $hash = $_POST['hash' . $loop];
         $filename = $_POST['filename'. $loop];
-        $description = $_POST['description'. $loop];
+        $description = isset($_POST['description'. $loop]) ? $_POST['description'. $loop] : '';
         
         $tempDestination = $preferences['upload.folder'] . "temp/" . $hash;
         
@@ -369,7 +369,7 @@ function getFolderProfileDeliveryItems($profileId, $folderId) {
     return $data;
 }
 
-function getFolderProfileDeliveryStats($folderId) {
+function getFolderProfileDeliveryStatsBase($folderId) {
     $data = ORM::for_table('folder_profile_delivery_item')->
             select('folder_profile_delivery_item.id')->
             select('folder_profile_delivery_item.profile_id')->
@@ -384,7 +384,20 @@ function getFolderProfileDeliveryStats($folderId) {
             where('folder_profile_delivery_item.is_visible', 1)->
             group_by('folder_profile_delivery_item.profile_id')->
             order_by_asc('folder_profile_delivery_item.id')->
-            order_by_asc('folder_profile_delivery_item.order_nr')->
+            order_by_asc('folder_profile_delivery_item.order_nr');
+    
+    return $data;
+}
+
+function getFolderProfileDeliveryStats($folderId) {
+    $data = getFolderProfileDeliveryStatsBase($folderId)->
+            find_array();
+    return $data;
+}
+
+function getFolderProfileDeliveryStatsByProfile($folderId, $profileId) {
+    $data = getFolderProfileDeliveryStatsBase($folderId)->
+            where('profile.id', $profileId)->
             find_array();
     return $data;
 }
@@ -437,6 +450,47 @@ function getDocumentDataByHash($hash) {
 function getExtension($ext) {
     return ORM::for_table('file_extension')->
             find_one($ext);
+}
+
+function getPersonsWithEventByFolderAndProfile($folderId, $profileId) {
+    return ORM::for_table('person')->distinct()->
+            select('person.id')->
+            select('event.id', 'event_id')->
+            inner_join('person_profile', array('person_profile.person_id', '=', 'person.id'))->
+            inner_join('folder_profile_delivery_item', array('folder_profile_delivery_item.profile_id', '=', 'person_profile.profile_id'))->
+            inner_join('folder', array('folder.id', '=', 'folder_profile_delivery_item.folder_id'))->
+            inner_join('event', array('event.folder_id', '=', 'folder_profile_delivery_item.folder_id'))->
+            where('folder_profile_delivery_item.folder_id', $folderId)->
+            where('folder_profile_delivery_item.profile_id', $profileId)->
+            where('event.is_automatic', 1)->
+            find_array();
+}
+
+function checkItemUpdateStatus($folderId, $profileId) {
+    $data = getFolderProfileDeliveryStatsByProfile($folderId, $profileId);
+    
+    // para cada perfil que tiene ítems, comprobamos si están todos los
+    // elementos
+    foreach ($data as $item) {
+        
+        // obtener usuarios asociados a esta carpeta y perfil
+        $persons = getPersonsWithEventByFolderAndProfile($folderId, $profileId);
+        
+        if ($item['total'] == $item['c']) {
+            // están todos los elementos: marcar como completados los eventos
+            // de todos los usuarios
+            foreach($persons as $person) {
+                addCompletedEvent($person['event_id'], $person['id']);
+            }
+        }
+        else {
+            // no están todos los elementos: marcar como incompletos los eventos
+            // de todos los usuarios
+            foreach($persons as $person) {
+                removeCompletedEvent($person['event_id'], $person['id']);
+            }            
+        }
+    }
 }
 
 function createDelivery($folderId, $userId, $profileId, $displayName, $deliveryName, $description, $itemId, $dataPath, $dataHash, $filesize, $revision = 0) {
@@ -501,6 +555,8 @@ function createDelivery($folderId, $userId, $profileId, $displayName, $deliveryN
     
     $delivery->set('current_revision_id', $revision['id']);
     $delivery->save();
-   
+    
+    checkItemUpdateStatus($folderId, $profileId);
+    
     return ORM::get_db()->commit();
 }
