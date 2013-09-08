@@ -33,7 +33,10 @@ $app->get('/arbol(/:id)', function ($id = NULL) use ($app, $user, $organization)
 
     if (NULL !== $id) {
         $data = getParsedFoldersByCategory($id, $profileGender);
-        $folders = getFoldersByCategory($id, $user);
+        // TODO: Optimizar leyendo todos los permisos de golpe para todas las
+        // carpetas y colocándolos en un array
+        $allFolders = getFoldersByCategory($id);
+        $folders = getFoldersAndStatsByCategoryAndUser($id, $user) + $allFolders;
         $persons = getFolderPersonsByCategory($id);
         $folderProfiles = getProfilesByCategory($id);
 
@@ -115,7 +118,7 @@ function getTree($orgId, $app, $id, &$matchedCategory, &$parentCategory) {
             order_by_asc('category_left')->
             where('organization_id', $orgId)->
             where_gt('category_level', 0)->
-            find_many();
+            find_array();
 
     foreach ($data as $category) {
         if ($category['category_level'] == 1) {
@@ -176,6 +179,13 @@ function getFolderPersonsByCategory($categoryId) {
             find_array());
 }
 
+function getFoldersByCategory($categoryId) {
+    return parseArray(ORM::for_table('folder')->
+            where('folder.category_id', $categoryId)->
+            where('folder.is_visible', 1)->
+            find_array());
+}
+
 function getFolders() {
     return ORM::for_table('folder')->
             select('folder.*')->
@@ -188,10 +198,11 @@ function getFolders() {
             group_by('folder.id');
 }
 
-function getFoldersByCategory($category_id, $user) {
+function getFoldersAndStatsByCategoryAndUser($categoryId, $user) {
     return parseArray(getFolders()->
             where('person_profile.person_id', $user['id'])->
-            where('folder.category_id', $category_id)->
+            where('folder.category_id', $categoryId)->
+            where('folder.is_visible', 1)->
             find_array());
 }
 
@@ -215,24 +226,31 @@ function getProfilesByCategory($category_id) {
 
 
 function parseFolders($data, &$profileGender) {
-    
+
     $return = array();
     $currentData = array();
     $currentFolderId = NULL;
+    $firstDelivery = true;
 
     foreach ($data as $delivery) {
+        if ($firstDelivery) {
+            $currentFolderId = $delivery['folder_id'];
+            $firstDelivery = false;
+        }
         if ($delivery['folder_id'] !== $currentFolderId) {
-            if ($currentData != NULL) {
+            //if ($currentData != NULL) {
                 $return[] = array(
                     'id' => $currentFolderId,
                     'data' => $currentData
                 );
-            }
+            //}
             $currentData = array();
             $currentFolderId = $delivery['folder_id'];
         }
         else {
-            $currentData[] = $delivery->as_array();
+            if ($delivery['id'] != NULL) {
+                $currentData[] = $delivery->as_array();
+            }
             if (isset($profileGender[$delivery['profile_id']])) {
                 if ($profileGender[$delivery['profile_id']] != $delivery['gender']) {
                     $profileGender[$delivery['profile_id']] = 0;
@@ -243,7 +261,7 @@ function parseFolders($data, &$profileGender) {
             }
         }
     }
-    if ($currentData != NULL) {
+    if (! $firstDelivery ) {
         $return[] = array(
             'id' => $currentFolderId,
             'data' => $currentData
@@ -262,9 +280,9 @@ function getParsedFolders() {
             select('revision.uploader_person_id')->
             select('person.gender')->
             inner_join('folder_delivery', array('folder_delivery.delivery_id','=','delivery.id'))->
-            inner_join('folder', array('folder.id', '=', 'folder_delivery.folder_id'))->
             inner_join('revision', array('delivery.current_revision_id', '=', 'revision.id'))->
             inner_join('person', array('person.id', '=', 'revision.uploader_person_id'))->
+            right_outer_join('folder', array('folder.id', '=', 'folder_delivery.folder_id'))->
             order_by_asc('folder.order_nr')->
             order_by_asc('delivery.profile_id')->
             order_by_asc('folder_delivery.order_nr')->
