@@ -63,6 +63,7 @@ $app->post('/entrar', function () use ($app, $preferences) {
             select('user_name')->
             select('blocked_access')->
             select('retry_count')->
+            select('last_login')->
             where('user_name', $username)->
             find_one();
 
@@ -75,20 +76,26 @@ $app->post('/entrar', function () use ($app, $preferences) {
                 find_one();
 
         if ($user) {
-            // poner a cero la cuenta de intentos infructuosos
-            $user->set('retry_count' ,0);
-            $user->set('blocked_access', NULL);
-            $user->set('last_login', $now);
-            $user->save();
 
+            // obtener pertenencia a la organización
             $membership = ORM::for_table('person_organization')->
                     where('organization_id', $_SESSION['organization_id'])->
                     where('person_id', $user['id'])->find_one();
 
+            // poner a cero la cuenta de intentos infructuosos
+            $user->set('retry_count' ,0);
+            $user->set('blocked_access', NULL);
+            $firstLogin = ($user['last_login'] == NULL);
+
             if ($membership) {
                 if ($membership['is_active']) {
+                    // registrar la hora en la que ha entrado con éxito
+                    $user->set('last_login', $now);
+                    $user->save();
                     $_SESSION['person_id'] = $user['id'];
-                    $app->redirect($app->urlFor('activities'));
+                    // si es la primera conexión, enviar a su página de datos
+                    // personales
+                    $app->redirect($app->urlFor($firstLogin ? 'personal' : 'activities'));
                 }
                 else {
                     $app->flash('login_error', 'not active');
@@ -97,6 +104,8 @@ $app->post('/entrar', function () use ($app, $preferences) {
             else {
                 $app->flash('login_error', 'no organization');
             }
+            // guardar cambios aunque haya ocurrido un error
+            $user->save();
         }
         else {
             if ($login_security) {
