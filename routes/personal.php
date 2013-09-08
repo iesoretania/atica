@@ -16,14 +16,6 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see [http://www.gnu.org/licenses/]. */
 
-$app->get('/bienvenida', function () use ($app, $user) {
-    if (!$user) {
-        $app->redirect($app->urlFor('login'));
-    }
-    $breadcrumb = array(array('display_name' => 'Primer acceso', 'target' => '#'));
-    $app->render('welcome.html.twig', array('navigation' => $breadcrumb));
-})->name('welcome');
-
 $app->get('/personal(/:id)', function ($id = NULL) use ($app, $user) {
     if (!$user) {
         $app->redirect($app->urlFor('login'));
