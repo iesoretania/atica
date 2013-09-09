@@ -128,6 +128,7 @@ if (isset($_SESSION['person_id'])) {
         $user['is_admin'] = $user['is_global_administrator'] ||
                 $membership['is_local_administrator'];
         $user['is_active'] = $membership['is_active'];
+        $user['is_local_administrator'] = $membership['is_local_administrator'];
     }
 }
 

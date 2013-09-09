@@ -62,11 +62,12 @@ $app->get('/arbol(/:id)', function ($id = NULL) use ($app, $user, $organization)
         'folders' => $folders));
 })->name('tree');
 
-$app->get('/descargar/:kind/:cid/:id/', function ($kind, $cid, $id) use ($app, $user, $preferences) {
+$app->get('/descargar/:kind/:cid/:id/(:p1/)(:p2/)', function ($kind, $cid, $id, $p1 = NULL, $p2 = NULL) use ($app, $user, $preferences) {
 
     // $kind =
     // 1 -> la descarga se produce desde una carpeta del árbol, $cid = category.id
     // 2 -> la descarga se produce desde un agrupamiento, $cid = grouping.id
+    // 3 -> la descarga se produce desde un evento, $cid = event.id, $p1, $p2 pasan
     switch($kind) {
         case 1:
             // sólo usuarios autenticados
@@ -77,6 +78,9 @@ $app->get('/descargar/:kind/:cid/:id/', function ($kind, $cid, $id) use ($app, $
             break;
         case 2:
             $errorUrl = $app->urlFor('grouping', array('id' => $cid));
+            break;
+        case 3:
+            $errorUrl = $app->urlFor('event', array('id' => $cid, 'pid' => $p1, 'aid' => $p2));
             break;
         default:
             $app-redirect($app->urlFor('frontpage'));

@@ -139,6 +139,8 @@ $app->map('/evento/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $user, 
     $app->render('event.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true,
         'url' => $app->request()->getPathInfo(),
+        'pid' => $pid,
+        'aid' => $aid,
         'sidebar' => $sidebar,
         'user' => $user,
         'profiles' => $profiles,

@@ -62,7 +62,7 @@
         <tbody>
             {% for delivery in deliveries %}
             <tr>
-                <td class="thin"><a href="{{ urlFor('download', { 'id': delivery.id, 'cid': category.id, 'kind': 1 }) }}">{{ delivery.display_name | replace({'_':' '})}}</a> 
+                <td class="thin"><a href="{{ urlFor('download', { 'id': delivery.id, 'cid': event.id, 'kind': 3, 'p1': pid, 'p2': aid }) }}">{{ delivery.display_name | replace({'_':' '})}}</a> 
                 {% if user['is_admin'] or info['manage_permission'] or delivery['uploader_person_id'] == user['id'] %}<a class="delivery-tools hidden-print" title="Modificar envío"><span class="icon-pencil"></span></a>{% endif %}</td>
                 <td>{{ delivery.event_delivery_description }}</td>
                 <td>{{ delivery.upload_date | date("Y-m-d") }}</td>
