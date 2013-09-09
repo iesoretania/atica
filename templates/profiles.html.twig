@@ -1,0 +1,44 @@
+{#  ATICA - Web application for supporting Quality Management Systems
+    Copyright (C) 2009-2013: Luis-Ramón López López
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
+
+{% extends "layout.html.twig" %}
+
+{% block maincontent %}
+<div class="panel panel-info">
+    <div class="panel-heading">
+{% if local %}
+        <h1>¡Bienvenid{{ ['o/a', 'o', 'a'][user.gender] }} {{ user.first_name }}!</h1>
+{% else %}
+        <h1>Perfiles asignados: {{ userData.display_name }}</h1>
+{% endif %}
+    </div>
+    <div class="panel-body">
+{% if local %}
+        <h3>Por favor, tómate unos minutos para asegurarte de que los datos de la aplicación son correctos</h3>
+{% endif %}
+        <form class="form-horizontal" role="form" method="post" action="{{ url }}">
+            {% if profiles %}
+            <h4>Estos son los perfiles asociados al usuario que aparecen en la base de datos:</h4>
+            <ul>
+                {% for profile in profiles %}
+                <li>{{ [profile['display_name_neutral'], profile['display_name_male'], profile['display_name_female']][userData['gender']] }}{% if profile['display_name'] %} ({{ profile['display_name'] }}){% endif %}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </form>
+    </div>
+</div>
+{% endblock %}

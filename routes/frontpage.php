@@ -76,7 +76,7 @@ function getGroupings($orgId, $app, $id, &$matchedGrouping, &$parentGrouping) {
             order_by_asc('grouping_left')->
             where('organization_id', $orgId)->
             where_gt('grouping_level', 0)->
-            find_many();
+            find_array();
 
     foreach ($data as $grouping) {
         if ($grouping['grouping_level'] == 1) {
@@ -144,7 +144,7 @@ function getParsedGroupingFolders($groupingId) {
             order_by_asc('grouping_folder.order_nr')->
             order_by_asc('delivery.profile_id')->
             order_by_asc('revision.upload_date')->
-            find_many();
+            find_array();
     
     $return = array();
     $currentData = array();
@@ -162,7 +162,7 @@ function getParsedGroupingFolders($groupingId) {
             $currentFolderId = $delivery['folder_id'];
         }
         else {
-            $currentData[] = $delivery->as_array();
+            $currentData[] = $delivery;
         }
     }
     if ($currentData != NULL) {

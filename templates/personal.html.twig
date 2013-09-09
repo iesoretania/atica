@@ -22,6 +22,8 @@
 {% set male = (userData['gender'] == 1) %}
 {% set female = (userData['gender'] == 2) %}
 {% set global_admin = (userData['is_global_administrator'] == 1) %}
+{% set local_admin = (userData['is_local_administrator'] == 1) %}
+{% set active = (userData['is_active'] == 1) %}
 <div class="panel panel-info">
     <div class="panel-heading">
 {% if local %}
@@ -41,8 +43,15 @@
                 <div class="col-md-10">
                     <input type="text" class="form-control" name="username" id="username" placeholder="Nombre de usuario para entrar en la plataforma" value="{{ userData.user_name }}">
                 </div>
-            </div>
+            </div>              
             {% endif %}
+            <div class="form-group">
+                <label class="col-md-2 control-label">Acceso</label>
+                <div class="col-md-10">
+                    <label class="radio-inline"><input type="radio" name="active" value="0" {{active ? '' : ' checked="checked"' }}{{ user.is_admin ? '' : ' disabled' }}> Denegado</label>
+                    <label class="radio-inline"><input type="radio" name="active" value="1" {{active ? ' checked="checked"' : ''}}{{ user.is_admin ? '' : ' disabled' }}> Permitido</label>
+                </div>
+            </div>                
             <div class="form-group">
                 <label for="displayname" class="col-md-2 control-label">Nombre visible</label>
                 <div class="col-md-10">
@@ -90,12 +99,19 @@
             </div>
             {% endif %}
             {% if user.is_admin %}
+            <div class="form-group text-danger">
+                <label class="col-md-2 control-label">Administración local</label>
+                <div class="col-md-10">
+                    <label class="radio-inline"><input type="radio" name="localadmin" value="0"{{local_admin ? '' : ' checked="checked"' }}> No</label>
+                    <label class="radio-inline"><input type="radio" name="localadmin" value="1"{{local_admin ? ' checked="checked"' }}> Sí, puede administrar este centro</label>
+                </div>
+            </div>                
             {% if user.is_global_administrator %}
             <div class="form-group text-danger">
                 <label class="col-md-2 control-label">Administración global</label>
                 <div class="col-md-10">
                     <label class="radio-inline"><input type="radio" name="globaladmin" value="0"{{global_admin ? '' : ' checked="checked"' }}{{ local ? ' disabled' }}> No</label>
-                    <label class="radio-inline"><input type="radio" name="globaladmin" value="1"{{global_admin ? ' checked="checked"' }}{{ local ? ' disabled' }}> Sí, puede administrar la plataforma</label>
+                    <label class="radio-inline"><input type="radio" name="globaladmin" value="1"{{global_admin ? ' checked="checked"' }}{{ local ? ' disabled' }}> Sí, puede administrar la plataforma completa</label>
                 </div>
             </div>
             {% endif %}
@@ -108,6 +124,8 @@
             {% endif %}
             {% if edit %}
                 <button type="submit" name="savepersonal" class="btn btn-success">Guardar cambios</button>
+            {% endif %}
+            {% if user.is_admin %}
             {% endif %}
         </form>
     </div>

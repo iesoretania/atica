@@ -113,7 +113,9 @@ if (isset($_SESSION['person_id'])) {
     // comprobar si pertenece a la organización
     $membership = ORM::for_table('person_organization')->
             where('organization_id', $_SESSION['organization_id'])->
-            where('person_id', $_SESSION['person_id'])->find_one()->as_array();
+            where('person_id', $_SESSION['person_id'])->
+            where('is_active', 1)->
+            find_one()->as_array();
 
     // si no pertenece, sacar al usuario porque no debería ocurrir
     if (!$membership) {
@@ -125,6 +127,7 @@ if (isset($_SESSION['person_id'])) {
         // administrador global)
         $user['is_admin'] = $user['is_global_administrator'] ||
                 $membership['is_local_administrator'];
+        $user['is_active'] = $membership['is_active'];
     }
 }
 

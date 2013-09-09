@@ -84,6 +84,12 @@
                         <button type="button" class="close" data-dismiss="alert">&times;</button>
                         {% if flash['save_error'] == 'error' %}
                         <strong>Ocurrió un error guardando los cambios.</strong> La información no se ha almacenado en la base de datos.
+                        {% elseif flash['save_error'] == 'oldpassword' %}
+                        <strong>No se puede realizar el cambio de contraseña.</strong> La contraseña actual no coincide por lo que se ha denegado el cambio.
+                        {% elseif flash['save_error'] == 'passwordmatch' %}
+                        <strong>No se realizó el cambio de contraseña.</strong> Las nuevas contraseñas no coinciden. Inténtelo de nuevo.
+                        {% elseif flash['save_error'] == 'passwordlength' %}
+                        <strong>No se realizó el cambio de contraseña.</strong> La nueva contraseña es demasiado corta. Inténtelo de nuevo.
                         {% else %}
                         <strong>{{ flash['save_error_summary'] }}</strong> {{ flash['save_error_detail'] }}
                         {% endif %}
