@@ -47,7 +47,6 @@ $app->map('/evento/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $user, 
     // obtener entregas asociadas
     $deliveries = getDeliveriesFromEvent($id);
     
-    
     // obtener perfiles
     $profiles = getUserProfiles($user['id'], $organization['id'], false);
     
@@ -120,7 +119,7 @@ $app->map('/evento/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $user, 
         array('display_name' => $event['display_name'])
     );
     
-    if ($folder['id']) {
+    if ($folder && isset($folder['id'])) {
         $profileGender = array();
         $data = getParsedFolderById($folder['id'], $profileGender);
         $folderProfiles = getProfilesByFolderId($folder['id']);

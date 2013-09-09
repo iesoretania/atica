@@ -304,6 +304,10 @@ function getParsedFoldersByCategory($categoryId, &$profileGender) {
 }
 
 function getFolder($folderId) {
+    if (NULL == $folderId) {
+        return false;
+    }
     return ORM::for_table('folder')->
-            find_one($folderId);
+            where('folder.id', $folderId)->
+            find_one()->as_array();
 }
