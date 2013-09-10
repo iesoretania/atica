@@ -22,7 +22,7 @@
         <h1>{{ event.display_name }}</h1>
     </div>
     
-    {% if event.description %}<div class="panel-body"><h4>{{ event.description }}</h4></div>{% endif %}
+    {% if event.description %}<div class="panel-body"><h4>{{ event.description | nl2br }}</h4></div>{% endif %}
     {% if event.is_manual or event.is_automatic %}
     <div class="panel-footer">
         <p>

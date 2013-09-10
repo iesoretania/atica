@@ -52,7 +52,7 @@
     <div class="panel-heading">
     <h1>{{ category ? category['display_name'] : 'Árbol de documentos' }}</h1>
     </div>
-    {% if category.description %}<div class="panel-body"><h4>{{ category.description }}</h4></div>{% endif %}
+    {% if category.description %}<div class="panel-body"><h4>{{ category.description | nl2br }}</h4></div>{% endif %}
 </div>
 {% if data %}
 {% include 'folder.html.twig' %}
