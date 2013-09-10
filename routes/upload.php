@@ -124,7 +124,8 @@ $app->post('/enviar/:id', function ($id) use ($app, $user, $preferences, $organi
             move_uploaded_file($_FILES['document']['tmp_name'][$loop], $tempDestination);
 
             $filename = $_FILES['document']['name'][$loop];
-            $description = preg_replace("/\\.[^.\\s]{2,3,4}$/", "", $filename);
+            $info = pathinfo( $filename );
+            $description = $info['filename'];
             $items[] = array(
                 'name' => $filename,
                 'description' => $description,
@@ -212,7 +213,7 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
         $ok = true;
         $hash = $_POST['hash' . $loop];
         $filename = $_POST['filename'. $loop];
-        $description = isset($_POST['description'. $loop]) ? $_POST['description'. $loop] : '';
+        $description = isset($_POST['description'. $loop]) ? $_POST['description'. $loop] : $_POST['filename'. $loop];
         
         $tempDestination = $preferences['upload.folder'] . "temp/" . $hash;
         

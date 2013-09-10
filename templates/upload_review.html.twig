@@ -80,8 +80,12 @@
                 <div class="col-lg-6">
                     <input type="hidden" name="hash{{ loop.index }}" value="{{ item['hash'] }}">
                     <input type="hidden" name="filename{{ loop.index }}" value="{{ item['name'] }}">
-                    {% if items %}<input type="hidden" name="description{{ loop.index }}" value="{{ item['description'] }}">{% endif %}
-                    <input class="form-control" name="{{ items ? 'no_ ' }}filename{{ loop.index }}" type="text" {{ items ? 'disabled ' }} value="{{item.name}}">
+                    {% if items %}
+                    <input type="hidden" name="description{{ loop.index }}" value="{{ item['description'] }}">
+                    <input class="form-control" name="no_filename{{ loop.index }}" type="text" {{ items ? 'disabled ' }} value="{{item.name}}">
+                    {% else %}
+                    <input class="form-control" name="description{{ loop.index }}" type="text" {{ items ? 'disabled ' }} value="{{item.description}}">
+                    {% endif %}
                 </div>
                 {% if items %}
                 <div class="col-lg-6">
