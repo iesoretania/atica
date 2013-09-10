@@ -248,20 +248,21 @@ function parseFolders($data, &$profileGender) {
                     'data' => $currentData
                 );
             //}
-            $currentData = array();
+            $currentData = array($delivery->as_array());
             $currentFolderId = $delivery['folder_id'];
         }
         else {
             if ($delivery['id'] != NULL) {
                 $currentData[] = $delivery->as_array();
-            }
-            if (isset($profileGender[$delivery['profile_id']])) {
-                if ($profileGender[$delivery['profile_id']] != $delivery['gender']) {
-                    $profileGender[$delivery['profile_id']] = 0;
+            
+                if (isset($profileGender[$delivery['profile_id']])) {
+                    if ($profileGender[$delivery['profile_id']] != $delivery['gender']) {
+                        $profileGender[$delivery['profile_id']] = 0;
+                    }
                 }
-            }
-            else {
-                $profileGender[$delivery['profile_id']] = $delivery['gender'];
+                else {
+                    $profileGender[$delivery['profile_id']] = $delivery['gender'];
+                }
             }
         }
     }
@@ -271,7 +272,6 @@ function parseFolders($data, &$profileGender) {
             'data' => $currentData
         );
     }
-
     return $return;
 }
 
@@ -299,7 +299,7 @@ function getParsedFoldersByCategory($categoryId, &$profileGender) {
     $data = getParsedFolders()->
             where('folder.category_id', $categoryId)->
             find_many();
-
+    
     return parseFolders($data, $profileGender);
 }
 
