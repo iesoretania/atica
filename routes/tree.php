@@ -248,7 +248,10 @@ function parseFolders($data, &$profileGender) {
                     'data' => $currentData
                 );
             //}
-            $currentData = array($delivery->as_array());
+            $currentData = array();
+            if ($delivery['id'] != NULL) {
+                $currentData[] = $delivery->as_array();
+            }
             $currentFolderId = $delivery['folder_id'];
         }
         else {
