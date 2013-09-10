@@ -175,7 +175,8 @@ function getEventsForProfiles($profile_ids, $user, $base = 33) {
     $genderChoice = array ('display_name_neutral', 'display_name_male', 'display_name_female');
     $data = ORM::for_table('event')->
             select('event.*')->
-            select('activity_profile.*')->
+            select('event_profile.*')->
+            select('activity.id', 'activity_id')->
             select('activity.display_name', 'activity_display_name')->
             select('activity.description', 'activity_description')->
             select('profile.display_name', 'profile_display_name')->
@@ -184,15 +185,12 @@ function getEventsForProfiles($profile_ids, $user, $base = 33) {
             select_expr('(event.from_week+48-' . $base . ') % 48', 'n_from_week')->
             select_expr('(event.to_week+48-' . $base . ') % 48', 'n_to_week')->
             inner_join('activity_event', array('activity_event.event_id', '=', 'event.id'))->
-            inner_join('activity_profile', array('activity_profile.activity_id', '=', 'activity_event.activity_id'))->
+            inner_join('event_profile', array('event_profile.event_id', '=', 'event.id'))->
             inner_join('activity', array('activity.id', '=', 'activity_event.activity_id'))->
-            inner_join('profile', array('profile.id', '=', 'activity_profile.profile_id'))->
+            inner_join('profile', array('profile.id', '=', 'event_profile.profile_id'))->
             inner_join('profile_group', array('profile_group.id', '=', 'profile.profile_group_id'))->
             left_outer_join('completed_event', 'completed_event.event_id = event.id AND completed_event.person_id = ' . $user['id'])->
-            group_by('activity_profile.profile_id')->
-            group_by('activity_event.event_id')->
-            order_by_asc('activity_event.activity_id')->
-            order_by_asc('activity_event.order_nr')->
+            group_by('event_profile.profile_id')->
             order_by_asc('n_from_week')->
             order_by_asc('n_to_week');
     
