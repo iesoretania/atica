@@ -285,6 +285,7 @@ function getParsedFolders() {
             select('folder.id', 'folder_id')->
             select('revision.upload_date')->
             select('revision.uploader_person_id')->
+            select('revision.revision_nr')->
             select('person.gender')->
             inner_join('folder_delivery', array('folder_delivery.delivery_id','=','delivery.id'))->
             inner_join('revision', array('delivery.current_revision_id', '=', 'revision.id'))->
