@@ -45,8 +45,8 @@
             </div>
             {% endif %}
             <div class="form-group">
-                <label for="displayName">Nombre a mostrar</label>
-                <input type="text" class="form-control" name="displayName" value="{{ delivery['display_name'] }}"></input>
+                <label for="displayname">Nombre a mostrar</label>
+                <input type="text" class="form-control" name="displayname" value="{{ delivery['display_name'] }}"></input>
             </div>
             <div class="form-group">
                 <label for="description">Descripción detallada</label>
@@ -68,7 +68,7 @@
                 <p class="help-block">El documento enviado podrá ser almacenado como una nueva revisión si se pulsa el botón de abajo o bien podrá reemplazar otro envío anterior de la lista.</p>
             </div>
             <div class="form-group">
-                <button type="submit" class="btn btn-primary">Entregar como nueva revisión</button>
+                <button type="submit" name="new" class="btn btn-primary">Entregar como nueva revisión</button>
             </div>
         </div>
         <table class="table table-striped table-condensed table-hover">
@@ -89,8 +89,8 @@
                     <td>{{ revision['download_filename'] }}</td>
                     <td>{{ revision['upload_date'] | date('Y-m-d') }}</td>
                     <td>{{ uploaders[revision['uploader_person_id']]['display_name'] }}</td>
-                    <td><button class="btn btn-warning" title="Cambia esta revisión por el documento indicado más arriba">Reemplazar</button></td>
-                    <td><button class="btn btn-danger" title="Elimina esta revisión de la plataforma">Eliminar</button></td>
+                    <td><button class="btn btn-warning" name="replace{{ revision['id'] }}" disabled title="Cambia esta revisión por el documento indicado más arriba">Reemplazar</button></td>
+                    <td><button class="btn btn-danger" name="remove{{ revision['id'] }}" disabled title="Elimina esta revisión de la plataforma">Eliminar</button></td>
                 </tr>
             {% endfor %}
             </tbody>

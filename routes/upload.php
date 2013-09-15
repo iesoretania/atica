@@ -494,35 +494,13 @@ function checkItemUpdateStatus($folderId, $profileId) {
     }
 }
 
-function createDelivery($folderId, $userId, $profileId, $displayName, $deliveryName, $description, $itemId, $dataPath, $dataHash, $filesize, $revision = 0) {
+function createDelivery($folderId, $userId, $profileId, $fileName, $deliveryName, $description, $itemId, $dataPath, $dataHash, $filesize, $revisionNr = 0) {
     
-    $documentData = getDocumentDataByHash($dataHash);
     $order = ORM::for_table('folder_delivery')->
             where('folder_id', $folderId)->
             max('order_nr');
-    
-    
+        
     ORM::get_db()->beginTransaction();
-    
-    if (false === $documentData) {
-        $documentData = ORM::for_table('document_data')->create();
-        $documentData->set('download_path', $dataPath);
-        $documentData->set('data_hash', $dataHash);
-        $documentData->set('download_filesize', $filesize);
-        $documentData->save();
-    }
-    
-    $ext = pathinfo($displayName, PATHINFO_EXTENSION);
-            
-    $extension = getExtension($ext);
-    if (false === $extension) {
-        $extension = ORM::for_table('file_extension')->create();
-        $extension->set('id', $ext);
-        $extension->set('mime', 'application/octet-stream');
-        $extension->set('display_name', 'Documento .' . $ext);
-        $extension->set('icon', 'icon-none.png');
-        $extension->save();
-    }
     
     $delivery = ORM::for_table('delivery')->create();
     $delivery->set('profile_id', $profileId);
@@ -537,22 +515,8 @@ function createDelivery($folderId, $userId, $profileId, $displayName, $deliveryN
     $folderDelivery->set('delivery_id', $delivery['id']);
     $folderDelivery->set('order_nr', $order + 1000);
     $folderDelivery->save();
-    
-    $revision = ORM::for_table('revision')->create();
-    $revision->set('delivery_id', $delivery['id']);
-    $revision->set('uploader_person_id', $userId);
-    $revision->set('upload_date', date('c'));
-    $revision->save();
-    
-    $document = ORM::for_table('document')->create();
-    $document->set('document_data_id', $documentData['id']);
-    $document->set('download_filename', $displayName);
-    $document->set('extension_id', $extension['id']);
-    $document->set('revision_id', $revision['id']);
-    $document->save();
 
-    $revision->set('original_document_id', $document['id']);
-    $revision->save();
+    $revision = createRevision($delivery['id'], $userId, $fileName, $dataPath, $dataHash, $filesize, $revisionNr);
     
     $delivery->set('current_revision_id', $revision['id']);
     $delivery->save();
@@ -560,4 +524,49 @@ function createDelivery($folderId, $userId, $profileId, $displayName, $deliveryN
     checkItemUpdateStatus($folderId, $profileId);
     
     return ORM::get_db()->commit();
+}
+
+function createRevision($deliveryId, $userId, $fileName, $dataPath, $dataHash, $filesize, $revisionNr) {
+    
+    $revision = ORM::for_table('revision')->create();
+    $revision->set('delivery_id', $deliveryId);
+    $revision->set('uploader_person_id', $userId);
+    $revision->set('upload_date', date('c'));
+    $revision->set('revision_nr', $revisionNr);
+    $revision->save();
+    
+    $documentData = getDocumentDataByHash($dataHash);
+    
+    if (false === $documentData) {
+        $documentData = ORM::for_table('document_data')->create();
+        $documentData->set('download_path', $dataPath);
+        $documentData->set('data_hash', $dataHash);
+        $documentData->set('download_filesize', $filesize);
+        $documentData->save();
+    }
+    
+    $ext = pathinfo($fileName, PATHINFO_EXTENSION);
+            
+    $extension = getExtension($ext);
+    if (false === $extension) {
+        $extension = ORM::for_table('file_extension')->create();
+        $extension->set('id', $ext);
+        $extension->set('mime', 'application/octet-stream');
+        $extension->set('display_name', 'Documento .' . $ext);
+        $extension->set('icon', 'icon-none.png');
+        $extension->save();
+    }
+    
+    $document = ORM::for_table('document')->create();
+    $document->set('document_data_id', $documentData['id']);
+    $document->set('download_filename', $fileName);
+    $document->set('extension_id', $extension['id']);
+    $document->set('revision_id', $revision['id']);
+    $document->save();
+
+    $revision->set('original_document_id', $document['id']);
+    $revision->save();
+    
+    return $revision;
+    
 }
