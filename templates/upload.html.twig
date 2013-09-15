@@ -54,6 +54,7 @@
     <strong>Entrega correcta.</strong> {{ flash['upload_ok'] == 1 ? 'Un documento ha sido registrado' : flash['upload_ok'] ~ ' documentos han sido registrados' }}.
 </div>
 {% endif %}
+{% block upload_main_content %}
 <div class="panel panel-info">
     <div class="panel-heading">
         <h1>Entrega de nuevos documentos</h1>
@@ -116,7 +117,7 @@
         <form class="form" enctype="multipart/form-data" role="form" method="post" action="{{ urlFor('upload', {'id': folder.id}) }}">
             {% if folder['is_divided'] %}
             <div class="form-group">
-                <label for="profileSelect">Enviar como</label>
+                <label for="profile">Enviar como</label>
                 <select class="form-control select" name="profile">
                     {% for profile in upload_as %}<option value="{{ profile['id'] }}">{{ [profile['display_name_neutral'], profile['display_name_male'], profile['display_name_female']][user['gender']] }}{% if profile['display_name'] %} ({{ profile['display_name'] }}){% endif %}</option>{% endfor %}
                 </select>
@@ -133,4 +134,5 @@
         </form>
     </div>
 </div>
+{% endblock %}
 {% endblock %}

@@ -59,7 +59,7 @@ $app->get('/enviar/:id', function ($id) use ($app, $user, $config, $organization
                     }
                 }
                 else {
-                    $uploadAs = array_merge($uploadAs, $data);
+                    $uploadAs[$item['id']] = $item;
                 }
             }
             else {

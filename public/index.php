@@ -145,6 +145,7 @@ require('../routes/activities.php');
 require('../routes/event.php');
 require('../routes/tree.php');
 require('../routes/upload.php');
+require('../routes/manage.php');
 
 // Ejecutar aplicación
 $app->run();
