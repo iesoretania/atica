@@ -145,9 +145,22 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
         $menu[] = array('caption' => $i['caption'], 'active' => ($section == $key), 'target' => $app->urlFor('personal', array('id' => $id, 'section' => $key)));
     }
 
-    $sidebar = array(
-        $menu
-    );
+
+    if ($user['is_admin']) {
+       $sidebar = array(
+           array(
+            array('caption' => 'Operaciones', 'icon' => 'group'),
+            array('caption' => 'Administrar usuarios', 'target' => $app->urlFor('frontpage')),
+            array('caption' => 'Administrar perfiles', 'target' => $app->urlFor('frontpage')),
+            array('caption' => 'Nuevo usuario', 'target' => $app->urlFor('frontpage'))
+           )
+       );
+    }
+    else {
+        $sidebar = array();
+    }
+    
+    $sidebar[] = $menu;
 
     // lista perfiles del usuario
     $profiles = getProfilesByUser($id);
