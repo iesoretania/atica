@@ -56,7 +56,7 @@
                         {% if gender %}<span class="icon-{{gender}}"></span>{% endif %}
                     </td>
                     <td class="hidden-xs hidden-sm">{{ person['email'] }}</td>
-                    <td>{{ person['last_login'] ? (person['last_login'] | date('Y/m/d')) : '---' }}</td>
+                    <td>{% if person['last_login'] %}<abbr title="{{ person['last_login'] | date('Y/m/d G:i') }}">{{ person['last_login'] | date('Y/m/d') }}</abbr>{% endif %}</td>
                 </tr>
                 </a>
                 {% endfor %}
