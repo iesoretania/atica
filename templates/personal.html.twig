@@ -30,7 +30,7 @@
                 <tr>
                     <th class="col-md-2"><input type="checkbox"> <a href="{{ urlFor('personlist', { 'sort': 0, 'filter': filter } ) }}">Usuario</a></th>
                     <th class="col-md-7"><a href="{{ urlFor('personlist', { 'sort': 1, 'filter': filter } ) }}">Nombre</a></th>
-                    <th class="hidden-xs col-md-2"><a href="{{ urlFor('personlist', { 'sort': 2, 'filter': filter } ) }}">Correo-e</a></th>
+                    <th class="hidden-xs hidden-sm col-md-2"><a href="{{ urlFor('personlist', { 'sort': 2, 'filter': filter } ) }}">Correo-e</a></th>
                     <th class="col-md-1"><a href="{{ urlFor('personlist', { 'sort': 3, 'filter': filter } ) }}">Últ. conexión</a></th>
                 </tr>
             </thead>
@@ -55,7 +55,7 @@
                         <a href="{{ link }}">{{ person['first_name'] ~ ' ' ~ person['last_name'] }}</a>
                         {% if gender %}<span class="icon-{{gender}}"></span>{% endif %}
                     </td>
-                    <td class="hidden-xs">{{ person['email'] }}</td>
+                    <td class="hidden-xs hidden-sm">{{ person['email'] }}</td>
                     <td>{{ person['last_login'] ? (person['last_login'] | date('Y/m/d')) : '---' }}</td>
                 </tr>
                 </a>
@@ -64,8 +64,8 @@
         </table>
         <div class="panel-footer">
             <p><strong>Con los elementos seleccionados:</strong></p>
-            <button type="submit" name="enable" class="btn btn-default">Activar usuarios</button>
-            <button type="submit" name="disable" class="btn btn-default">Desactivar usuarios</button>
+            <button type="submit" name="enable" class="btn btn-info">Activar usuarios</button>
+            <button type="submit" name="disable" class="btn btn-warning">Desactivar usuarios</button>
             {% if user['is_global_administrator'] %}
             <button type="submit" name="delete" class="btn btn-danger">Eliminar usuarios</button>
             {% endif %}

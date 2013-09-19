@@ -322,7 +322,7 @@ function getPersonManagementSidebar($section, $app) {
     return array(
         array(
          array('caption' => 'Operaciones', 'icon' => 'group'),
-         array('caption' => 'Administrar usuarios', 'active' => ($section == 1),'target' => $app->urlFor('personlist')),
+         array('caption' => 'Gestionar usuarios', 'active' => ($section == 1),'target' => $app->urlFor('personlist')),
          array('caption' => 'Administrar perfiles', 'active' => ($section == 2),'target' => $app->urlFor('frontpage')),
          array('caption' => 'Nuevo usuario', 'active' => ($section == 3), 'target' => $app->urlFor('personal', array('id' => 0, 'section' => 0)))
         )
