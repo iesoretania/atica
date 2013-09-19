@@ -226,7 +226,7 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
 })->name('personal')->via('GET', 'POST')->
     conditions(array('section' => '[0-9]{1}'));
 
-$app->map('/listado(/:sort(/:filter))', function ($sort = 0, $filter = 1) use ($app, $user, $organization, $preferences) {
+$app->map('/listado(/:sort(/:filter))', function ($sort = 0, $filter = 1) use ($app, $user, $organization) {
     if ((!$user) || (!$user['is_admin'])) {
         $app->redirect($app->urlFor('login'));
     }
@@ -254,6 +254,35 @@ $app->map('/listado(/:sort(/:filter))', function ($sort = 0, $filter = 1) use ($
         'persons' => $persons
     ));
 })->name('personlist')->via('GET', 'POST');
+
+
+$app->map('/perfiles(/:filter)', function ($filter = 1) use ($app, $user, $organization) {
+    if ((!$user) || (!$user['is_admin'])) {
+        $app->redirect($app->urlFor('login'));
+    }
+    $sidebar = getPersonManagementSidebar(2, $app);
+    
+    $filterArray = array();
+    if ($filter) {
+        $filterArray['person_organization.is_active'] = 1;
+    }
+    $profiles = getProfilesByOrganization($organization['id']);
+    
+    // generar barra de navegación
+    $breadcrumb = array(
+        array('display_name' => 'Perfiles', 'target' => $app->urlFor('personlist'),
+        array('display_name' => $organization['display_name'])
+    ));
+    
+    // lanzar plantilla
+    $app->render('profiles.html.twig', array(
+        'navigation' => $breadcrumb,
+        'sidebar' => $sidebar,
+        'filter' => $filter,
+        'profiles' => $profiles,
+        'url' => $app->request()->getPathInfo()
+    ));
+})->name('profilelist')->via('GET', 'POST');
 
 function getUserById($personId, $orgId) {
     $data = ORM::for_table('person')->
@@ -323,7 +352,7 @@ function getPersonManagementSidebar($section, $app) {
         array(
          array('caption' => 'Operaciones', 'icon' => 'group'),
          array('caption' => 'Gestionar usuarios', 'active' => ($section == 1),'target' => $app->urlFor('personlist')),
-         array('caption' => 'Administrar perfiles', 'active' => ($section == 2),'target' => $app->urlFor('frontpage')),
+         array('caption' => 'Administrar perfiles', 'active' => ($section == 2),'target' => $app->urlFor('profilelist')),
          array('caption' => 'Nuevo usuario', 'active' => ($section == 3), 'target' => $app->urlFor('personal', array('id' => 0, 'section' => 0)))
         )
     );
@@ -347,5 +376,24 @@ function getOrganizationPersons($orgId, $sortIndex = 0, $filter = false) {
             $data = $data->where($key, $condition);
         }
     }
+    return $data->find_many();
+}
+
+function getProfilesByOrganization($orgId, $filter = false) {
+    $data = ORM::for_table('profile')->
+            select('profile.*')->
+            select('profile_group.display_name_neutral')->
+            select('profile_group.abbreviation')->
+            inner_join('profile_group', array('profile_group.id', '=', 'profile.profile_group_id'))->
+            where('profile_group.organization_id', $orgId)->
+            order_by_asc('profile_group.display_name_neutral')->
+            order_by_asc('profile.display_name');
+    
+    if ($filter) {
+        foreach ($filter as $key => $condition) {
+            $data = $data->where($key, $condition);
+        }
+    }
+    
     return $data->find_many();
 }

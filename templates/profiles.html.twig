@@ -1,0 +1,71 @@
+{#  ATICA - Web application for supporting Quality Management Systems
+    Copyright (C) 2009-2013: Luis-Ramón López López
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
+
+{% extends "layout.html.twig" %}
+
+{% block maincontent %}
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <h1>Listado de perfiles</h1>
+    </div>
+    <div class="panel-body">
+        <a href="{{ urlFor('profilelist', { 'filter': 1-filter } ) }}" class="btn btn-info pull-right">{{ filter ? 'Mostrar todos los perfiles' : 'Mostrar sólo los perfiles activos' }}</a>
+        <a href="{{ urlFor('profilelist', { 'filter': 1-filter } ) }}" class="btn btn-info">Añadir nuevo perfil</a>
+    </div>
+    <form>
+        <table class="table table-striped table-condensed table-hover">
+            <thead>
+                <tr>
+                    <th class="col-md-4"><input type="checkbox"> Perfil</th>
+                    <th class="col-md-6"></th>
+                    <th class="col-md-2">Usuarios asociados</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for profile in profiles %}
+                {% set link = urlFor('profilelist', { 'filter': filter } )  %}
+                <tr>
+                    <td><input type="checkbox" name="profile{{ profile['id'] }}">
+                        <a href="{{ link }}">{{ profile['display_name_neutral'] }}</a>
+                        {# if not profile['is_active'] %}
+                            <span class="icon-eye-close" title="Perfil inactivo"></span>
+                        {% endif #}
+                    </td>
+                    <td>
+                        {% if profile['display_name'] %}
+                        <a href="{{ link }}">{{ profile['display_name'] }}</a>
+                        {% else %}
+                        <a href="{{ urlFor('profilelist', { 'filter': 1-filter } ) }}" class="btn btn-info">Nuevo subperfil</a>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ profile['count'] }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="panel-footer">
+            <p><strong>Con los elementos seleccionados:</strong></p>
+            <button type="submit" name="enable" class="btn btn-info">Activar perfiles</button>
+            <button type="submit" name="disable" class="btn btn-warning">Desactivar perfiles</button>
+            {% if user['is_global_administrator'] %}
+            <button type="submit" name="delete" class="btn btn-danger">Eliminar perfiles</button>
+            {% endif %}
+        </div>
+    </form>
+</div>
+{% endblock %}

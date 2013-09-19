@@ -29,8 +29,8 @@
             <thead>
                 <tr>
                     <th class="col-md-2"><input type="checkbox"> <a href="{{ urlFor('personlist', { 'sort': 0, 'filter': filter } ) }}">Usuario</a></th>
-                    <th class="col-md-7"><a href="{{ urlFor('personlist', { 'sort': 1, 'filter': filter } ) }}">Nombre</a></th>
-                    <th class="hidden-xs hidden-sm col-md-2"><a href="{{ urlFor('personlist', { 'sort': 2, 'filter': filter } ) }}">Correo-e</a></th>
+                    <th class="col-md-6"><a href="{{ urlFor('personlist', { 'sort': 1, 'filter': filter } ) }}">Nombre</a></th>
+                    <th class="hidden-xs hidden-sm col-md-3"><a href="{{ urlFor('personlist', { 'sort': 2, 'filter': filter } ) }}">Correo-e</a></th>
                     <th class="col-md-1"><a href="{{ urlFor('personlist', { 'sort': 3, 'filter': filter } ) }}">Últ. conexión</a></th>
                 </tr>
             </thead>
@@ -42,9 +42,10 @@
                     <td><input type="checkbox" name="user{{ person['id'] }}">
                         <a href="{{ link }}">{{ person['user_name'] }}</a>
                         {% if not person['is_active'] %}
-                            <span class="icon-eye-close"></span>
-                        {% elseif person['is_local_administrator'] or person['is_global_administrator'] %}
-                            <span class="icon-cog"></span>
+                            <span class="icon-eye-close" title="Desactivado"></span>
+                        {% endif %}
+                        {% if person['is_local_administrator'] or person['is_global_administrator'] %}
+                            <span class="icon-cog" title="Administrador"></span>
                         {% endif %}
                     </td>
                     <td class="visible-xs">
@@ -58,7 +59,6 @@
                     <td class="hidden-xs hidden-sm">{{ person['email'] }}</td>
                     <td>{% if person['last_login'] %}<abbr title="{{ person['last_login'] | date('Y/m/d G:i') }}">{{ person['last_login'] | date('Y/m/d') }}</abbr>{% endif %}</td>
                 </tr>
-                </a>
                 {% endfor %}
             </tbody>
         </table>
