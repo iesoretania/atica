@@ -17,117 +17,59 @@
 {% extends "layout.html.twig" %}
 
 {% block maincontent %}
-{% set edit = local or user['is_admin'] %}
-{% set email_enabled = (userData['email_enabled'] == 1) %}
-{% set male = (userData['gender'] == 1) %}
-{% set female = (userData['gender'] == 2) %}
-{% set global_admin = (userData['is_global_administrator'] == 1) %}
-{% set local_admin = (userData['is_local_administrator'] == 1) %}
-{% set active = (userData['is_active'] == 1) %}
 <div class="panel panel-info">
     <div class="panel-heading">
-{% if local %}
-        <h1>¡Bienvenid{{ ['o/a', 'o', 'a'][user.gender] }} {{ user.first_name }}!</h1>
-{% else %}
-        <h1>Datos personales: {{ userData.display_name }}</h1>
-{% endif %}
+        <h1>Listado de personal</h1>
     </div>
     <div class="panel-body">
-{% if local %}
-        <h3>Por favor, tómate unos minutos para asegurarte de que los datos de la aplicación son correctos</h3>
-{% endif %}
-        <form class="form-horizontal" role="form" method="post" action="{{ url }}">
-            {% if user.is_admin %}
-            <div class="form-group">
-                <label for="username" class="col-md-2 control-label">Nombre de usuario</label>
-                <div class="col-md-10">
-                    <input type="text" class="form-control" name="username" id="username" placeholder="Nombre de usuario para entrar en la plataforma" value="{{ userData.user_name }}">
-                </div>
-            </div>              
-            {% endif %}
-            <div class="form-group">
-                <label class="col-md-2 control-label">Acceso</label>
-                <div class="col-md-10">
-                    <label class="radio-inline"><input type="radio" name="active" value="0" {{active ? '' : ' checked="checked"' }}{{ user.is_admin ? '' : ' disabled' }}> Denegado</label>
-                    <label class="radio-inline"><input type="radio" name="active" value="1" {{active ? ' checked="checked"' : ''}}{{ user.is_admin ? '' : ' disabled' }}> Permitido</label>
-                </div>
-            </div>                
-            <div class="form-group">
-                <label for="displayname" class="col-md-2 control-label">Nombre visible</label>
-                <div class="col-md-10">
-                    <input type="text" class="form-control" name="displayname" id="displayname" placeholder="Nombre con el que aparecerá en la plataforma" value="{{ userData.display_name }}"{{ edit ? '' : ' disabled' }}>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="firstname" class="col-md-2 control-label">Nombre</label>
-                <div class="col-md-10">
-                    <input type="text" class="form-control" name="firstname" id="firstname" placeholder="Nombre completo sin abreviaturas" value="{{ userData.first_name }}"{{ edit ? '' : ' disabled' }}>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="lastname" class="col-md-2 control-label">Apellidos</label>
-                <div class="col-md-10">
-                    <input type="text" class="form-control" name="lastname" id="lastname" placeholder="Apellidos completos" value="{{ userData.last_name }}"{{ edit ? '' : ' disabled' }}>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="initials" class="col-md-2 control-label">Iniciales</label>
-                <div class="col-md-5">
-                    <input type="text" maxlength="5" class="form-control" name="initials" id="initials" placeholder="Iniciales en mayúsculas sin espacios ni puntos" value="{{ userData.initials }}"{{ edit ?: ' disabled' }}>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-2 control-label">Sexo</label>
-                <div class="col-md-10">
-                    <label class="radio-inline"><input type="radio" name="gender" id="male" value="1" {{male ? ' checked="checked"' }}{{ edit ? '' : ' disabled' }}> Hombre</label>
-                    <label class="radio-inline"><input type="radio" name="gender" id="female" value="2" {{female ? ' checked="checked"' : ''}}{{ edit ? '' : ' disabled' }}> Mujer</label>
-                </div>
-            </div>
-            {% if edit %}
-            <div class="form-group">
-                <label for="email" class="col-md-2 control-label">Correo electrónico</label>
-                <div class="col-md-6">
-                    <input type="text" class="form-control" name="email" id="email" placeholder="Correo electrónico donde recibir las notificaciones" value="{{ userData.email }}"{{ edit ? '' : ' disabled' }}>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-2 control-label">Notificaciones por correo</label>
-                <div class="col-md-10">
-                    <label class="radio-inline"><input type="radio" name="notify" id="dont_notify" value="0"{{email_enabled ? '' : ' checked="checked"' }}> No quiero recibir notificaciones</label>
-                    <label class="radio-inline"><input type="radio" name="notify" id="do_notify" value="1"{{email_enabled ? ' checked="checked"' }}> Sí, quiero recibirlas</label>
-                </div>
-            </div>
-            {% endif %}
-            {% if user.is_admin %}
-            <div class="form-group text-danger">
-                <label class="col-md-2 control-label">Administración local</label>
-                <div class="col-md-10">
-                    <label class="radio-inline"><input type="radio" name="localadmin" value="0"{{local_admin ? '' : ' checked="checked"' }}> No</label>
-                    <label class="radio-inline"><input type="radio" name="localadmin" value="1"{{local_admin ? ' checked="checked"' }}> Sí, puede administrar este centro</label>
-                </div>
-            </div>                
-            {% if user.is_global_administrator %}
-            <div class="form-group text-danger">
-                <label class="col-md-2 control-label">Administración global</label>
-                <div class="col-md-10">
-                    <label class="radio-inline"><input type="radio" name="globaladmin" value="0"{{global_admin ? '' : ' checked="checked"' }}{{ local ? ' disabled' }}> No</label>
-                    <label class="radio-inline"><input type="radio" name="globaladmin" value="1"{{global_admin ? ' checked="checked"' }}{{ local ? ' disabled' }}> Sí, puede administrar la plataforma completa</label>
-                </div>
-            </div>
-            {% endif %}
-            <div class="form-group">
-                <label for="description" class="col-md-2 control-label">Otra información</label>
-                <div class="col-md-10">
-                    <textarea class="form-control" name="description" id="description" rows="3" placeholder="Notas internas para los administradores"></textarea>
-                </div>
-            </div>
-            {% endif %}
-            {% if edit %}
-                <button type="submit" name="savepersonal" class="btn btn-success">Guardar cambios</button>
-            {% endif %}
-            {% if user.is_admin %}
-            {% endif %}
-        </form>
+        <a href="{{ urlFor('personlist', { 'sort': 0, 'filter': 1-filter } ) }}" class="btn btn-info pull-right">{{ filter ? 'Mostrar todos los usuarios' : 'Mostrar sólo los usuarios activos' }}</a>
     </div>
+    <form>
+        <table class="table table-striped table-condensed table-hover">
+            <thead>
+                <tr>
+                    <th class="col-md-2"><input type="checkbox"> <a href="{{ urlFor('personlist', { 'sort': 0, 'filter': filter } ) }}">Usuario</a></th>
+                    <th class="col-md-7"><a href="{{ urlFor('personlist', { 'sort': 1, 'filter': filter } ) }}">Nombre</a></th>
+                    <th class="hidden-xs col-md-2"><a href="{{ urlFor('personlist', { 'sort': 2, 'filter': filter } ) }}">Correo-e</a></th>
+                    <th class="col-md-1"><a href="{{ urlFor('personlist', { 'sort': 3, 'filter': filter } ) }}">Últ. conexión</a></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for person in persons %}
+                {% set link = urlFor('personal', { 'id': person['id'], 'section': 0 }) %}
+                {% set gender = ['', 'male', 'female'][person['gender']] %}
+                <tr>
+                    <td><input type="checkbox" name="user{{ person['id'] }}">
+                        <a href="{{ link }}">{{ person['user_name'] }}</a>
+                        {% if not person['is_active'] %}
+                            <span class="icon-eye-close"></span>
+                        {% elseif person['is_local_administrator'] or person['is_global_administrator'] %}
+                            <span class="icon-cog"></span>
+                        {% endif %}
+                    </td>
+                    <td class="visible-xs">
+                        <a href="{{ link }}">{{ person['display_name'] }}</a>
+                        {% if gender %}<span class="icon-{{gender}}"></span>{% endif %}
+                    </td>
+                    <td class="hidden-xs">
+                        <a href="{{ link }}">{{ person['first_name'] ~ ' ' ~ person['last_name'] }}</a>
+                        {% if gender %}<span class="icon-{{gender}}"></span>{% endif %}
+                    </td>
+                    <td class="hidden-xs">{{ person['email'] }}</td>
+                    <td>{{ person['last_login'] ? (person['last_login'] | date('Y/m/d')) : '---' }}</td>
+                </tr>
+                </a>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="panel-footer">
+            <p><strong>Con los elementos seleccionados:</strong></p>
+            <button type="submit" name="enable" class="btn btn-default">Activar usuarios</button>
+            <button type="submit" name="disable" class="btn btn-default">Desactivar usuarios</button>
+            {% if user['is_global_administrator'] %}
+            <button type="submit" name="delete" class="btn btn-danger">Eliminar usuarios</button>
+            {% endif %}
+        </div>
+    </form>
 </div>
 {% endblock %}

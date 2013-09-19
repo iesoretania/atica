@@ -24,22 +24,41 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
     // ¿se busca la información del usuario activo?
     $itsMe = ($id == NULL) || ($id == $user['id']);
 
+    // si es un nuevo usuario, la única sección admitida es la cero
+    if (($id == 0) && ($section != 0)) {
+        $app->redirect($app->urlFor('frontpage'));
+    }
+    
     // si es así, asignar sus datos
     if ($itsMe) {
         $id = $user['id'];
         $userData = $user;
     } else {
-        // cargar los datos del usuario indicado como parámetro
-        $userData = getUserById($id, $organization['id']);
-        if (!$userData) {
-            // ¿no existe en la organización? Salir de aquí
-            $app->redirect($app->urlFor('frontpage'));
+        // cargar los datos del usuario indicado como parámetro si no es
+        // el identificador 0, que significa nuevo usuario
+        if ($id != 0) {
+            $userData = getUserById($id, $organization['id']);
+            if (!$userData) {
+                // ¿no existe en la organización? Salir de aquí
+                $app->redirect($app->urlFor('frontpage'));
+            }
+        }
+        else {
+            $userData = array( 'new' => true, 'is_active' => 1 );
         }
     }
 
     // comprobar si se están cambiando datos
     if (isset($_POST['savepersonal']) && ($user['is_admin'] || $itsMe)) {
-        $local = getUserObjectById($id);
+        
+        ORM::get_db()->beginTransaction();
+        
+        if ($id == 0) {
+            $local = ORM::for_table('person')->create();
+        }
+        else {
+            $local = getUserObjectById($id);
+        }
         if (isset($_POST['displayname'])) {
             $local->set('display_name', $_POST['displayname']);
         }
@@ -68,7 +87,9 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
             if (isset($_POST['description'])) {
                 $local->set('description', strlen($_POST['description']) > 0 ? $_POST['description'] : NULL);
             }
-            if (isset($_POST['active']) && (isset($_POST['localadmin']))) {
+            // los flags de usuario activo y administrador local se grabarán
+            // luego si es un usuario nuevo
+            if (($id != 0) && isset($_POST['active']) && isset($_POST['localadmin'])) {
                 setPersonIsActiveAndLocalAdmin($_POST['active'], $_POST['localadmin'], $id, $organization['id']);
             }
             // permitir cambiar opción de administrador global si ya lo somos
@@ -79,8 +100,22 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
         }
         if ($local->save()) {
             $app->flash('save_ok', 'ok');
+            
+            // si es nuevo, añadirlo a la organización
+            if ($id == 0) {
+                $id = $local['id'];
+                $personOrganization = ORM::for_table('person_organization')->
+                        create();
+                $personOrganization->set('person_id', $id);
+                $personOrganization->set('organization_id', $organization['id']);
+                $personOrganization->set('is_active', $_POST['active']);
+                $personOrganization->set('is_local_administrator', $_POST['localadmin']);
+                $personOrganization->save();
+            }
+            ORM::get_db()->commit();
         } else {
             $app->flash('save_error', 'error');
+            ORM::get_db()->rollBack();
         }
         $app->redirect($app->urlFor('personal', array('id' => $id, 'section' => $section)));
     }
@@ -118,23 +153,33 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
 
     // menú lateral de secciones
     $menu = array(
-        array('caption' => ($itsMe ? 'Mis datos' : $userData['display_name']), 'icon' => 'user')
+        array('caption' => ($itsMe ? 'Mis datos' : (($id != 0) ? $userData['display_name'] : 'Nuevo usuario')), 'icon' => 'user')
     );
 
     // las secciones vienen en este array
     $options = array(
-        0 => array('caption' => 'Personal', 'template' => 'personal'),
-        1 => array('caption' => 'Perfiles', 'template' => 'profiles')/* ,
-              2 => array('caption' => 'Envíos realizados', 'template' => 'personal') */
+        0 => array('caption' => 'Personal', 'template' => 'user_personal'),
+        1 => array('caption' => 'Perfiles', 'template' => 'user_profiles')/*,
+        2 => array('caption' => 'Envíos realizados', 'template' => 'user_deliveries') */
     );
+
+    // si el usuario es administrador, permitir ver el informe de actividad
+    if ($user['is_admin']) {
+        $options[3] = array('caption' => 'Registro de actividad', 'template' => 'user_personal');
+    }
+
+    // si el usuario es administrador global, permitir asignar organizaciones
+    if ($user['is_global_administrator']) {
+        $options[5] = array('caption' => 'Pertenencia a centros', 'template' => 'user_personal');
+    }
 
     // si el usuario es él mismo o es administrador, permitir cambiar la contraseña
     // y ver el informe de actividad
     if ($itsMe || $user['is_admin']) {
         //$options[3] = array('caption' => 'Registro de actividad', 'template' => 'personal');
-        $options[4] = array('caption' => 'Cambiar contraseña', 'template' => 'password');
+        $options[4] = array('caption' => 'Cambiar contraseña', 'template' => 'user_password');
     }
-
+    
     // comprobar que la sección existe
     if (!isset($options[$section])) {
         $app->redirect($app->urlFor('frontpage'));
@@ -147,28 +192,26 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
 
 
     if ($user['is_admin']) {
-       $sidebar = array(
-           array(
-            array('caption' => 'Operaciones', 'icon' => 'group'),
-            array('caption' => 'Administrar usuarios', 'target' => $app->urlFor('frontpage')),
-            array('caption' => 'Administrar perfiles', 'target' => $app->urlFor('frontpage')),
-            array('caption' => 'Nuevo usuario', 'target' => $app->urlFor('frontpage'))
-           )
-       );
+        $sidebar = getPersonManagementSidebar(($id == 0) ? 3 : 0, $app);
     }
     else {
         $sidebar = array();
     }
     
-    $sidebar[] = $menu;
-
-    // lista perfiles del usuario
-    $profiles = getProfilesByUser($id);
+    // mostrar menú de perfil sólo si no estamos creando un nuevo usuario
+    if ($id != 0) {
+        $sidebar[] = $menu;
+        // lista perfiles del usuario
+        $profiles = getProfilesByUser($id);
+    }
+    else {
+        $profiles = array();
+    }
 
     // generar barra de navegación
     $breadcrumb = array(
         array('display_name' => 'Usuarios', 'target' => $app->urlFor('personal', array('id' => $user['id'], 'section' => 0))),
-        array('display_name' => $userData['display_name'], 'target' => $app->urlFor('personal', array('id' => $id, 'section' => 0))),
+        array('display_name' => ($id != 0) ? $userData['display_name'] : 'Nuevo usuario', 'target' => $app->urlFor('personal', array('id' => $id, 'section' => 0))),
         array('display_name' => $options[$section]['caption'])
     );
     // lanzar plantilla
@@ -180,17 +223,53 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
         'profiles' => $profiles,
         'local' => $itsMe
     ));
-})->name('personal')->via('GET', 'POST');
+})->name('personal')->via('GET', 'POST')->
+    conditions(array('section' => '[0-9]{1}'));
+
+$app->map('/listado(/:sort(/:filter))', function ($sort = 0, $filter = 1) use ($app, $user, $organization, $preferences) {
+    if ((!$user) || (!$user['is_admin'])) {
+        $app->redirect($app->urlFor('login'));
+    }
+    $sidebar = getPersonManagementSidebar(1, $app);
+    
+    $filterArray = array();
+    if ($filter) {
+        $filterArray['person_organization.is_active'] = 1;
+    }
+    $persons = getOrganizationPersons($organization['id'], $sort, $filterArray);
+    
+    // generar barra de navegación
+    $breadcrumb = array(
+        array('display_name' => 'Usuarios', 'target' => $app->urlFor('personlist'),
+        array('display_name' => $organization['display_name'])
+    ));
+    
+    // lanzar plantilla
+    $app->render('personal.html.twig', array(
+        'navigation' => $breadcrumb,
+        'sidebar' => $sidebar,
+        'sort' => $sort,
+        'filter' => $filter,
+        'url' => $app->request()->getPathInfo(),
+        'persons' => $persons
+    ));
+})->name('personlist')->via('GET', 'POST');
 
 function getUserById($personId, $orgId) {
-    return ORM::for_table('person')->
+    $data = ORM::for_table('person')->
                     select('person.*')->
                     select('person_organization.is_local_administrator')->
                     select('person_organization.is_active')->
                     inner_join('person_organization', array('person_organization.person_id', '=', 'person.id'))->
                     where('person_organization.person_id', $personId)->
                     where('person_organization.organization_id', $orgId)->
-                    find_one()->as_array();
+                    find_one();
+    if ($data) {
+        return $data->as_array();
+    }
+    else {
+        return false;
+    }
 }
 
 function getUserObjectById($personId) {
@@ -213,25 +292,23 @@ function getProfilesByUser($personId) {
 }
 
 function setPersonIsActiveAndLocalAdmin($stateActive, $stateLocalAdmin, $personId, $orgId) {
-    ORM::get_db()->beginTransaction();
     $personOrganization = ORM::for_table('person_organization')->
             where('person_id', $personId)->
             where('organization_id', $orgId)->
             delete_many();
 
     if (!$personOrganization) {
-        ORM::get_db()->rollBack();
         return false;
     }
 
-    $personOrganization = ORM::for_table('person_organization')->create();
-    $personOrganization->set('person_id', $personId);
-    $personOrganization->set('organization_id', $orgId);
-    $personOrganization->set('is_active', $stateActive);
-    $personOrganization->set('is_local_administrator', $stateLocalAdmin);
-    $personOrganization->save();
+    $personOrganization2 = ORM::for_table('person_organization')->create();
+    $personOrganization2->set('person_id', $personId);
+    $personOrganization2->set('organization_id', $orgId);
+    $personOrganization2->set('is_active', $stateActive);
+    $personOrganization2->set('is_local_administrator', $stateLocalAdmin);
+    $personOrganization2->save();
 
-    return ORM::get_db()->commit();
+    return $personOrganization2->save();
 }
 
 function checkUserPassword($personId, $password, $salt) {
@@ -239,4 +316,36 @@ function checkUserPassword($personId, $password, $salt) {
                     where('id', $personId)->
                     where('password', sha1($salt . $password))->
                     count() > 0;
+}
+
+function getPersonManagementSidebar($section, $app) {
+    return array(
+        array(
+         array('caption' => 'Operaciones', 'icon' => 'group'),
+         array('caption' => 'Administrar usuarios', 'active' => ($section == 1),'target' => $app->urlFor('personlist')),
+         array('caption' => 'Administrar perfiles', 'active' => ($section == 2),'target' => $app->urlFor('frontpage')),
+         array('caption' => 'Nuevo usuario', 'active' => ($section == 3), 'target' => $app->urlFor('personal', array('id' => 0, 'section' => 0)))
+        )
+    );
+}
+
+function getOrganizationPersons($orgId, $sortIndex = 0, $filter = false) {
+    $fields = array('user_name', 'first_name', 'email', 'last_login',
+        'last_name', 'gender', 'email_enabled',
+        'person_organization.is_local_administrator', 'is_global_administrator');
+    
+    $data = ORM::for_table('person')->
+            select('person.*')->
+            select('person_organization.is_active')->
+            select('person_organization.is_local_administrator')->
+            inner_join('person_organization', array('person_organization.person_id', '=', 'person.id'))->
+            where('person_organization.organization_id', $orgId)->
+            order_by_asc($fields[$sortIndex]);
+    
+    if ($filter) {
+        foreach ($filter as $key => $condition) {
+            $data = $data->where($key, $condition);
+        }
+    }
+    return $data->find_many();
 }

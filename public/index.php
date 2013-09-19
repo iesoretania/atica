@@ -138,6 +138,10 @@ $twig->addGlobal('organization', $organization);
 $twig->addGlobal('user', $user);
 
 // Definir rutas
+\Slim\Route::setDefaultConditions(array(
+    'id' => '[0-9]{1,}'
+));
+
 require('../routes/session.php');
 require('../routes/personal.php');
 require('../routes/frontpage.php');
