@@ -47,10 +47,11 @@
                         {% if person['is_local_administrator'] or person['is_global_administrator'] %}
                             <span class="icon-cog" title="Administrador"></span>
                         {% endif %}
+                        <a href="{{ urlFor('personal', { 'id': person['id'], 'section': 1 }) }}" class="delivery-tools"><span class="icon-group"></span></a>
                     </td>
                     <td class="visible-xs">
                         <a href="{{ link }}">{{ person['display_name'] }}</a>
-                        {% if gender %}<span class="icon-{{gender}}"></span>{% endif %}
+                        
                     </td>
                     <td class="hidden-xs">
                         <a href="{{ link }}">{{ person['first_name'] ~ ' ' ~ person['last_name'] }}</a>
