@@ -40,18 +40,18 @@ $app->get('/arbol(/:id)', function ($id = NULL) use ($app, $user, $organization)
         $persons = getFolderPersonsByCategory($id);
         $folderProfiles = getProfilesByCategory($id);
 
-        $breadcrumb = array(
-            array('display_name' => 'Árbol', 'target' => $app->urlFor('tree')),
-            array('display_name' => $parent['display_name'], 'target' => $app->urlFor('tree')),
+    $breadcrumb = array(
+        array('display_name' => 'Árbol', 'target' => $app->urlFor('tree')),
+        array('display_name' => $parent['display_name'], 'target' => $app->urlFor('tree')),
             array('display_name' => $category['display_name'])
-        );
+    );
     }
     else {
         $breadcrumb = array(
             array('display_name' => 'Árbol', 'target' => '#')
         );
     }
-
+    
     $app->render('tree.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar,
         'category' => $category,
@@ -111,6 +111,81 @@ $app->get('/descargar/:kind/:cid/:id/(:p1/)(:p2/)', function ($kind, $cid, $id, 
     readfile($file);
 })->name('download');
 
+$app->map('/carpeta/:id', function ($id) use ($app, $user, $organization) {
+    if (!$user) {
+        $app->redirect($app->urlFor('login'));
+    }
+
+    $category = array();
+    $parent = array();
+
+    $data = getCategories($organization['id']);
+    $allProfiles = getProfilesByOrganization($organization['id']);
+    $uploadProfiles = parseArray(getPermissionProfiles($id, 1));
+    $managerProfiles = parseArray(getPermissionProfiles($id, 0));
+    
+    if ($user['is_admin'] && isset($_POST['savefolder'])) {
+        ORM::get_db()->beginTransaction();
+        
+        if ($id == 0) {
+            $local = ORM::for_table('person')->create();
+        }
+        else {
+            $local = getFolderObjectById($id);
+        }
+        $local->set('category_id', $_POST['category']);
+        $local->set('display_name', $_POST['displayname']);
+        $local->set('description', strlen($_POST['description'])>0 ? $_POST['description'] : NULL);
+        $local->set('is_visible', $_POST['visible']);
+        $local->set('is_divided', $_POST['divided']);
+        $local->set('show_revision_nr', $_POST['revisionnr']);
+        $local->set('auto_clean', $_POST['autoclean']);
+        if ($local->save()) {
+            $ok = true;
+            if (isset($_POST['managers'])) {
+                $ok = $ok && setFolderProfiles($id, 0, $_POST['managers']);
+            }
+            if (isset($_POST['uploaders'])) {
+                $ok = $ok && setFolderProfiles($id, 1, $_POST['uploaders']);
+            }
+            if ($ok) {
+                $app->flash('save_ok', 'ok');
+                ORM::get_db()->commit();
+            }
+            else {
+                $app->flash('save_error', 'error');
+                ORM::get_db()->rollBack();
+            }
+        }
+        else {
+            $app->flash('save_error', 'error');
+            ORM::get_db()->rollBack();
+        }
+        
+        $app->redirect($app->request()->getPathInfo());
+    }
+    
+    $folder = getFolder($id);
+    
+    $sidebar = getTree($organization['id'], $app, $folder['category_id'], $category, $parent);
+
+    $breadcrumb = array(
+        array('display_name' => 'Árbol', 'target' => $app->urlFor('tree')),
+        array('display_name' => $parent['display_name'], 'target' => $app->urlFor('tree')),
+        array('display_name' => $category['display_name']),
+        array('display_name' => 'Gestionar carpeta')
+    );
+    
+    $app->render('manage_folder.html.twig', array(
+        'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar,
+        'category' => $category,
+        'url' => $app->request()->getPathInfo(),
+        'data' => $data,
+        'allProfiles' => $allProfiles,
+        'uploaders' => $uploadProfiles,
+        'managers' => $managerProfiles,
+        'folder' => $folder));
+})->name('managefolder')->via('GET', 'POST');
 
 function getTree($orgId, $app, $id, &$matchedCategory, &$parentCategory) {
     $return = array();
@@ -307,11 +382,69 @@ function getParsedFoldersByCategory($categoryId, &$profileGender) {
     return parseFolders($data, $profileGender);
 }
 
+function getFolderObjectById($folderId) {
+return ORM::for_table('folder')->
+            where('folder.id', $folderId)->
+            find_one();
+}
+
 function getFolder($folderId) {
     if (NULL == $folderId) {
         return false;
     }
-    return ORM::for_table('folder')->
-            where('folder.id', $folderId)->
-            find_one()->as_array();
+    return getFolderObjectById($folderId)->as_array();
+}
+
+function getCategories($orgId) {
+    $data = ORM::for_table('category')->
+            select('category.*')->
+            where('organization_id', $orgId)->
+            order_by_asc('category_left')->
+            find_array();
+    
+    $return = array();
+    
+    $current = NULL;
+    $currentData = array();
+    
+    foreach($data as $element) {
+        if ($element['category_level'] == 1) {
+            if ($current != NULL) {
+                $return[] = array(
+                    'info' => $current,
+                    'data' => $currentData
+                );
+            }
+            $current = $element;
+            $currentData = array();
+        }
+        else {
+            $currentData[] = $element;
+        }
+    }
+    if ($current != NULL) {
+        $return[] = array(
+                    'info' => $current,
+                    'data' => $currentData
+        );
+    }
+    return $return;
+}
+
+function setFolderProfiles($folderId, $permission, $profiles) {
+    $query = ORM::for_table('folder_permission')->
+            where('folder_id', $folderId)->
+            where('permission', $permission)->
+            delete_many();
+    
+    $ok = true;
+    foreach ($profiles as $profile) {
+        $insert = ORM::for_table('folder_permission')->create();
+        $insert->set('folder_id', $folderId);
+        $insert->set('permission', $permission);
+        $insert->set('profile_id', $profile);
+        $ok = $ok && $insert->save();
+    }
+    
+    return $ok;
 }

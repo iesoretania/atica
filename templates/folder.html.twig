@@ -3,7 +3,9 @@
 {% set buttons = user['is_admin'] or info['manage_permission'] or info['upload_permission'] %}
 <div class="panel panel-default">
     <div class="panel-heading">
-        <h2>{{ info['display_name'] }}</h2>
+        <h2>{{ info['display_name'] }}
+            {% if user['is_admin'] %}&nbsp;<small class="pull-right hidden-print"><a class="folder-tools" href="{{ urlFor('managefolder', { 'id': info.id })  }}"><span class="icon-cog"></span></a> {% if not loop.first %}<a class="folder-tools" title="Subir carpeta" href=""><span class="icon-arrow-up"></span></a>{% endif %} {% if not loop.last %}<a class="folder-tools" title="Bajar carpeta" href=""><span class="icon-arrow-down"></span></a>{% endif %}</small>{% endif %}
+        </h2>
         {% if buttons and top_buttons %}
         {% include 'folder_buttons.html.twig' %}
         {% endif %}

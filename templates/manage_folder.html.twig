@@ -1,0 +1,110 @@
+{#  ATICA - Web application for supporting Quality Management Systems
+    Copyright (C) 2009-2013: Luis-Ramón López López
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
+
+{% extends "tree.html.twig" %}
+{% block stylesheets %}
+ <link rel="stylesheet" href="lib/select2/select2.css">
+{% endblock %}
+{% block scripts %}
+<script src="lib/select2/select2.min.js"></script>
+<script src="lib/select2/select2_locale_es.js"></script>
+<script>
+    $(document).ready(function() { $(".select").select2(); });
+</script>
+{% endblock %}
+{% block maincontent %}
+<div class="panel panel-info">
+    <div class="panel-heading">
+    <h1>Gestionar carpeta: {{ folder['display_name'] }}</h1>
+    </div>
+    {% if folder['description'] %}<div class="panel-body"><h4>{{  folder['description'] | nl2br }}</h4></div>{% endif %}
+</div>
+<div class="panel panel-default">
+    <div class="panel-body">
+        <form class="form-horizontal" role="form" method="post" action="{{ url }}">
+            <div class="form-group">
+                <label for="category" class="col-md-2 control-label">Pertenece a</label>
+                <select class="select col-md-10" id="category" name="category">
+                    {% for categories in data %}
+                    <optgroup label="{{ categories.info.display_name }}">
+                        {% for category in categories.data %}
+                        <option value="{{ category['id'] }}" {% if category['id'] == folder['category_id'] %} selected {% endif %}>{{ category['display_name'] }}</option>
+                        {% endfor %}
+                    </optgroup>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="displayname" class="col-md-2 control-label">Nombre de la carpeta</label>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" name="displayname" id="displayname" placeholder="Nombre de la carpeta que se mostrará" value="{{ folder.display_name }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="description" class="col-md-2 control-label">Más información</label>
+                <div class="col-md-10">
+                    <textarea class="form-control" name="description" id="description" rows="3" placeholder="Descripción del contenido de la carpeta e instrucciones de uso"></textarea>
+                </div>
+            </div>                
+            <div class="form-group">
+                <label class="col-md-2 control-label">Visible</label>
+                <div class="col-md-10">
+                    <label class="radio-inline"><input type="radio" name="visible" value="0" {{folder.is_visible ? '' : ' checked="checked"' }}> Oculta</label>
+                    <label class="radio-inline"><input type="radio" name="visible" value="1" {{folder.is_visible ? ' checked="checked"' : ''}}> Visible</label>
+                </div>
+            </div>                
+            <div class="form-group">
+                <label class="col-md-2 control-label">Almacenar perfil en envío</label>
+                <div class="col-md-10">
+                    <label class="radio-inline"><input type="radio" name="divided" value="0" {{folder.is_divided ? '' : ' checked="checked"' }}> No</label>
+                    <label class="radio-inline"><input type="radio" name="divided" value="1" {{folder.is_divided ? ' checked="checked"' : ''}}> Sí, se organizan por perfil</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label">Mostrar nº de revisión</label>
+                <div class="col-md-10">
+                    <label class="radio-inline"><input type="radio" name="revisionnr" value="0" {{folder.show_revision_nr ? '' : ' checked="checked"' }}> No</label>
+                    <label class="radio-inline"><input type="radio" name="revisionnr" value="1" {{folder.show_revision_nr ? ' checked="checked"' : ''}}> Sí</label>
+                </div>
+            </div>    
+            <div class="form-group">
+                <label class="col-md-2 control-label">Al comenzar un nuevo curso</label>
+                <div class="col-md-10">
+                    <label class="radio-inline"><input type="radio" name="autoclean" value="0" {{folder.show_revision_nr ? '' : ' checked="checked"' }}> No cambiar el contenido</label>
+                    <label class="radio-inline"><input type="radio" name="autoclean" value="1" {{folder.show_revision_nr ? ' checked="checked"' : ''}}> Vaciar las entregas</label>
+                </div>
+            </div>    
+            <div class="form-group">
+                <label for="managers" class="col-md-2 control-label">Responsables</label>
+                <select class="select col-md-10" multiple id="managers" name="managers[]">
+                    {% for profile in allProfiles %}
+                    <option value="{{ profile['id'] }}" {% if managers[profile['id']] %} selected {% endif %}>{{ profile['display_name_neutral'] }}{% if profile['display_name'] %} ({{ profile['display_name'] }}){% endif %}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="uploaders" class="col-md-2 control-label">Pueden entregar</label>
+                <select class="select col-md-10" multiple id="uploaders" name="uploaders[]">
+                     {% for profile in allProfiles %}
+                    <option value="{{ profile['id'] }}" {% if uploaders[profile['id']] %} selected {% endif %}>{{ profile['display_name_neutral'] }}{% if profile['display_name'] %} ({{ profile['display_name'] }}){% endif %}</option>
+                    {% endfor %}
+                </select>
+            </div>                
+            <button type="submit" name="savefolder" class="btn btn-success">{{ folder.new ? 'Crear carpeta' : 'Guardar cambios' }}</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -208,6 +208,14 @@ footer {
     text-decoration: none;
 }
 
+.folder-tools {
+    color: #888;
+}
+
+.folder-tools:hover {
+    text-decoration: none;
+}
+
 @keyframes flashing {
     from {
         opacity: 1;
