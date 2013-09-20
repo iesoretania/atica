@@ -291,7 +291,7 @@ $app->map('/perfiles(/:filter)', function ($filter = 1) use ($app, $user, $organ
     ));
     
     // lanzar plantilla
-    $app->render('profiles.html.twig', array(
+    $app->render('manage_profiles.html.twig', array(
         'navigation' => $breadcrumb,
         'sidebar' => $sidebar,
         'filter' => $filter,
