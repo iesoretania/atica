@@ -91,8 +91,8 @@
                 <div class="col-lg-6">
                     <select class="form-control select" name="element{{ loop.index }}">
                     <option value="0">No entregar, descartar este documento</option>
-                    {% for i in deliveries %}
-                        {% if i.c == 0 %}<option value="{{ i.id }}">{{ i.display_name }}</option>{% endif %}
+                    {% for i in deliveries if i.c == 0 %}
+                        <option value="{{ i.id }}">{{ i.display_name }}</option>
                     {% endfor %}
                     </select>
                 </div>

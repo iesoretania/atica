@@ -15,7 +15,16 @@
     along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
 
 {% extends "layout.html.twig" %}
-
+{% block stylesheets %}
+ <link rel="stylesheet" href="lib/select2/select2.css">
+{% endblock %}
+{% block scripts %}
+<script src="lib/select2/select2.min.js"></script>
+<script src="lib/select2/select2_locale_es.js"></script>
+<script>
+    $(document).ready(function() { $(".select").select2(); });
+</script>
+{% endblock %}
 {% block maincontent %}
 <div class="panel panel-info">
     <div class="panel-heading">
@@ -26,19 +35,27 @@
 {% endif %}
     </div>
     <div class="panel-body">
-{% if local %}
+    {% if local and not user['is_admin'] %}
         <h3>Por favor, tómate unos minutos para asegurarte de que los datos de la aplicación son correctos</h3>
-{% endif %}
+        <h4>Estos son los perfiles asociados al usuario que aparecen en la base de datos:</h4>
+        <ul>
+            {% for profile in profiles %}
+            <li>{{ [profile['display_name_neutral'], profile['display_name_male'], profile['display_name_female']][userData['gender']] }}{% if profile['display_name'] %} ({{ profile['display_name'] }}){% endif %}</li>
+            {% else %}
+            <li>No hay ningún perfil registrado</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <h4>Seleccione los perfiles del usuario</h4>
         <form class="form-horizontal" role="form" method="post" action="{{ url }}">
-            {% if profiles %}
-            <h4>Estos son los perfiles asociados al usuario que aparecen en la base de datos:</h4>
-            <ul>
-                {% for profile in profiles %}
-                <li>{{ [profile['display_name_neutral'], profile['display_name_male'], profile['display_name_female']][userData['gender']] }}{% if profile['display_name'] %} ({{ profile['display_name'] }}){% endif %}</li>
+            <select class="form-control select" multiple id="profiles" name="profiles[]">
+                {% for profile in allProfiles %}
+                <option value="{{ profile['id'] }}" {% if profiles[profile['id']] %} selected {% endif %}>{{ [profile['display_name_neutral'], profile['display_name_male'], profile['display_name_female']][userData['gender']] }}{% if profile['display_name'] %} ({{ profile['display_name'] }}){% endif %}</option>
                 {% endfor %}
-            </ul>
-            {% endif %}
+            </select><br />
+            <button type="submit" name="saveprofiles" class="btn btn-primary">Guardar los cambios</button>
         </form>
+    {% endif %}        
     </div>
 </div>
 {% endblock %}

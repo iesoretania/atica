@@ -150,6 +150,18 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
             $app->redirect($app->urlFor('personal', array('id' => $id, 'section' => 0)));
         }
     }
+    
+    // cambio de perfiles
+    if ((isset($_POST['saveprofiles']) && ($user['is_admin']))) {
+        $ok = setUserProfiles($id, $_POST['profiles']);
+        if ($ok) {
+            $app->flash('save_ok', 'ok');
+        }
+        else {
+            $app->flash('save_error', 'error');
+        }
+        $app->redirect($app->urlFor('personal', array('id' => $id, 'section' => 1)));
+    }
 
     // menú lateral de secciones
     $menu = array(
@@ -202,12 +214,19 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
     if ($id != 0) {
         $sidebar[] = $menu;
         // lista perfiles del usuario
-        $profiles = getProfilesByUser($id);
+        $profiles = parseArray(getProfilesByUser($id));
     }
     else {
         $profiles = array();
     }
 
+    if ($user['is_admin']) {
+        $allProfiles = getProfilesByOrganization($organization['id']);
+    }
+    else {
+        $allProfiles = array();
+    }
+    
     // generar barra de navegación
     $breadcrumb = array(
         array('display_name' => 'Usuarios', 'target' => $app->urlFor('personal', array('id' => $user['id'], 'section' => 0))),
@@ -221,6 +240,7 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
         'url' => $app->request()->getPathInfo(),
         'userData' => $userData,
         'profiles' => $profiles,
+        'allProfiles' => $allProfiles,
         'local' => $itsMe
     ));
 })->name('personal')->via('GET', 'POST')->
@@ -232,11 +252,7 @@ $app->map('/listado(/:sort(/:filter))', function ($sort = 0, $filter = 1) use ($
     }
     $sidebar = getPersonManagementSidebar(1, $app);
     
-    $filterArray = array();
-    if ($filter) {
-        $filterArray['person_organization.is_active'] = 1;
-    }
-    $persons = getOrganizationPersons($organization['id'], $sort, $filterArray);
+    $persons = getOrganizationPersons($organization['id'], $sort, $filter);
     
     // generar barra de navegación
     $breadcrumb = array(
@@ -358,7 +374,7 @@ function getPersonManagementSidebar($section, $app) {
     );
 }
 
-function getOrganizationPersons($orgId, $sortIndex = 0, $filter = false) {
+function getOrganizationPersons($orgId, $sortIndex = 0, $filter = true) {
     $fields = array('user_name', 'first_name', 'email', 'last_login',
         'last_name', 'gender', 'email_enabled',
         'person_organization.is_local_administrator', 'is_global_administrator');
@@ -372,17 +388,18 @@ function getOrganizationPersons($orgId, $sortIndex = 0, $filter = false) {
             order_by_asc($fields[$sortIndex]);
     
     if ($filter) {
-        foreach ($filter as $key => $condition) {
-            $data = $data->where($key, $condition);
-        }
+        $data = $data->where('person_organization.is_active', 1);
     }
+    
     return $data->find_many();
 }
 
-function getProfilesByOrganization($orgId, $filter = false) {
+function getProfilesByOrganization($orgId, $filter = true) {
     $data = ORM::for_table('profile')->
             select('profile.*')->
             select('profile_group.display_name_neutral')->
+            select('profile_group.display_name_male')->
+            select('profile_group.display_name_female')->
             select('profile_group.abbreviation')->
             inner_join('profile_group', array('profile_group.id', '=', 'profile.profile_group_id'))->
             where('profile_group.organization_id', $orgId)->
@@ -390,10 +407,24 @@ function getProfilesByOrganization($orgId, $filter = false) {
             order_by_asc('profile.display_name');
     
     if ($filter) {
-        foreach ($filter as $key => $condition) {
-            $data = $data->where($key, $condition);
-        }
+        //$data = $data->where('profile.is_active', 1);
     }
     
     return $data->find_many();
+}
+
+function setUserProfiles($userId, $profiles) {
+    ORM::get_db()->beginTransaction();
+    $query = ORM::for_table('person_profile')->
+            where('person_id', $userId)->
+            delete_many();
+    
+    foreach ($profiles as $profile) {
+        $insert = ORM::for_table('person_profile')->create();
+        $insert->set('person_id', $userId);
+        $insert->set('profile_id', $profile);
+        $insert->save();
+    }
+    
+    return ORM::get_db()->commit();
 }
