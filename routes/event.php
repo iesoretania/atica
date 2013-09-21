@@ -121,7 +121,7 @@ $app->map('/evento/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $user, 
     
     if ($folder && isset($folder['id'])) {
         $profileGender = array();
-        $data = getParsedFolderById($folder['id'], $profileGender);
+        $data = getParsedFolderById($organization['id'], $folder['id'], $profileGender);
         $folderProfiles = getProfilesByFolderId($folder['id']);
         $folders = getFoldersById($folder['id'], $user);
         $persons = getFolderPersonsByFolderId($folder['id']);
@@ -184,13 +184,13 @@ function getDeliveriesFromEvent($eventId) {
     return $data;
 }
 
-function getParsedFolderById($folderId, &$profileGender) {
+function getParsedFolderById($orgId, $folderId, &$profileGender, $filter = true) {
 
-    $data = getParsedFolders()->
-            where('folder.id', $folderId)->
-            find_many();
-
-    return parseFolders($data, $profileGender);
+    $folders = getFoldersByOrganization($orgId, $filter)->
+                where('id', $folderId)->
+                find_array();
+    
+    return getDeliveriesFromFolders($folders, $profileGender);
 }
 
 function getFoldersById($folderId) {
