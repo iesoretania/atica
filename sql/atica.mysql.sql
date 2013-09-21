@@ -102,6 +102,7 @@ CREATE TABLE delivery (
   description text,
   creation_date datetime NOT NULL,
   current_revision_id int(11) unsigned DEFAULT NULL,
+  is_visible tinyint(1) unsigned NOT NULL DEFAULT '1',
   public_token varchar(45) DEFAULT NULL,
   item_id int(11) unsigned DEFAULT NULL,
   PRIMARY KEY (id),
@@ -136,6 +137,7 @@ CREATE TABLE "event" (
   organization_id int(11) unsigned NOT NULL,
   display_name varchar(255) NOT NULL,
   description text,
+  folder_id int(11) unsigned DEFAULT NULL,
   from_week int(11) unsigned DEFAULT NULL,
   to_week int(11) unsigned DEFAULT NULL,
   period_description varchar(255) DEFAULT NULL,
@@ -143,7 +145,8 @@ CREATE TABLE "event" (
   is_manual tinyint(1) unsigned NOT NULL DEFAULT '1',
   is_visible tinyint(1) unsigned NOT NULL DEFAULT '1',
   PRIMARY KEY (id),
-  KEY event_organization_id_fk (organization_id)
+  KEY event_organization_id_fk (organization_id),
+  KEY event_folder_id_fk (folder_id)
 );
 
 CREATE TABLE event_delivery (
@@ -153,16 +156,6 @@ CREATE TABLE event_delivery (
   PRIMARY KEY (event_id,delivery_id),
   KEY event_delivery_event_id_fk (event_id),
   KEY event_delivery_delivery_id_fk (delivery_id)
-);
-
-CREATE TABLE event_folder (
-  event_id int(11) unsigned NOT NULL,
-  folder_id int(11) unsigned NOT NULL,
-  description text,
-  is_mandatory tinyint(1) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (event_id,folder_id),
-  KEY event_folder_event_id_fk (event_id),
-  KEY event_folder_folder_id_fk (folder_id)
 );
 
 CREATE TABLE event_profile (
@@ -191,6 +184,7 @@ CREATE TABLE folder (
   description text,
   is_divided tinyint(1) unsigned NOT NULL DEFAULT '0',
   is_visible tinyint(1) unsigned NOT NULL DEFAULT '1',
+  is_restricted tinyint(1) unsigned NOT NULL DEFAULT '0',
   has_snapshot tinyint(1) unsigned NOT NULL DEFAULT '0',
   filter varchar(255) DEFAULT NULL,
   filter_description text,
@@ -357,7 +351,7 @@ CREATE TABLE person_profile (
 
 CREATE TABLE "profile" (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
-  profile_group_id int(11) unsigned NOT NULL,
+  profile_group_id int(11) unsigned DEFAULT NULL,
   order_nr int(11) unsigned NOT NULL,
   display_name varchar(255) DEFAULT '',
   description text,
@@ -463,18 +457,15 @@ ALTER TABLE `delivery`
 ALTER TABLE `document`
   ADD CONSTRAINT document_document_data_fk FOREIGN KEY (document_data_id) REFERENCES document_data (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
   ADD CONSTRAINT document_extension_fk FOREIGN KEY (extension_id) REFERENCES file_extension (id),
-  ADD CONSTRAINT document_revision_id_fk FOREIGN KEY (revision_id) REFERENCES revision (id) ON DELETE CASCADE;
+  ADD CONSTRAINT document_ibfk_3 FOREIGN KEY (revision_id) REFERENCES revision (id) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 ALTER TABLE `event`
+  ADD CONSTRAINT event_ibfk_1 FOREIGN KEY (folder_id) REFERENCES folder (id) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT event_organization_id_fk FOREIGN KEY (organization_id) REFERENCES organization (id);
 
 ALTER TABLE `event_delivery`
   ADD CONSTRAINT event_delivery_delivery_id_fk FOREIGN KEY (delivery_id) REFERENCES delivery (id) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT event_delivery_event_id_fk FOREIGN KEY (event_id) REFERENCES event (id) ON DELETE CASCADE ON UPDATE CASCADE;
-
-ALTER TABLE `event_folder`
-  ADD CONSTRAINT event_folder_event_id_fk FOREIGN KEY (event_id) REFERENCES event (id) ON UPDATE CASCADE,
-  ADD CONSTRAINT event_folder_folder_id_fk FOREIGN KEY (folder_id) REFERENCES folder (id) ON UPDATE CASCADE;
 
 ALTER TABLE `event_profile`
   ADD CONSTRAINT event_profile_group_event_id_fk FOREIGN KEY (event_id) REFERENCES event (id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -533,7 +524,7 @@ ALTER TABLE `profile_group`
 
 ALTER TABLE `revision`
   ADD CONSTRAINT revision_delivery_id_fk FOREIGN KEY (delivery_id) REFERENCES delivery (id) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT revision_ibfk_1 FOREIGN KEY (original_document_id) REFERENCES document (id) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT revision_ibfk_7 FOREIGN KEY (original_document_id) REFERENCES document (id) ON DELETE SET NULL ON UPDATE SET NULL,
   ADD CONSTRAINT revision_uploader_person_id_fk FOREIGN KEY (uploader_person_id) REFERENCES person (id) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `revision_comment`
@@ -545,6 +536,7 @@ ALTER TABLE `session`
 
 ALTER TABLE `snapshot`
   ADD CONSTRAINT snapshot_organization_id_fk FOREIGN KEY (organization_id) REFERENCES organization (id) ON DELETE CASCADE ON UPDATE CASCADE;
+SET FOREIGN_KEY_CHECKS=1;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
