@@ -28,7 +28,7 @@
 {% block maincontent %}
 <div class="panel panel-info">
     <div class="panel-heading">
-    <h1>Gestionar carpeta: {{ folder['display_name'] }}</h1>
+    <h1>{{ new ? 'Nueva carpeta' : 'Gestionar carpeta: ' ~ folder['display_name'] }}</h1>
     </div>
     {% if folder['description'] %}<div class="panel-body"><h4>{{  folder['description'] | nl2br }}</h4></div>{% endif %}
 </div>

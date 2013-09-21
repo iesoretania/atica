@@ -111,7 +111,7 @@ $app->get('/descargar/:kind/:cid/:id/(:p1/)(:p2/)', function ($kind, $cid, $id, 
     readfile($file);
 })->name('download');
 
-$app->map('/carpeta/:id', function ($id) use ($app, $user, $organization) {
+$app->map('/carpeta/:id(/:catid)', function ($id, $catid = NULL) use ($app, $user, $organization) {
     if (!$user) {
         $app->redirect($app->urlFor('login'));
     }
@@ -128,7 +128,9 @@ $app->map('/carpeta/:id', function ($id) use ($app, $user, $organization) {
         ORM::get_db()->beginTransaction();
         
         if ($id == 0) {
-            $local = ORM::for_table('person')->create();
+            $order = getMaxFolderOrder($_POST['category']) + 1000;
+            $local = ORM::for_table('folder')->create();
+            $local->set('order_nr', $order);
         }
         else {
             $local = getFolderObjectById($id);
@@ -140,7 +142,9 @@ $app->map('/carpeta/:id', function ($id) use ($app, $user, $organization) {
         $local->set('is_divided', $_POST['divided']);
         $local->set('show_revision_nr', $_POST['revisionnr']);
         $local->set('auto_clean', $_POST['autoclean']);
+        
         if ($local->save()) {
+            $id = $local['id'];
             $ok = true;
             if (isset($_POST['managers'])) {
                 $ok = $ok && setFolderProfiles($id, 0, $_POST['managers']);
@@ -167,7 +171,24 @@ $app->map('/carpeta/:id', function ($id) use ($app, $user, $organization) {
     
     $folder = getFolder($id);
     
-    $sidebar = getTree($organization['id'], $app, $folder['category_id'], $category, $parent);
+    if (!$folder) {
+        // valores por defecto de las carpetas nuevas
+        $folder = array();
+        $folder['is_visible'] = 1;
+        $folder['category_id'] = $catid;
+    }
+    
+    if (NULL == $catid) {
+        $catid = $folder['category_id'];
+    }
+    
+    $query = getCategoryObjectById($organization['id'], $catid);
+    if (!$query) {
+        // error, no existe la categoría en la organización, posible
+        // intento de ataque
+        $app->redirect($app->urlFor('frontpage'));
+    }    
+    $sidebar = getTree($organization['id'], $app, $catid, $category, $parent);
 
     $breadcrumb = array(
         array('display_name' => 'Árbol', 'target' => $app->urlFor('tree')),
@@ -181,6 +202,7 @@ $app->map('/carpeta/:id', function ($id) use ($app, $user, $organization) {
         'category' => $category,
         'url' => $app->request()->getPathInfo(),
         'data' => $data,
+        'new' => ($id == 0),
         'allProfiles' => $allProfiles,
         'uploaders' => $uploadProfiles,
         'managers' => $managerProfiles,
@@ -389,7 +411,7 @@ return ORM::for_table('folder')->
 }
 
 function getFolder($folderId) {
-    if (NULL == $folderId) {
+    if ((NULL == $folderId) || (0 == $folderId)) {
         return false;
     }
     return getFolderObjectById($folderId)->as_array();
@@ -447,4 +469,17 @@ function setFolderProfiles($folderId, $permission, $profiles) {
     }
     
     return $ok;
+}
+
+function getCategoryObjectById($orgId, $catId) {
+    return ORM::for_table('category')->
+            where('organization_id', $orgId)->
+            where('id', $catId)->
+            find_one();
+}
+
+function getMaxFolderOrder($catId) {
+    return ORM::for_table('folder')->
+            where('category_id', $catId)->
+            max('order_nr');
 }
