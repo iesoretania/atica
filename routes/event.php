@@ -42,7 +42,7 @@ $app->map('/evento/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $user, 
     }
     
     // obtener carpeta
-    $folder = getFolder($event['folder_id']);
+    $folder = getFolder($organization['id'], $event['folder_id']);
     
     // obtener entregas asociadas
     $deliveries = getDeliveriesFromEvent($id);

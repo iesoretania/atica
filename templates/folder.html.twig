@@ -4,7 +4,7 @@
 <div class="panel panel-default">
     <div class="panel-heading">
         <h2>{{ info['display_name'] }}
-            {% if user['is_admin'] %}&nbsp;<small class="pull-right hidden-print"><a class="folder-tools" href="{{ urlFor('managefolder', { 'id': info.id })  }}"><span class="icon-cog"></span></a> {% if not loop.first %}<a class="folder-tools" title="Subir carpeta" href=""><span class="icon-arrow-up"></span></a>{% endif %} {% if not loop.last %}<a class="folder-tools" title="Bajar carpeta" href=""><span class="icon-arrow-down"></span></a>{% endif %}</small>{% endif %}
+            {% if user['is_admin'] %}&nbsp;<small class="pull-right hidden-print"><a class="folder-tools" href="{{ urlFor('managefolder', { 'id': info.id })  }}"><span class="icon-cog"></span></a> {% if not loop.first %}<a class="folder-tools" title="Subir carpeta" href="{{ urlFor('folderoperation', { 'id': info['id'], 'data': lastinfo['id'], 'oper': 'swap' }) }}"><span class="icon-arrow-up"></span></a>{% endif %} {% if not loop.last %}<a class="folder-tools" title="Bajar carpeta" href="{{  urlFor('folderoperation', { 'id': info['id'], 'oper': 'swapnext' }) }}"><span class="icon-arrow-down"></span></a>{% endif %}</small>{% endif %}
         </h2>
         {% if buttons and top_buttons %}
         {% include 'folder_buttons.html.twig' %}
@@ -40,6 +40,12 @@
                 <td>{% if info['show_revision_nr'] %}{{ delivery['revision_nr'] ~ ' ('}}{% endif %}<abbr title="{{ delivery.upload_date | date('Y/m/d G:i') }}">{{ delivery.upload_date | date('Y/m/d') }}</abbr>{% if info['show_revision_nr'] %}){% endif %}</td>
                 <td><a href="{{ urlFor('personal', { 'id': personId, 'section': 0 }) }}">{{ persons[personId]['display_name']}}</a></td>
             </tr>
+            {% else %}
+            <tr class="warning">
+                <td colspan="3">
+                    Aún no hay documentos registrados
+                </td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
@@ -49,4 +55,5 @@
     </div>
     {% endif %}
 </div>
+{% set lastinfo = info %}
 {% endfor %}

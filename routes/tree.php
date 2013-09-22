@@ -40,11 +40,11 @@ $app->get('/arbol(/:id)', function ($id = NULL) use ($app, $user, $organization)
         $persons = getFolderPersonsByCategory($id);
         $folderProfiles = getProfilesByCategory($id);
 
-    $breadcrumb = array(
-        array('display_name' => 'Árbol', 'target' => $app->urlFor('tree')),
-        array('display_name' => $parent['display_name'], 'target' => $app->urlFor('tree')),
-            array('display_name' => $category['display_name'])
-    );
+        $breadcrumb = array(
+            array('display_name' => 'Árbol', 'target' => $app->urlFor('tree')),
+            array('display_name' => $parent['display_name'], 'target' => $app->urlFor('tree')),
+                array('display_name' => $category['display_name'])
+        );
     }
     else {
         $breadcrumb = array(
@@ -134,7 +134,7 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = NULL) use ($app, $use
             $local->set('order_nr', $order);
         }
         else {
-            $local = getFolderObjectById($id);
+            $local = getFolderObjectById($organization['id'], $id);
         }
         $local->set('category_id', $_POST['category']);
         $local->set('display_name', $_POST['displayname']);
@@ -174,7 +174,7 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = NULL) use ($app, $use
         $app->redirect($app->request()->getPathInfo());
     }
     
-    $folder = getFolder($id);
+    $folder = getFolder($organization['id'], $id);
     
     if (!$folder) {
         // valores por defecto de las carpetas nuevas
@@ -214,6 +214,39 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = NULL) use ($app, $use
         'restricted' => $restrictedProfiles,
         'folder' => $folder));
 })->name('managefolder')->via('GET', 'POST');
+
+$app->get('/opcarpeta/:id/:oper(/:data)', function ($id, $oper, $data = NULL) use ($app, $user, $organization) {
+    if (!$user['is_admin']) {
+        $app->redirect($app->urlFor('login'));
+    }
+    
+    $folder = getFolderObjectById($organization['id'], $id);
+    
+    switch ($oper) {
+        case 'swap':
+            ORM::get_db()->beginTransaction();
+            $folder2 = getFolderObjectById($organization['id'], $data);
+            $tmpOrderNr = $folder2['order_nr'];
+            $folder2->set('order_nr', $folder['order_nr']);
+            $folder->set('order_nr', $tmpOrderNr);
+            $folder->save();
+            $folder2->save();
+            ORM::get_db()->commit();
+            break;
+        case 'swapnext':
+            ORM::get_db()->beginTransaction();
+            $folder2 = getNextFolderObject($folder);
+            $tmpOrderNr = $folder2['order_nr'];
+            $folder2->set('order_nr', $folder['order_nr']);
+            $folder->set('order_nr', $tmpOrderNr);
+            $folder->save();
+            $folder2->save();
+            ORM::get_db()->commit();
+            break;        
+    }
+    
+    $app->redirect($app->urlFor('tree', array('id' => $folder['category_id'])));
+})->name('folderoperation');
 
 function getTree($orgId, $app, $id, &$matchedCategory, &$parentCategory) {
     $return = array();
@@ -331,17 +364,20 @@ function getProfilesByCategory($category_id) {
             find_array());
 }
 
-function getFolderObjectById($folderId) {
+function getFolderObjectById($orgId, $folderId) {
 return ORM::for_table('folder')->
+            select('folder.*')->
+            inner_join('category', array('category.id', '=', 'folder.category_id'))->
+            where('category.organization_id', $orgId)->
             where('folder.id', $folderId)->
             find_one();
 }
 
-function getFolder($folderId) {
+function getFolder($orgId, $folderId) {
     if ((NULL == $folderId) || (0 == $folderId)) {
         return false;
     }
-    return getFolderObjectById($folderId)->as_array();
+    return getFolderObjectById($orgId, $folderId)->as_array();
 }
 
 function getCategories($orgId) {
@@ -460,6 +496,7 @@ function getDeliveriesFromFolders($folders, &$profileGender) {
     }
     return $return;
 }
+
 function getParsedDeliveriesByCategory($orgId, $catId, &$profileGender, $filter = true) {
     
     $folders = getFoldersByOrganization($orgId, $filter)->
@@ -467,4 +504,11 @@ function getParsedDeliveriesByCategory($orgId, $catId, &$profileGender, $filter 
                 find_array();
     
     return getDeliveriesFromFolders($folders, $profileGender);
+}
+
+function getNextFolderObject($folder) {
+    return ORM::for_table('folder')->
+            where('category_id', $folder['category_id'])->
+            where_gt('order_nr', $folder['order_nr'])->
+            find_one();
 }

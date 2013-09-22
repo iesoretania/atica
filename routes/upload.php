@@ -25,7 +25,7 @@ $app->get('/enviar/:id', function ($id) use ($app, $user, $config, $organization
     $category = array();
     $parent = array();
 
-    $folder = getFolder($id);
+    $folder = getFolder($organization['id'], $id);
     $uploadProfiles = parseArray(getPermissionProfiles($id, 1));
     $managerProfiles = parseArray(getPermissionProfiles($id, 0));
     $userProfiles = parseArray(getUserProfiles($user['id'], $organization['id'], true));
@@ -101,7 +101,7 @@ $app->post('/enviar/:id', function ($id) use ($app, $user, $preferences, $organi
     $items = array();
 
     // TODO: Comprobar si la carpeta es válida
-    $folder = getFolder($id);
+    $folder = getFolder($organization['id'], $id);
     
     // TODO: Comprobar perfil
     $profileIsSet = $folder['is_divided'];
@@ -176,7 +176,7 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
     }
     
     // TODO: Comprobar si la carpeta es válida
-    $folder = getFolder($id);
+    $folder = getFolder($organization['id'], $id);
     
     if (isset($_POST['discard'])) {
         // descartar envío: borrar archivos temporales

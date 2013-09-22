@@ -31,7 +31,7 @@ $app->map('/modificar/:folderid/:id', function ($folderId, $id) use ($app, $user
     $category = array();
     $parent = array();
 
-    $folder = getFolder($folderId);
+    $folder = getFolder($organization['id'], $folderId);
     $uploadProfiles = parseArray(getPermissionProfiles($folderId, 1));
     $managerProfiles = parseArray(getPermissionProfiles($folderId, 0));
     $userProfiles = parseArray(getUserProfiles($user['id'], $organization['id'], true));
