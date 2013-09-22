@@ -21,6 +21,11 @@
     <div class="panel-heading">
         <h1>Actividades{% if detail %}: {{ detail }}{% endif %}</h1>
     </div>
+    {% if user['is_admin'] and detail %}
+    <div class="panel-footer">
+        <a class="btn btn-warning" href="{{ urlFor('frontpage') }}">Crear nueva categoría de actividad</a>
+    </div>
+    {% endif %}
 </div>
 {% if events %}
 {% set now = (current-base+48) % 48 %}
@@ -31,10 +36,12 @@
     </div>
     {% for activity in profile.data %}
     <div class="panel-body">
-        <h3>{{ activity.info.activity_display_name }}</h3>
-        {% if activity.info.activity_description %}<small>{{ activity.info.activity_description | nl2br }}</small>{% endif %}
+        <h3>{{ activity.info.activity_display_name }}{% if user['is_admin'] %}&nbsp;<small class="pull-right hidden-print"><a class="folder-tools" href="{{ urlFor('frontpage') }}"><span class="icon-cog"></span></a></small>{% endif %}</h3>
+        {% if activity.info.activity_description %}<p>{{ activity.info.activity_description | nl2br }}</p>{% endif %}
+        {% if user['is_admin'] %}
+        <a class="btn btn-warning" href="{{ urlFor('frontpage') }}">Crear nueva actividad</a>
+        {% endif %}
     </div>
-
     <table class="table table-striped table-condensed table-hover">
         <thead>
             <tr>
@@ -44,13 +51,12 @@
             </tr>
         </thead>
         <tbody>
-
             {% for event in activity.data %}
             {% set from = (event.from_week-base+48) % 48 %}
             {% set to = (event.to_week-base+48) % 48 %}
             <tr {% if event.completed_date %}class="success"{% elseif (now>=from) and (now<=to) %}class="warning"{% elseif (now>=from) and (now>to) %}class="danger"{% endif %}>
                 <td>{{ event.period_description }} {{ parsePeriod(event.from_week, event.to_week, period_labels) }}</td>
-                <td><a href="{{ urlFor('event', { 'id': event.id, 'aid': activity.info.activity_id, 'pid': profile.info.profile_id }) }}">{{ event.display_name }}</a></td>
+                <td><a href="{{ urlFor('event', { 'id': event.id, 'aid': activity.info.activity_id, 'pid': profile.info.profile_id }) }}">{{ event.display_name }}</a>{% if user['is_admin'] %} <a class="delivery-tools hidden-print" title="Modificar actividad" href="{{ urlFor('manageevent', { 'id': event.id }) }}"><span class="icon-pencil"></span></a>{% endif %}</td>
                 <td>
                 {% if (event.is_automatic or event.is_manual) %}
                 {{ event.completed_date ? event.completed_date | date('Y-m-d') : 'Pendiente' }}

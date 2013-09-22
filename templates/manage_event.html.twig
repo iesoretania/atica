@@ -1,0 +1,147 @@
+{#  ATICA - Web application for supporting Quality Management Systems
+    Copyright (C) 2009-2013: Luis-Ramón López López
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
+
+{% extends "layout.html.twig" %}
+{% block stylesheets %}
+ <link rel="stylesheet" href="lib/select2/select2.css">
+{% endblock %}
+{% block scripts %}
+<script src="lib/select2/select2.min.js"></script>
+<script src="lib/select2/select2_locale_es.js"></script>
+<script>
+    $(document).ready(function() { $(".select").select2(); });
+</script>
+{% endblock %}
+{% block maincontent %}
+{% set fromweek = event.from_week % 4 %}
+{% set frommonth = event.from_week // 4 %}
+{% set toweek = event.to_week % 4 %}
+{% set tomonth = event.to_week // 4 %}
+{% set months = [ 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre' ] %}
+{% set weeks = [ '1ª semana', '2ª semana', '3ª semana', '4ª semana' ] %}
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <h1>{{ new ? 'Nueva actividad' : 'Modificar actividad' }}</h1>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-body">
+        <form class="form-horizontal" role="form" method="post" action="{{ url }}">
+            <div class="form-group">
+                <label for="category" class="col-md-2 control-label">Pertenece a</label>
+                <select class="select col-md-10" id="categories" multiple name="categories[]">
+                    {% for category in categories %}
+                        <option value="{{ category['id'] }}" {% if selectedCategories[category['id']] %} selected {% endif %}>{{ category['display_name'] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="displayname" class="col-md-2 control-label">Nombre de la actividad</label>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" name="displayname" id="displayname" placeholder="Nombre de la actividad que se mostrará" value="{{ event.display_name }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="description" class="col-md-2 control-label">Más información</label>
+                <div class="col-md-10">
+                    <textarea class="form-control" name="description" id="description" rows="8" placeholder="Descripción del contenido de la actividad e instrucciones de uso">{{ event.description }}</textarea>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="fromweek" class="col-md-2 control-label">Desde</label>
+                <select class="select col-md-3" id="fromweek" name="fromweek">
+                    {% for item in weeks %}
+                    <option value="{{ loop.index0 }}" {{ fromweek == loop.index0 ? 'selected' }}>{{ item }}</option>
+                    {% endfor %}
+                </select>
+                <select class="select col-md-4" id="frommonth" name="frommonth">
+                    {% for item in months %}
+                    <option value="{{ loop.index0 }}" {{ frommonth == loop.index0 ? 'selected' }}>{{ item }}</option>
+                    {% endfor %}
+                </select>                
+            </div>
+            <div class="form-group">
+                <label for="fromweek" class="col-md-2 control-label">Hasta</label>
+                <select class="select col-md-3" id="toweek" name="toweek">
+                    {% for item in weeks %}
+                    <option value="{{ loop.index0 }}" {{ toweek == loop.index0 ? 'selected' }}>{{ item }}</option>
+                    {% endfor %}
+                </select>
+                <select class="select col-md-4" id="tomonth" name="tomonth">
+                    {% for item in months %}
+                    <option value="{{ loop.index0 }}" {{ tomonth == loop.index0 ? 'selected' }}>{{ item }}</option>
+                    {% endfor %}
+                </select>                
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label">Visible</label>
+                <div class="col-md-10">
+                    <label class="radio-inline"><input type="radio" name="visible" value="0" {{event.is_visible ? '' : ' checked="checked"' }}> Oculta</label>
+                    <label class="radio-inline"><input type="radio" name="visible" value="1" {{event.is_visible ? ' checked="checked"' : ''}}> Visible</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label">Es automática</label>
+                <div class="col-md-10">
+                    <label class="radio-inline"><input type="radio" name="automatic" value="0" {{event.is_automatic ? '' : ' checked="checked"' }}> No</label>
+                    <label class="radio-inline"><input type="radio" name="automatic" value="1" {{event.is_automatic ? ' checked="checked"' : ''}}> Sí, se marcará automáticamente</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label">Es manual</label>
+                <div class="col-md-10">
+                    <label class="radio-inline"><input type="radio" name="manual" value="0" {{event.is_manual ? '' : ' checked="checked"' }}> No</label>
+                    <label class="radio-inline"><input type="radio" name="manual" value="1" {{event.is_manual ? ' checked="checked"' : ''}}> Sí, se puede marcar manualmente</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="managers" class="col-md-2 control-label">Perfiles asociados</label>
+                <select class="select col-md-10" multiple id="profiles" name="profiles[]">
+                    {% for profile in allProfiles %}
+                    <option value="{{ profile['id'] }}" {% if profiles[profile['id']] %} selected {% endif %}>{{ profile['display_name_neutral'] }}{% if profile['display_name'] %} ({{ profile['display_name'] }}){% endif %}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="deliveries" class="col-md-2 control-label">Entregas relacionadas</label>
+                <select class="select col-md-10" id="folder" multiple name="deliveries[]">
+                    {% for category in allDeliveries %}
+                    <optgroup label="{{ category.info.display_name }}">
+                        {% for delivery in category.data %}
+                        <option value="{{ delivery['id'] }}" {% if deliveries[delivery.id] %} selected {% endif %}>{{ delivery['display_name'] }}</option>
+                        {% endfor %}
+                    </optgroup>
+                    {% endfor %}
+                </select>
+            </div>                
+            <div class="form-group">
+                <label for="folder" class="col-md-2 control-label">Carpeta de entrega</label>
+                <select class="select col-md-10" id="folder" name="folder">
+                    <option value="0" {{ event['folder_id'] ? '' : 'selected' }}>Ninguna</option>
+                    {% for category in folders %}
+                    <optgroup label="{{ category.info.display_name }}">
+                        {% for folder in category.data %}
+                        <option value="{{ folder['id'] }}" {% if folder['id'] == event['folder_id'] %} selected {% endif %}>{{ folder['display_name'] }}</option>
+                        {% endfor %}
+                    </optgroup>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" name="saveevent" class="btn btn-success">{{ folder.new ? 'Crear actividad' : 'Guardar cambios' }}</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
