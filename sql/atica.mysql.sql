@@ -1,10 +1,4 @@
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
-
-
-CREATE TABLE "action" (
+CREATE TABLE IF NOT EXISTS "action" (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
   organization_id int(11) unsigned NOT NULL,
   action_type_id int(11) unsigned NOT NULL,
@@ -24,14 +18,14 @@ CREATE TABLE "action" (
   KEY action_action_type_id (action_type_id)
 );
 
-CREATE TABLE action_type (
+CREATE TABLE IF NOT EXISTS action_type (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
   display_name varchar(255) NOT NULL,
   description text,
   PRIMARY KEY (id)
 );
 
-CREATE TABLE activity (
+CREATE TABLE IF NOT EXISTS activity (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
   organization_id int(11) unsigned NOT NULL,
   display_name varchar(255) NOT NULL,
@@ -40,7 +34,7 @@ CREATE TABLE activity (
   KEY activity_organization_id_fk (organization_id)
 );
 
-CREATE TABLE activity_event (
+CREATE TABLE IF NOT EXISTS activity_event (
   activity_id int(11) unsigned NOT NULL,
   event_id int(11) unsigned NOT NULL,
   order_nr int(11) unsigned NOT NULL,
@@ -49,7 +43,7 @@ CREATE TABLE activity_event (
   KEY activity_event_activity_id_fk (activity_id)
 );
 
-CREATE TABLE activity_profile (
+CREATE TABLE IF NOT EXISTS activity_profile (
   activity_id int(11) unsigned NOT NULL,
   profile_id int(11) unsigned NOT NULL,
   PRIMARY KEY (activity_id,profile_id),
@@ -57,7 +51,7 @@ CREATE TABLE activity_profile (
   KEY activity_profile_profile_id_fk (profile_id)
 );
 
-CREATE TABLE category (
+CREATE TABLE IF NOT EXISTS category (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
   organization_id int(11) unsigned NOT NULL,
   category_left int(11) unsigned DEFAULT NULL,
@@ -70,7 +64,7 @@ CREATE TABLE category (
   KEY category_organization_id_fk (organization_id)
 );
 
-CREATE TABLE completed_event (
+CREATE TABLE IF NOT EXISTS completed_event (
   event_id int(11) unsigned NOT NULL,
   person_id int(11) unsigned NOT NULL,
   completed_date date NOT NULL,
@@ -79,7 +73,7 @@ CREATE TABLE completed_event (
   KEY completed_event_person_id_fk (person_id)
 );
 
-CREATE TABLE configuration (
+CREATE TABLE IF NOT EXISTS configuration (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
   item_id varchar(255) NOT NULL,
   organization_id int(11) unsigned DEFAULT NULL,
@@ -95,7 +89,7 @@ CREATE TABLE configuration (
   KEY configuration_organization_id_fk (organization_id)
 );
 
-CREATE TABLE delivery (
+CREATE TABLE IF NOT EXISTS delivery (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
   profile_id int(11) unsigned DEFAULT NULL,
   display_name varchar(255) NOT NULL,
@@ -111,7 +105,7 @@ CREATE TABLE delivery (
   KEY delivery_item_id_fk (item_id)
 );
 
-CREATE TABLE document (
+CREATE TABLE IF NOT EXISTS document (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
   revision_id int(11) unsigned NOT NULL,
   download_filename varchar(255) NOT NULL,
@@ -123,7 +117,7 @@ CREATE TABLE document (
   KEY document_document_data_fk (document_data_id)
 );
 
-CREATE TABLE document_data (
+CREATE TABLE IF NOT EXISTS document_data (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
   download_path varchar(255) DEFAULT NULL,
   download_filesize int(11) unsigned DEFAULT NULL,
@@ -132,7 +126,7 @@ CREATE TABLE document_data (
   PRIMARY KEY (id)
 );
 
-CREATE TABLE "event" (
+CREATE TABLE IF NOT EXISTS "event" (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
   organization_id int(11) unsigned NOT NULL,
   display_name varchar(255) NOT NULL,
@@ -149,7 +143,7 @@ CREATE TABLE "event" (
   KEY event_folder_id_fk (folder_id)
 );
 
-CREATE TABLE event_delivery (
+CREATE TABLE IF NOT EXISTS event_delivery (
   event_id int(11) unsigned NOT NULL,
   delivery_id int(11) unsigned NOT NULL,
   description text,
@@ -158,7 +152,7 @@ CREATE TABLE event_delivery (
   KEY event_delivery_delivery_id_fk (delivery_id)
 );
 
-CREATE TABLE event_profile (
+CREATE TABLE IF NOT EXISTS event_profile (
   event_id int(11) unsigned NOT NULL,
   profile_id int(11) unsigned NOT NULL,
   PRIMARY KEY (event_id,profile_id),
@@ -166,7 +160,7 @@ CREATE TABLE event_profile (
   KEY event_profile_profile_id (profile_id)
 );
 
-CREATE TABLE file_extension (
+CREATE TABLE IF NOT EXISTS file_extension (
   id varchar(45) NOT NULL,
   mime varchar(255) NOT NULL,
   display_name varchar(255) NOT NULL,
@@ -176,7 +170,7 @@ CREATE TABLE file_extension (
   PRIMARY KEY (id)
 );
 
-CREATE TABLE folder (
+CREATE TABLE IF NOT EXISTS folder (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
   category_id int(11) unsigned NOT NULL,
   order_nr int(11) unsigned NOT NULL,
@@ -197,7 +191,7 @@ CREATE TABLE folder (
   KEY folder_category_id_fk_idx (category_id)
 );
 
-CREATE TABLE folder_delivery (
+CREATE TABLE IF NOT EXISTS folder_delivery (
   folder_id int(11) unsigned NOT NULL,
   delivery_id int(11) unsigned NOT NULL,
   order_nr int(11) unsigned NOT NULL,
@@ -208,7 +202,7 @@ CREATE TABLE folder_delivery (
   KEY folder_delivery_snapshot_id_fk_idx (snapshot_id)
 );
 
-CREATE TABLE folder_permission (
+CREATE TABLE IF NOT EXISTS folder_permission (
   folder_id int(11) unsigned NOT NULL,
   profile_id int(11) unsigned NOT NULL,
   permission tinyint(4) NOT NULL,
@@ -218,7 +212,7 @@ CREATE TABLE folder_permission (
   KEY folder_permission_permission (permission)
 );
 
-CREATE TABLE folder_profile_delivery_item (
+CREATE TABLE IF NOT EXISTS folder_profile_delivery_item (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
   profile_id int(11) unsigned NOT NULL,
   folder_id int(11) unsigned NOT NULL,
@@ -232,7 +226,7 @@ CREATE TABLE folder_profile_delivery_item (
   KEY folder_profile_delivery_item_folder_id_fk_idx (id)
 );
 
-CREATE TABLE grouping (
+CREATE TABLE IF NOT EXISTS grouping (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
   organization_id int(11) unsigned NOT NULL,
   grouping_left int(11) unsigned NOT NULL,
@@ -246,7 +240,7 @@ CREATE TABLE grouping (
   KEY grouping_organization_id_fk (organization_id)
 );
 
-CREATE TABLE grouping_folder (
+CREATE TABLE IF NOT EXISTS grouping_folder (
   grouping_id int(11) unsigned NOT NULL,
   folder_id int(11) unsigned NOT NULL,
   order_nr int(11) unsigned NOT NULL DEFAULT '0',
@@ -256,7 +250,7 @@ CREATE TABLE grouping_folder (
   KEY activity_folder_folder_id_fk (folder_id)
 );
 
-CREATE TABLE grouping_profile (
+CREATE TABLE IF NOT EXISTS grouping_profile (
   grouping_id int(11) unsigned NOT NULL,
   profile_id int(11) unsigned NOT NULL,
   PRIMARY KEY (grouping_id,profile_id),
@@ -264,7 +258,30 @@ CREATE TABLE grouping_profile (
   KEY grouping_profile_group_profile_group_id (profile_id)
 );
 
-CREATE TABLE non_conformance (
+CREATE TABLE IF NOT EXISTS log (
+  id int(11) unsigned NOT NULL AUTO_INCREMENT,
+  "time" datetime NOT NULL,
+  person_id int(11) unsigned NOT NULL,
+  ip varchar(45) NOT NULL,
+  organization_id int(11) unsigned NOT NULL,
+  module varchar(20) NOT NULL,
+  command int(11) unsigned NOT NULL,
+  "action" varchar(40) NOT NULL,
+  url varchar(255) NOT NULL,
+  info varchar(255) NOT NULL,
+  activity_id int(11) unsigned DEFAULT NULL,
+  event_id int(11) unsigned DEFAULT NULL,
+  grouping_id int(11) unsigned DEFAULT NULL,
+  folder_id int(11) unsigned DEFAULT NULL,
+  profile_id int(11) unsigned DEFAULT NULL,
+  delivery_id int(11) unsigned DEFAULT NULL,
+  revision_id int(11) unsigned DEFAULT NULL,
+  document_id int(11) unsigned DEFAULT NULL,
+  delivery_item_id int(11) unsigned DEFAULT NULL,
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS non_conformance (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
   organization_id int(11) unsigned NOT NULL,
   non_conformance_type_id int(11) unsigned NOT NULL,
@@ -283,14 +300,14 @@ CREATE TABLE non_conformance (
   KEY non_conformance_type_fk (non_conformance_type_id)
 );
 
-CREATE TABLE non_conformance_type (
+CREATE TABLE IF NOT EXISTS non_conformance_type (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
   display_name varchar(255) NOT NULL,
   description text,
   PRIMARY KEY (id)
 );
 
-CREATE TABLE organization (
+CREATE TABLE IF NOT EXISTS organization (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
   display_name varchar(65) NOT NULL,
   additional_info varchar(65) DEFAULT NULL,
@@ -300,7 +317,7 @@ CREATE TABLE organization (
   PRIMARY KEY (id)
 );
 
-CREATE TABLE person (
+CREATE TABLE IF NOT EXISTS person (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
   user_name varchar(50) NOT NULL,
   display_name varchar(255) NOT NULL,
@@ -323,7 +340,7 @@ CREATE TABLE person (
   PRIMARY KEY (id)
 );
 
-CREATE TABLE person_organization (
+CREATE TABLE IF NOT EXISTS person_organization (
   person_id int(11) unsigned NOT NULL,
   organization_id int(11) unsigned NOT NULL,
   is_active tinyint(1) unsigned NOT NULL DEFAULT '1',
@@ -333,7 +350,7 @@ CREATE TABLE person_organization (
   KEY person_organization_organization_id_fk (organization_id)
 );
 
-CREATE TABLE person_preferences (
+CREATE TABLE IF NOT EXISTS person_preferences (
   person_id int(11) unsigned NOT NULL,
   preference varchar(255) NOT NULL,
   "value" varchar(255) DEFAULT NULL,
@@ -341,7 +358,7 @@ CREATE TABLE person_preferences (
   KEY person_preferences_person_id_fk (person_id)
 );
 
-CREATE TABLE person_profile (
+CREATE TABLE IF NOT EXISTS person_profile (
   person_id int(11) unsigned NOT NULL,
   profile_id int(11) unsigned NOT NULL,
   PRIMARY KEY (person_id,profile_id),
@@ -349,7 +366,7 @@ CREATE TABLE person_profile (
   KEY person_profile_profile_fk (profile_id)
 );
 
-CREATE TABLE "profile" (
+CREATE TABLE IF NOT EXISTS "profile" (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
   profile_group_id int(11) unsigned DEFAULT NULL,
   order_nr int(11) unsigned NOT NULL,
@@ -359,7 +376,7 @@ CREATE TABLE "profile" (
   KEY profile_profile_group_id_fk (profile_group_id)
 );
 
-CREATE TABLE profile_group (
+CREATE TABLE IF NOT EXISTS profile_group (
   id int(11) unsigned NOT NULL,
   organization_id int(11) unsigned NOT NULL,
   display_name_male varchar(255) NOT NULL,
@@ -373,7 +390,7 @@ CREATE TABLE profile_group (
   KEY profile_group_id_fk_idx (id)
 );
 
-CREATE TABLE revision (
+CREATE TABLE IF NOT EXISTS revision (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
   delivery_id int(11) unsigned NOT NULL,
   revision_nr int(11) unsigned NOT NULL,
@@ -391,7 +408,7 @@ CREATE TABLE revision (
   KEY revision_original_document_id (original_document_id)
 );
 
-CREATE TABLE revision_comment (
+CREATE TABLE IF NOT EXISTS revision_comment (
   person_id int(11) unsigned NOT NULL,
   revision_id int(11) unsigned NOT NULL,
   role int(11) unsigned NOT NULL,
@@ -404,7 +421,7 @@ CREATE TABLE revision_comment (
   KEY revision_comment_revision_id_fk (revision_id)
 );
 
-CREATE TABLE "session" (
+CREATE TABLE IF NOT EXISTS "session" (
   id varchar(64) NOT NULL,
   person_id int(11) unsigned NOT NULL,
   expiration datetime NOT NULL,
@@ -412,7 +429,7 @@ CREATE TABLE "session" (
   KEY session_person_fk (person_id)
 );
 
-CREATE TABLE "snapshot" (
+CREATE TABLE IF NOT EXISTS "snapshot" (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
   organization_id int(11) unsigned NOT NULL,
   order_nr int(11) unsigned NOT NULL,
@@ -455,9 +472,9 @@ ALTER TABLE `delivery`
   ADD CONSTRAINT delivery_profile_id_fk FOREIGN KEY (profile_id) REFERENCES profile (id) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `document`
+  ADD CONSTRAINT document_ibfk_1 FOREIGN KEY (revision_id) REFERENCES revision (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
   ADD CONSTRAINT document_document_data_fk FOREIGN KEY (document_data_id) REFERENCES document_data (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  ADD CONSTRAINT document_extension_fk FOREIGN KEY (extension_id) REFERENCES file_extension (id),
-  ADD CONSTRAINT document_ibfk_3 FOREIGN KEY (revision_id) REFERENCES revision (id) ON DELETE NO ACTION ON UPDATE NO ACTION;
+  ADD CONSTRAINT document_extension_fk FOREIGN KEY (extension_id) REFERENCES file_extension (id);
 
 ALTER TABLE `event`
   ADD CONSTRAINT event_ibfk_1 FOREIGN KEY (folder_id) REFERENCES folder (id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -524,7 +541,7 @@ ALTER TABLE `profile_group`
 
 ALTER TABLE `revision`
   ADD CONSTRAINT revision_delivery_id_fk FOREIGN KEY (delivery_id) REFERENCES delivery (id) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT revision_ibfk_7 FOREIGN KEY (original_document_id) REFERENCES document (id) ON DELETE SET NULL ON UPDATE SET NULL,
+  ADD CONSTRAINT revision_orig_document_id_fk FOREIGN KEY (original_document_id) REFERENCES document (id) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT revision_uploader_person_id_fk FOREIGN KEY (uploader_person_id) REFERENCES person (id) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `revision_comment`
@@ -536,8 +553,3 @@ ALTER TABLE `session`
 
 ALTER TABLE `snapshot`
   ADD CONSTRAINT snapshot_organization_id_fk FOREIGN KEY (organization_id) REFERENCES organization (id) ON DELETE CASCADE ON UPDATE CASCADE;
-SET FOREIGN_KEY_CHECKS=1;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
