@@ -369,6 +369,7 @@ CREATE TABLE IF NOT EXISTS person_profile (
 CREATE TABLE IF NOT EXISTS "profile" (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
   profile_group_id int(11) unsigned DEFAULT NULL,
+  is_container tinyint(1) unsigned NOT NULL DEFAULT '0',
   order_nr int(11) unsigned NOT NULL,
   display_name varchar(255) DEFAULT '',
   description text,

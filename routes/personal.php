@@ -396,11 +396,12 @@ function getProfilesByOrganization($orgId, $filter = true) {
             select('profile_group.abbreviation')->
             inner_join('profile_group', array('profile_group.id', '=', 'profile.profile_group_id'))->
             where('profile_group.organization_id', $orgId)->
+            where('profile.is_container', 0)->
             order_by_asc('profile_group.display_name_neutral')->
             order_by_asc('profile.display_name');
     
     if ($filter) {
-        //$data = $data->where('profile.is_active', 1);
+        $data = $data->where('profile.is_active', 1);
     }
     
     return $data->find_many();
