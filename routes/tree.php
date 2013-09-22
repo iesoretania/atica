@@ -123,6 +123,7 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = NULL) use ($app, $use
     $allProfiles = getProfilesByOrganization($organization['id']);
     $uploadProfiles = parseArray(getPermissionProfiles($id, 1));
     $managerProfiles = parseArray(getPermissionProfiles($id, 0));
+    $restrictedProfiles = parseArray(getPermissionProfiles($id, 2));
     
     if ($user['is_admin'] && isset($_POST['savefolder'])) {
         ORM::get_db()->beginTransaction();
@@ -140,6 +141,7 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = NULL) use ($app, $use
         $local->set('description', strlen($_POST['description'])>0 ? $_POST['description'] : NULL);
         $local->set('is_visible', $_POST['visible']);
         $local->set('is_divided', $_POST['divided']);
+        $local->set('is_restricted', $_POST['restrictedaccess']);
         $local->set('show_revision_nr', $_POST['revisionnr']);
         $local->set('auto_clean', $_POST['autoclean']);
         
@@ -151,6 +153,9 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = NULL) use ($app, $use
             }
             if (isset($_POST['uploaders'])) {
                 $ok = $ok && setFolderProfiles($id, 1, $_POST['uploaders']);
+            }
+            if (isset($_POST['restricted'])) {
+                $ok = $ok && setFolderProfiles($id, 2, $_POST['restricted']);
             }
             if ($ok) {
                 $app->flash('save_ok', 'ok');
@@ -192,8 +197,8 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = NULL) use ($app, $use
 
     $breadcrumb = array(
         array('display_name' => 'Árbol', 'target' => $app->urlFor('tree')),
-        array('display_name' => $parent['display_name'], 'target' => $app->urlFor('tree')),
-        array('display_name' => $category['display_name']),
+        array('display_name' => $parent['display_name'], 'target' => $app->urlFor('tree', array('id' => $catid))),
+        array('display_name' => $category['display_name'], 'target' => $app->urlFor('tree', array('id' => $catid))),
         array('display_name' => 'Gestionar carpeta')
     );
     
@@ -206,6 +211,7 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = NULL) use ($app, $use
         'allProfiles' => $allProfiles,
         'uploaders' => $uploadProfiles,
         'managers' => $managerProfiles,
+        'restricted' => $restrictedProfiles,
         'folder' => $folder));
 })->name('managefolder')->via('GET', 'POST');
 
