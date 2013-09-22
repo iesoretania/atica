@@ -22,7 +22,8 @@
         <h1>Listado de personal</h1>
     </div>
     <div class="panel-body">
-        <a href="{{ urlFor('personlist', { 'sort': 0, 'filter': 1-filter } ) }}" class="btn btn-info pull-right">{{ filter ? 'Mostrar todos los usuarios' : 'Mostrar sólo los usuarios activos' }}</a>
+        <a href="{{ urlFor('personal', { 'id': 0, 'section': 0 } ) }}" class="btn btn-success">Crear un nuevo usuario</a> 
+        <a href="{{ urlFor('personlist', { 'sort': 0, 'filter': 1-filter } ) }}" class="btn btn-info">{{ filter ? 'Mostrar todos los usuarios' : 'Mostrar sólo los usuarios activos' }}</a>
     </div>
     <form>
         <table class="table table-striped table-condensed table-hover">
