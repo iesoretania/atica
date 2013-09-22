@@ -15,7 +15,16 @@
     along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
 
 {% extends "layout.html.twig" %}
-
+{% block stylesheets %}
+ <link rel="stylesheet" href="lib/select2/select2.css">
+{% endblock %}
+{% block scripts %}
+<script src="lib/select2/select2.min.js"></script>
+<script src="lib/select2/select2_locale_es.js"></script>
+<script>
+    $(document).ready(function() { $(".select").select2(); });
+</script>
+{% endblock %}
 {% block maincontent %}
 {% set edit = local or user['is_admin'] %}
 {% set email_enabled = (userData['email_enabled'] == 1) %}
@@ -46,10 +55,10 @@
             </div>              
             {% endif %}
             <div class="form-group">
-                <label class="col-md-2 control-label">Acceso</label>
+                <label class="col-md-2 control-label">Estado</label>
                 <div class="col-md-10">
-                    <label class="radio-inline"><input type="radio" name="active" value="0" {{active ? '' : ' checked="checked"' }}{{ (user.is_admin and not local) ? '' : ' disabled' }}> Denegado</label>
-                    <label class="radio-inline"><input type="radio" name="active" value="1" {{active ? ' checked="checked"' : ''}}{{ (user.is_admin and not local) ? '' : ' disabled' }}> Permitido</label>
+                    <label class="radio-inline"><input type="radio" name="active" value="0" {{active ? '' : ' checked="checked"' }}{{ (user.is_admin and not local) ? '' : ' disabled' }}> Usuario no activo</label>
+                    <label class="radio-inline"><input type="radio" name="active" value="1" {{active ? ' checked="checked"' : ''}}{{ (user.is_admin and not local) ? '' : ' disabled' }}> Usuario activo</label>
                 </div>
             </div>                
             <div class="form-group">
@@ -98,6 +107,20 @@
                 </div>
             </div>
             {% endif %}
+            <div class="form-group">
+                <label class="col-md-2 control-label">Perfiles asociados</label>
+                <div class="col-md-10">
+                    {% if user.is_admin %}
+                        <select class="form-control select" multiple id="profiles" name="profiles[]">
+                        {% for profile in allProfiles %}
+                        <option value="{{ profile['id'] }}" {% if profiles[profile['id']] %} selected {% endif %}>{{ [profile['display_name_neutral'], profile['display_name_male'], profile['display_name_female']][userData['gender']] }}{% if profile['display_name'] %} ({{ profile['display_name'] }}){% endif %}</option>
+                        {% endfor %}
+                        </select>
+                    {% else %}
+                        <textarea class="form-control" name="profilelist" disabled rows="3">{% for profile in profiles %}{{ [profile['display_name_neutral'], profile['display_name_male'], profile['display_name_female']][userData['gender']] }}{% if profile['display_name'] %} ({{ profile['display_name'] }}){% endif %}{{ loop.last ? '' : ', ' }}{% endfor %}</textarea>
+                    {% endif %}
+                </div>
+            </div>             
             {% if user.is_admin %}
             <div class="form-group text-danger">
                 <label class="col-md-2 control-label">Administración local</label>
@@ -118,7 +141,7 @@
             <div class="form-group">
                 <label for="description" class="col-md-2 control-label">Otra información</label>
                 <div class="col-md-10">
-                    <textarea class="form-control" name="description" id="description" rows="3" placeholder="Notas internas para los administradores"></textarea>
+                    <textarea class="form-control" name="description" id="description" rows="3" placeholder="Notas internas para los administradores">{{ user['description'] }}</textarea>
                 </div>
             </div>
             {% endif %}

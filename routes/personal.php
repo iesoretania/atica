@@ -53,6 +53,7 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
         
         ORM::get_db()->beginTransaction();
         
+        $ok = true;
         if ($id == 0) {
             $local = ORM::for_table('person')->create();
         }
@@ -97,8 +98,14 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
             if ($user['is_global_administrator'] && isset($_POST['globaladmin']) && !$itsMe) {
                 $local->set('is_global_administrator', $_POST['globaladmin']);
             }
+             
+            // cambio de perfiles
+            if ($user['is_admin']) {
+                $ok = setUserProfiles($id, $_POST['profiles']);
+            }
         }
-        if ($local->save()) {
+        $ok = $ok && $local->save();
+        if ($ok) {
             $app->flash('save_ok', 'ok');
             
             // si es nuevo, añadirlo a la organización
@@ -150,18 +157,6 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
             $app->redirect($app->urlFor('personal', array('id' => $id, 'section' => 0)));
         }
     }
-    
-    // cambio de perfiles
-    if ((isset($_POST['saveprofiles']) && ($user['is_admin']))) {
-        $ok = setUserProfiles($id, $_POST['profiles']);
-        if ($ok) {
-            $app->flash('save_ok', 'ok');
-        }
-        else {
-            $app->flash('save_error', 'error');
-        }
-        $app->redirect($app->urlFor('personal', array('id' => $id, 'section' => 1)));
-    }
 
     // menú lateral de secciones
     $menu = array(
@@ -170,8 +165,7 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
 
     // las secciones vienen en este array
     $options = array(
-        0 => array('caption' => 'Personal', 'template' => 'user_personal'),
-        1 => array('caption' => 'Perfiles', 'template' => 'user_profiles')/*,
+        0 => array('caption' => 'Personal', 'template' => 'user_personal')/*,
         2 => array('caption' => 'Envíos realizados', 'template' => 'user_deliveries') */
     );
 
@@ -413,17 +407,17 @@ function getProfilesByOrganization($orgId, $filter = true) {
 }
 
 function setUserProfiles($userId, $profiles) {
-    ORM::get_db()->beginTransaction();
     $query = ORM::for_table('person_profile')->
             where('person_id', $userId)->
             delete_many();
     
+    $ok = true;
     foreach ($profiles as $profile) {
         $insert = ORM::for_table('person_profile')->create();
         $insert->set('person_id', $userId);
         $insert->set('profile_id', $profile);
-        $insert->save();
+        $ok = $ok && $insert->save();
     }
     
-    return ORM::get_db()->commit();
+    return $ok;
 }

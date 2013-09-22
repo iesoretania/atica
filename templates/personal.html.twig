@@ -51,12 +51,10 @@
                     </td>
                     <td class="visible-xs">
                         <a href="{{ link }}">{{ person['display_name'] }}</a>
-                        <a href="{{ urlFor('personal', { 'id': person['id'], 'section': 1 }) }}" class="delivery-tools"><span class="icon-group"></span></a>
                     </td>
                     <td class="hidden-xs">
                         <a href="{{ link }}">{{ person['first_name'] ~ ' ' ~ person['last_name'] }}</a>
                         {% if gender %}<span class="icon-{{gender}}"></span>{% endif %}
-                        <a href="{{ urlFor('personal', { 'id': person['id'], 'section': 1 }) }}" class="delivery-tools"><span class="icon-group"></span></a>
                     </td>
                     <td class="hidden-xs hidden-sm">{{ person['email'] }}</td>
                     <td>{% if person['last_login'] %}<abbr title="{{ person['last_login'] | date('Y/m/d G:i') }}">{{ person['last_login'] | date('Y/m/d') }}</abbr>{% endif %}</td>
