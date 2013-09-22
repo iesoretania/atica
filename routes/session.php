@@ -50,7 +50,7 @@ $app->get('/entrar', function () use ($app) {
     $app->render('login.html.twig', array('navigation' => $breadcrumb));
 })->name('login');
 
-$app->post('/entrar', function () use ($app, $preferences) {
+$app->post('/entrar', function () use ($app, $preferences, $organization) {
     if (!isset($_SESSION['organization_id'])) {
         $app->redirect($app->urlFor('organization'));
     }
@@ -96,17 +96,21 @@ $app->post('/entrar', function () use ($app, $preferences) {
                     // si es la primera conexión, enviar a su página de datos
                     // personales
                     if ($firstLogin) {
+                        doRegisterAction($app, $user, $organization, 'session', 0, 'login', 'first');
                         $app->redirect($app->urlFor('personal', array('id' => $user['id'], 'section' => 0)));
                     }
                     else {
+                        doRegisterAction($app, $user, $organization, 'session', 0, 'login', '');
                         $app->redirect($app->urlFor('activities'));
                     }
                 }
                 else {
+                    doRegisterAction($app, $user, $organization, 'session', 1, 'login_error', 'not active');
                     $app->flash('login_error', 'not active');
                 }
             }
             else {
+                doRegisterAction($app, $user, NULL, 'session', 2, 'login_error', 'no organization');
                 $app->flash('login_error', 'no organization');
             }
             // guardar cambios aunque haya ocurrido un error
@@ -116,11 +120,13 @@ $app->post('/entrar', function () use ($app, $preferences) {
             if ($login_security) {
                 // comprobar el número de intentos infructuosos
                 $login_security->set('retry_count', $login_security['retry_count']+1);
+                doRegisterAction($app, $user, NULL, 'session', 3, 'login_error', 'bad password');
                 if ($login_security['retry_count'] >= $preferences['login.retries']) {
                     // bloquear al usuario
                     $until = new DateTime;
                     $until->modify("+" . $preferences['login.block'] . " min");
                     $login_security->set('blocked_access', $until->format('Y-m-d H:i:s'));
+                    doRegisterAction($app, $user, NULL, 'session', 4, 'login_error', 'blocked');
                 }
                 $login_security->save();
             }
@@ -136,8 +142,50 @@ $app->post('/entrar', function () use ($app, $preferences) {
     $app->redirect($app->urlFor('login'));
 });
 
-$app->get('/salir', function () use ($app) {
+$app->get('/salir', function () use ($app, $user, $organization) {
+    if (isset($user['id'])) {
+        doRegisterAction($app, $user, $organization, 'session', 0, 'logout', '');
+    }
     unset($_SESSION['person_id']);
     $app->flash('home_info', 'logout');
     $app->redirect($app->urlFor('frontpage'));
 })->name('logout');
+
+function doRegisterAction($app, $user, $organization, $module, $command, $action,
+        $info, $data = NULL,
+        $time = NULL, $activityId = NULL, $eventId = NULL, $groupingId = NULL,
+        $folderId = NULL, $profileId = NULL, $deliveryId = NULL,
+        $revisionId = NULL, $documentId = NULL, $deliveryItemId = NULL) {
+    
+    if (NULL == $time) {
+        $time = date('c');
+    }
+    
+    $personId = is_null($user) ? NULL : $user['id'];
+    $orgId = is_null($organization) ? NULL : $organization['id'];
+    
+    $log = ORM::for_table('log')->create();
+    $log->set(array(
+        'time' => $time,
+        'person_id' => $personId,
+        'ip' => $app->request()->getIp(),
+        'organization_id' => $orgId,
+        'module' => $module,
+        'command' => $command,
+        'action' => $action,
+        'url' => $app->request()->getPathInfo(),
+        'info' => $info,
+        'data' => $data,
+        'activity_id' => $activityId,
+        'event_id' => $eventId,
+        'grouping_id' => $groupingId,
+        'folder_id' => $folderId,
+        'profile_id' => $profileId,
+        'delivery_id' => $deliveryId,
+        'revision_id' => $revisionId,
+        'document_id' => $documentId,
+        'delivery_item_id' => $deliveryItemId
+    ));
+    
+    return $log->save();
+}

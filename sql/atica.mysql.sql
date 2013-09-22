@@ -261,9 +261,9 @@ CREATE TABLE IF NOT EXISTS grouping_profile (
 CREATE TABLE IF NOT EXISTS log (
   id int(11) unsigned NOT NULL AUTO_INCREMENT,
   "time" datetime NOT NULL,
-  person_id int(11) unsigned NOT NULL,
+  person_id int(11) unsigned DEFAULT NULL,
   ip varchar(45) NOT NULL,
-  organization_id int(11) unsigned NOT NULL,
+  organization_id int(11) unsigned DEFAULT NULL,
   module varchar(20) NOT NULL,
   command int(11) unsigned NOT NULL,
   "action" varchar(40) NOT NULL,
