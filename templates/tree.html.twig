@@ -53,7 +53,7 @@
         <h1>{{ category ? category['display_name'] : 'Árbol de documentos' }}</h1>
     </div>
     {% if category.description %}<div class="panel-body"><h4>{{ category.description | nl2br }}</h4></div>{% endif %}
-    {% if user['is_admin'] %}
+    {% if user['is_admin'] and category %}
     <div class="panel-footer">
         <a class="btn btn-warning" href="{{ urlFor('managefolder', { 'id': 0, 'catid': category.id }) }}">Crear nueva carpeta</a>
     </div>
