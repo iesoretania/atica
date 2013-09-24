@@ -183,12 +183,15 @@ $app->map('/actividad/:id', function ($id) use ($app, $user, $organization) {
         else {
             $local = $event;
         }
+        $local->set('organization_id', $organization['id']);
         $local->set('display_name', $_POST['displayname']);
         $local->set('description', strlen($_POST['description'])>0 ? $_POST['description'] : NULL);
         $local->set('is_visible', $_POST['visible']);
         $local->set('is_manual', $_POST['manual']);
         $local->set('is_automatic', $_POST['automatic']);
-        $local->set('folder_id', $_POST['folder']);
+        if ($_POST['folder']) {
+            $local->set('folder_id', $_POST['folder']);
+        }
         $local->set('from_week', $_POST['fromweek']+4*$_POST['frommonth']);
         $local->set('to_week', $_POST['toweek']+4*$_POST['tomonth']);
         
@@ -224,7 +227,7 @@ $app->map('/actividad/:id', function ($id) use ($app, $user, $organization) {
     $selectedCategories = ($id == 0) ? array() : getEventActivitiesId($id);
     
     // obtener todos los perfiles
-    $allProfiles = getProfilesByOrganization($organization['id']);
+    $allProfiles = getProfilesByOrganization($organization['id'], true, true);
     
     // obtener los perfiles asociados a este evento
     $profiles = ($id == 0) ? array() : getEventProfilesId($id);
