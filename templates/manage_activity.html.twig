@@ -1,0 +1,46 @@
+{#  ATICA - Web application for supporting Quality Management Systems
+    Copyright (C) 2009-2013: Luis-Ramón López López
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
+
+{% extends "layout.html.twig" %}
+{% block maincontent %}
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <h1>{{ new ? 'Nueva categoría de actividades' : 'Modificar categoría de actividades' }}</h1>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-body">
+        <form class="form-horizontal" role="form" method="post" action="{{ url }}">
+            <div class="form-group">
+                <label for="displayname" class="col-md-2 control-label">Nombre de la categoría</label>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" name="displayname" id="displayname" placeholder="Nombre de la categoría que se mostrará" value="{{ activity.display_name }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="description" class="col-md-2 control-label">Más información</label>
+                <div class="col-md-10">
+                    <textarea class="form-control" name="description" id="description" rows="8" placeholder="Descripción del contenido de la actividad e instrucciones de uso">{{ activity.description }}</textarea>
+                </div>
+            </div>
+            <button type="submit" name="saveactivity" class="btn btn-success">{{ new ? 'Crear categoría de actividad' : 'Guardar cambios' }}</button>
+            {% if not new %}
+                <button type="submit" name="deleteactivity" class="btn btn-danger">Eliminar categoría y todos sus eventos</button>
+            {% endif %}
+        </form>
+    </div>
+</div>
+{% endblock %}

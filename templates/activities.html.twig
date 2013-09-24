@@ -21,9 +21,9 @@
     <div class="panel-heading">
         <h1>Actividades{% if detail %}: {{ detail }}{% endif %}</h1>
     </div>
-    {% if user['is_admin'] and detail %}
+    {% if user['is_admin'] %}
     <div class="panel-footer">
-        <a class="btn btn-warning" href="{{ urlFor('frontpage') }}">Crear nueva categoría de actividad</a>
+        <a class="btn btn-success" href="{{ urlFor('manageactivity', { 'id':0 }) }}">Crear nueva categoría de actividad</a>
     </div>
     {% endif %}
 </div>
@@ -36,10 +36,10 @@
     </div>
     {% for activity in profile.data %}
     <div class="panel-body">
-        <h3>{{ activity.info.activity_display_name }}{% if user['is_admin'] %}&nbsp;<small class="pull-right hidden-print"><a class="folder-tools" href="{{ urlFor('frontpage') }}"><span class="icon-cog"></span></a></small>{% endif %}</h3>
+        <h3>{{ activity.info.activity_display_name }}{% if user['is_admin'] %}&nbsp;<small class="pull-right hidden-print"><a class="folder-tools" href="{{ urlFor('manageactivity', { 'id': activity.info.activity_id }) }}"><span class="icon-cog"></span></a></small>{% endif %}</h3>
         {% if activity.info.activity_description %}<p>{{ activity.info.activity_description | nl2br }}</p>{% endif %}
         {% if user['is_admin'] %}
-        <a class="btn btn-warning" href="{{ urlFor('frontpage') }}">Crear nueva actividad</a>
+        <a class="btn btn-success" href="{{ urlFor('manageevent', { 'id': 0 }) }}">Crear nueva actividad</a>
         {% endif %}
     </div>
     <table class="table table-striped table-condensed table-hover">
@@ -71,7 +71,7 @@
 </div>
 {% endfor %}
 {% else %}
-<div class="alert alert-danger">
+<div class="alert alert-warning">
     No hay ninguna actividad para mostrar
 </div>
 {% endif %}

@@ -127,6 +127,71 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config,
         'events' => $parsedEvents));
 })->name('activities');
 
+$app->map('/grupoactividad/:id', function ($id) use ($app, $user, $config, $organization) {
+    
+    if (!$user || !$user['is_admin']) {
+        $app->redirect($app->urlFor('login'));
+    }
+    
+    if (0 != $id) {
+        $activity = getActivityObject($organization['id'], $id);
+    
+        if (!$activity) {
+            $app->redirect($app->urlFor('frontpage'));
+        }
+    }
+    else {
+        $activity = array();
+    }
+
+    
+    if (isset($_POST['saveactivity'])) {
+        ORM::get_db()->beginTransaction();
+        
+        if ($id == 0) {
+            $local = ORM::for_table('activity')->create();
+        }
+        else {
+            $local = $activity;
+        }
+        $local->set('organization_id', $organization['id']);
+        $local->set('display_name', $_POST['displayname']);
+        $local->set('description', strlen($_POST['description'])>0 ? $_POST['description'] : NULL);
+        
+        if ($local->save()) {      
+            $app->flash('save_ok', 'ok');
+                ORM::get_db()->commit();
+        }
+        else {
+            $app->flash('save_error', 'error');
+            ORM::get_db()->rollBack();
+        }
+        $app->redirect($app->request()->getPathInfo());
+    }
+    
+    // barra lateral
+    $sidebar = array(
+        array(
+            array('caption' => 'Gestión de actividades', 'icon' => 'calendar'),
+            array('caption' => 'Gestionar agrupación', 'active' => true, 'target' => $app->request()->getPathInfo())
+        )
+    );
+    
+    $breadcrumb = array(
+        array('display_name' => 'Actividades', 'target' => $app->urlFor('activities')),
+        array('display_name' => ($id == 0) ? 'Nueva agrupación de actividades' : $activity['display_name'])
+    );
+    
+    // generar página
+    $app->render('manage_activity.html.twig', array(
+        'navigation' => $breadcrumb,
+        'sidebar' => $sidebar,
+        'url' => $app->request()->getPathInfo(),
+        'new' => ($id == 0),
+        'activity' => ($id == 0) ? array() : $activity));
+    
+})->name('manageactivity')->via('GET', 'POST');
+
 function getUserProfiles($user_id, $org_id, $extended) {
     // $extended indica si queremos recibir también los perfiles generales
     $data = ORM::for_table('person_profile')->
@@ -265,4 +330,11 @@ function parseEvents($events,
     }
 
     return $return;
+}
+
+function getActivityObject($orgId, $actId) {
+    return ORM::for_table('activity')->
+            where('organization_id', $orgId)->
+            where('id', $actId)->
+            find_one();
 }
