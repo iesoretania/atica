@@ -201,8 +201,12 @@ $app->map('/actividad/:id', function ($id) use ($app, $user, $organization) {
         if ($local->save()) {
             $id = $local['id'];
             $ok = setEventProfiles($id, $_POST['profiles']);
-            $ok = $ok && setEventActivities($id, $_POST['categories']);
-            $ok = $ok && setEventDeliveries($id, $_POST['deliveries']);
+            if (isset($_POST['categories'])) {
+                $ok = $ok && setEventActivities($id, $_POST['categories']);
+            }
+            if (isset($_POST['deliveries'])) {
+                $ok = $ok && setEventDeliveries($id, $_POST['deliveries']);
+            }
             if ($ok) {
                 $app->flash('save_ok', 'ok');
                 ORM::get_db()->commit();
