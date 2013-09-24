@@ -22,7 +22,7 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config,
     }
 
     // obtener perfiles
-    $profiles = getUserProfiles($user['id'], $organization['id'], false);
+    $profiles = parseArray(getUserProfiles($user['id'], $organization['id'], false));
 
     // barra lateral de perfiles
     $profile_bar = array(
@@ -46,7 +46,7 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config,
         else {
             $active = false;
         }
-        array_push($profile_ids, $profile['id']);
+        array_push($profile_ids, $profile['profile_group_id']);
         if (!in_array($profile['profile_group_id'], $profile_group_ids)) {
             $profile_group_ids[] = $profile['profile_group_id'];
         }
@@ -57,7 +57,7 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config,
     $sidebar = array();
 
     array_push($sidebar, $profile_bar);
-    
+
     // obtener otros perfiles
     $otherProfiles = getUserOtherProfiles($user['id'], $organization['id'], $profile_group_ids);
     if (count($otherProfiles, COUNT_NORMAL) > 0) {
@@ -80,12 +80,12 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config,
         }
         array_push($sidebar, $other_profile_bar);
     }
-    
+
     // si hay un perfil como parámetro que no está asociado al usuario, redirigir
     if ((NULL != $id) && (NULL == $current)) {
         $app->redirect($app->urlFor('activities'));
     }
-    
+
     // barra superior de navegación
     if (NULL != $id) {
         $breadcrumb = array(
@@ -96,11 +96,14 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config,
     else {
         $breadcrumb = array(
             array('display_name' => 'Actividades')
-        );        
+        );
     }
 
     if ($id) {
-        $profile_ids = array( $id );
+        // si es un perfil del usuario, extraer el perfil contenedor
+        // si no, dejarlo como estaba
+        $idParam = isset($profiles[$id]) ? $profiles[$id]['profile_group_id'] : $id;
+        $profile_ids = array( $idParam );
     }
 
     // obtener actividades
@@ -110,10 +113,10 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config,
     $parsedEvents = parseEvents($events,
             'profile_id', array('profile_display_name', 'profile_group_display_name', 'profile_id'),
             'activity_id', array('activity_display_name', 'activity_description', 'activity_id'));
-    
+
     $now = getdate();
     $currentWeek = ($now['mon']-1)*4 + floor(($now['mday']-1)/7);
-    
+
     // generar página
     $app->render('activities.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true,
@@ -137,7 +140,7 @@ function getUserProfiles($user_id, $org_id, $extended) {
             where('profile_group.organization_id', $org_id)->
             order_by_asc('profile_group.display_name_neutral')->
             order_by_asc('profile.order_nr')->find_array();
-    
+
     if ($extended) {
         $data = array_merge($data,
             ORM::for_table('person_profile')->
@@ -157,7 +160,7 @@ function getUserProfiles($user_id, $org_id, $extended) {
                 order_by_asc('profile.order_nr')->find_array()
         );
     }
-    
+
     return $data;
 }
 
@@ -167,7 +170,7 @@ function getUserOtherProfiles($user_id, $org_id, $current) {
             where_not_in('profile_group.id', $current)->
             where('profile_group.organization_id', $org_id)->
             order_by_asc('profile_group.display_name_neutral')->find_many();
-    
+
     return $data;
 }
 
@@ -190,20 +193,20 @@ function getEventsForProfiles($profile_ids, $user, $base = 33) {
             inner_join('profile', array('profile.id', '=', 'event_profile.profile_id'))->
             inner_join('profile_group', array('profile_group.id', '=', 'profile.profile_group_id'))->
             left_outer_join('completed_event', 'completed_event.event_id = event.id AND completed_event.person_id = ' . $user['id'])->
-            group_by('event_profile.profile_id')->
+            order_by_asc('profile_group.display_name_neutral')->
             order_by_asc('n_from_week')->
             order_by_asc('n_to_week');
-    
+
     if ($profile_ids) {
         $data = $data->where_in('profile_id', $profile_ids);
     }
-    
+
     return $data->find_array();
 }
 
 function addDataInfo($data, $info = array(), $fields = array()) {
     $current = array();
-    
+
     foreach ($info as $field) {
         $current[$field] = $fields[$field];
     }
@@ -222,44 +225,44 @@ function parseEvents($events,
     $currentSecond = array();
 
     $lastItem = NULL;
-    
+
     $old = array(
         'first' => NULL,
         'second' => NULL
     );
-    
+
     foreach ($events as $event) {
-        
+
         if (($old['first'] != $event[$first_level]) ||
             ($old['second'] != $event[$second_level])) {
-            
+
             if (!empty($currentSecond)) {
                 $currentFirst[$old['second']] = addDataInfo($currentSecond, $second_info, $lastItem);
                 $currentSecond = array();
             }
             $old['second'] = $event[$second_level];
-            
+
             if ($old['first'] != $event[$first_level]) {
                 if (!empty($currentFirst)) {
                     $return[$old['first']] = addDataInfo($currentFirst, $first_info, $lastItem);
-                    
+
                     $currentFirst = array();
                 }
                 $old['first'] = $event[$first_level];
             }
         }
-        
+
         $currentSecond[] = $event;
         $lastItem = $event;
     }
-    
+
     if (!empty($currentSecond)) {
         $currentFirst[$old['second']] = addDataInfo($currentSecond, $second_info, $lastItem);
     }
-    
+
     if (!empty($currentFirst)) {
         $return[$old['first']] = addDataInfo($currentFirst, $first_info, $lastItem);
     }
-    
+
     return $return;
 }

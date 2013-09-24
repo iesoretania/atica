@@ -24,7 +24,7 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
     // obtener evento
     // TODO: Comprobar que el evento es válido
     $event = getActivityEvent($id, $aid, $user)->as_array();
-    
+
     if (!$event) {
         $app->redirect($app->urlFor('frontpage'));
     }
@@ -48,8 +48,8 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
     $deliveries = getDeliveriesFromEvent($id);
     
     // obtener perfiles
-    $profiles = getUserProfiles($user['id'], $organization['id'], false);
-    
+    $profiles = parseArray(getUserProfiles($user['id'], $organization['id'], false));
+
     // barra lateral de perfiles
     $profile_bar = array(
         array('caption' => 'Mis actividades', 'icon' => 'calendar'),
@@ -57,34 +57,35 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
     if (count($profiles, COUNT_NORMAL)>1) {
        $profile_bar[] = array('caption' => 'Ver todas', 'active' => ($id == NULL), 'target' => $app->urlFor('activities'));
     }
-    
     $current = NULL;
     $detail = '';
+    $itsMine = false;
     $profile_ids = array();
     $profile_group_ids = array();
     foreach ($profiles as $profile) {
         $gender = array ($profile['display_name_neutral'], $profile['display_name_male'], $profile['display_name_female']);
         $caption = $gender[$user['gender']] . " " . $profile['display_name'];
-        if ($profile['id'] == $pid) {
+        if (($profile['id'] == $pid) || ($profile['profile_group_id'] == $pid)) {
             $current = $profile;
             $detail = $caption;
             $active = true;
+            $itsMine = false;
         }
         else {
             $active = false;
         }
-        array_push($profile_ids, $profile['id']);
+        array_push($profile_ids, $profile['profile_group_id']);
         if (!in_array($profile['profile_group_id'], $profile_group_ids)) {
             $profile_group_ids[] = $profile['profile_group_id'];
         }
         array_push($profile_bar, array('caption' => $caption,
             'active' => $active, 'target' => $app->urlFor('activities', array('id' => $profile['id']))));
     }
-    
+
     $sidebar = array();
 
     array_push($sidebar, $profile_bar);
-    
+
     // obtener otros perfiles
     $otherProfiles = getUserOtherProfiles($user['id'], $organization['id'], $profile_group_ids);
     if (count($otherProfiles, COUNT_NORMAL) > 0) {
@@ -94,10 +95,11 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
 
         foreach ($otherProfiles as $profile) {
             $captionOther = $profile['display_name_neutral'] . " " . $profile['display_name'];
-            if ($profile['id'] == $pid) {
+            if (($profile['id'] == $pid) || ($profile['profile_group_id'] == $pid)) {
                 $current = $profile;
                 $detail = $captionOther;
                 $activeOther = true;
+                $itsMine = true;
             }
             else {
                 $activeOther = false;
@@ -150,6 +152,7 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
         'folderProfiles' => $folderProfiles,
         'persons' => $persons,
         'data' => $data,
+        'itsMine' => $itsMine,
         'deliveries' => $deliveries,
         'event' => $event));
 })->name('event')->via('GET', 'POST');
