@@ -44,7 +44,7 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
             }
         }
         else {
-            $userData = array( 'new' => true, 'is_active' => 1 );
+            $userData = array( 'new' => true, 'is_active' => 1, 'gender' => 0 );
         }
     }
 
@@ -98,27 +98,27 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
             if ($user['is_global_administrator'] && isset($_POST['globaladmin']) && !$itsMe) {
                 $local->set('is_global_administrator', $_POST['globaladmin']);
             }
-             
-            // cambio de perfiles
-            if ($user['is_admin']) {
-                $ok = setUserProfiles($id, $_POST['profiles']);
-            }
         }
         $ok = $ok && $local->save();
+        // si es nuevo, añadirlo a la organización
+        if ($ok && ($id == 0)) {
+            $id = $local['id'];
+            $personOrganization = ORM::for_table('person_organization')->
+                    create();
+            $personOrganization->set('person_id', $id);
+            $personOrganization->set('organization_id', $organization['id']);
+            $personOrganization->set('is_active', $_POST['active']);
+            $personOrganization->set('is_local_administrator', $_POST['localadmin']);
+            $ok = $ok && $personOrganization->save();
+        }
+        
+        // cambio de perfiles
+        if ($user['is_admin']) {
+            $ok = $ok && setUserProfiles($id, $_POST['profiles']);
+        }
+        
         if ($ok) {
             $app->flash('save_ok', 'ok');
-            
-            // si es nuevo, añadirlo a la organización
-            if ($id == 0) {
-                $id = $local['id'];
-                $personOrganization = ORM::for_table('person_organization')->
-                        create();
-                $personOrganization->set('person_id', $id);
-                $personOrganization->set('organization_id', $organization['id']);
-                $personOrganization->set('is_active', $_POST['active']);
-                $personOrganization->set('is_local_administrator', $_POST['localadmin']);
-                $personOrganization->save();
-            }
             ORM::get_db()->commit();
         } else {
             $app->flash('save_error', 'error');
@@ -220,7 +220,7 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
     else {
         $allProfiles = array();
     }
-    
+
     // generar barra de navegación
     $breadcrumb = array(
         array('display_name' => 'Usuarios', 'target' => $app->urlFor('personal', array('id' => $user['id'], 'section' => 0))),
@@ -406,7 +406,7 @@ function getProfilesByOrganization($orgId, $filter = true, $containers = false) 
         $data = $data->where('profile.is_active', 1);
     }
     
-    return $data->find_many();
+    return $data->find_array();
 }
 
 function setUserProfiles($userId, $profiles) {

@@ -21,7 +21,7 @@
     <div class="panel-heading">
         <h1>Listado de personal</h1>
     </div>
-    <div class="panel-body">
+    <div class="panel-body hidden-print">
         <a href="{{ urlFor('personal', { 'id': 0, 'section': 0 } ) }}" class="btn btn-success">Crear un nuevo usuario</a> 
         <a href="{{ urlFor('personlist', { 'sort': 0, 'filter': 1-filter } ) }}" class="btn btn-info">{{ filter ? 'Mostrar todos los usuarios' : 'Mostrar sólo los usuarios activos' }}</a>
     </div>
@@ -62,7 +62,7 @@
                 {% endfor %}
             </tbody>
         </table>
-        <div class="panel-footer">
+        <div class="panel-footer hidden-print">
             <p><strong>Con los elementos seleccionados:</strong></p>
             <button type="submit" name="enable" class="btn btn-info">Activar usuarios</button>
             <button type="submit" name="disable" class="btn btn-warning">Desactivar usuarios</button>
