@@ -139,7 +139,7 @@ $app->map('/modificar/:folderid/:id', function ($folderId, $id) use ($app, $user
         $ok = ($revision !== false);
         
         if ($ok && $newData) {
-            $ok = move_uploaded_file($_FILES['document']['tmp_name'][0], $documentDestination);
+            $ok = move_uploaded_file($_FILES['document']['tmp_name'][0], $preferences['upload.folder'] . $documentDestination);
         }
         
         if ($ok) {
