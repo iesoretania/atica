@@ -59,7 +59,7 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
     }
     $current = NULL;
     $detail = '';
-    $itsMine = false;
+    $isMine = true;
     $profile_ids = array();
     $profile_group_ids = array();
     foreach ($profiles as $profile) {
@@ -69,7 +69,7 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
             $current = $profile;
             $detail = $caption;
             $active = true;
-            $itsMine = false;
+            $isMine = true;
         }
         else {
             $active = false;
@@ -99,7 +99,7 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
                 $current = $profile;
                 $detail = $captionOther;
                 $activeOther = true;
-                $itsMine = true;
+                $isMine = false;
             }
             else {
                 $activeOther = false;
@@ -152,7 +152,7 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
         'folderProfiles' => $folderProfiles,
         'persons' => $persons,
         'data' => $data,
-        'itsMine' => $itsMine,
+        'isMine' => $isMine,
         'deliveries' => $deliveries,
         'event' => $event));
 })->name('event')->via('GET', 'POST');

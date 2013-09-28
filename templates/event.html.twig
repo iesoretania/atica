@@ -23,24 +23,24 @@
     </div>
     
     {% if event.description %}<div class="panel-body"><h4>{{ event.description | nl2br }}</h4></div>{% endif %}
-    {% if event.is_manual or event.is_automatic %}
+    {% if isMine and (event.is_manual or event.is_automatic) %}
     <div class="panel-footer">
         <p>
             <strong>Estado:</strong>
             <span>{{ event.completed_date ? 'Completada el ' ~(event.completed_date | date('Y-m-d')) : 'Pendiente' }}</span>
         </p>
         {% if event.is_automatic %}
-            <p>La actividad se marcará como completada <strong>de forma automática</strong> al realizar el envío indicado.<p>
+            <p>La actividad se marcará como completada <strong>de forma automática</strong> al realizar el envío indicado.</p>
         {% endif %}
         {% if event.is_manual %}
-        <p>La actividad puede marcarse como completada <strong>de forma manual</strong>. Use los botones para indicar cuando se haya completado.<p>
+        <p>La actividad puede marcarse como completada <strong>de forma manual</strong>. Use los botones para indicar cuando se haya completado.</p>
         <form class="form-inline" role="form" method="post" action="{{ url }}">
             {% if not event.completed_date %}
                 <button type="submit" name="mark" class="btn btn-success">Marcar como completada</button>
             {% else %}
                 <button type="submit" name="unmark" class="btn btn-danger">Marcar como no completada</button>
             {% endif %}
-        </form>
+        </form>   
         {% endif %}
     </div>
     {% endif %}

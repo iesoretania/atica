@@ -21,6 +21,9 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config,
         $app->redirect($app->urlFor('login'));
     }
 
+    // indica si el perfil pertence al usuario
+    $isMine = true;
+    
     // obtener perfiles
     $profiles = parseArray(getUserProfiles($user['id'], $organization['id'], false));
 
@@ -71,6 +74,7 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config,
                 $current = $profile;
                 $detail = $captionOther;
                 $activeOther = true;
+                $isMine = false;
             }
             else {
                 $activeOther = false;
@@ -124,6 +128,7 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config,
         'base' => $config['calendar.base_week'],
         'current' => $currentWeek,
         'sidebar' => $sidebar,
+        'isMine' => $isMine,
         'events' => $parsedEvents));
 })->name('activities');
 

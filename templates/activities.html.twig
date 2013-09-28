@@ -47,7 +47,7 @@
             <tr>
                 <th class="col-md-2">Calendario</th>
                 <th class="col-md-8">Actividad</th>
-                <th class="col-md-2">Estado</th>
+                {% if isMine %}<th class="col-md-2">Estado</th>{% endif %}
             </tr>
         </thead>
         <tbody>
@@ -57,13 +57,15 @@
             <tr {% if event.completed_date %}class="success"{% elseif (now>=from) and (now<=to) %}class="warning"{% elseif (event.is_automatic or event.is_manual) and ((now>=from) and (now>to)) %}class="danger"{% endif %}>
                 <td>{{ event.period_description }} {{ parsePeriod(event.from_week, event.to_week, period_labels) }}</td>
                 <td><a href="{{ urlFor('event', { 'id': event.id, 'aid': activity.info.activity_id, 'pid': profile.info.profile_id }) }}">{{ event.display_name }}</a>{% if user['is_admin'] %} <a class="delivery-tools hidden-print" title="Modificar actividad" href="{{ urlFor('manageevent', { 'id': event.id }) }}"><span class="icon-pencil"></span></a>{% endif %}</td>
+                {% if isMine %}
                 <td>
                 {% if (event.is_automatic or event.is_manual) %}
                 {{ event.completed_date ? event.completed_date | date('Y-m-d') : 'Pendiente' }}
                 {% else %}
-                &HorizontalLine;
+                &mdash;&mdash;&mdash;
                 {% endif %}
                 </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>
