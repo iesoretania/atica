@@ -15,7 +15,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see [http://www.gnu.org/licenses/]. */
 
-include './lib/AticaTwigExtension.php';
+require './vendor/autoload.php';
 
 class TwigExtensionTest extends PHPUnit_Framework_TestCase {
 
@@ -40,7 +40,7 @@ class TwigExtensionTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testParsePeriod()
 	{
-            $ext = new \AticaTwigExtension();
+            $ext = new \Atica\Extension\TwigExtension();
 
             $strings = array(
                 'months' => array('enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
@@ -69,7 +69,7 @@ class TwigExtensionTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testParsePeriodException()
 	{
-            $ext = new \AticaTwigExtension();
+            $ext = new \Atica\Extension\TwigExtension();
 
             $strings = array(
                 'months' => array('enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',

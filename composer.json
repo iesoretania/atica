@@ -11,6 +11,9 @@
             "homepage": "http://atica.iesoretania.es/"
         }
     ],
+    "autoload": {
+        "psr-0": { "Atica\\": "lib/" }
+    },
     "require": {
         "php": ">=5.3.0",
         "j4mie/idiorm": "1.4.*", 

@@ -18,7 +18,6 @@
 
 require '../vendor/autoload.php';
 require_once '../config/config.php';
-require_once '../lib/AticaTwigExtension.php';
 
 session_name('ATICAID');
 session_cache_limiter(false);
@@ -48,7 +47,7 @@ $view->parserOptions = array(
 );
 $view->parserExtensions = array(
     new \Slim\Views\TwigExtension(),
-    new \AticaTwigExtension(),
+    new \Atica\Extension\TwigExtension(),
     new \Twig_Extension_Debug()
 );
 $twig = $view->getInstance();

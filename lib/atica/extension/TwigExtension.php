@@ -16,9 +16,10 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see [http://www.gnu.org/licenses/]. */
 
-use Slim\Slim;
+namespace Atica\Extension;
+use \Slim\Slim;
 
-class AticaTwigExtension extends \Twig_Extension
+class TwigExtension extends \Twig_Extension
 {
     public function getName()
     {
@@ -66,4 +67,5 @@ class AticaTwigExtension extends \Twig_Extension
     {
         return (Slim::getInstance($appName)->router()->getCurrentRoute()->getName() == $route);
     }
+
 }
