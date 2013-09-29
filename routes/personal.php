@@ -63,6 +63,9 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
         if (isset($_POST['displayname'])) {
             $local->set('display_name', $_POST['displayname']);
         }
+        if (isset($_POST['description']) && (NULL != $_POST['description'])) {
+            $local->set('description', $_POST['description']);
+        }
         if (isset($_POST['firstname'])) {
             $local->set('first_name', $_POST['firstname']);
         }
