@@ -27,7 +27,7 @@ $app->get('/(portada)', function () use ($app, $user) {
     $parentGrouping = array();
     $matchedGrouping = array();
 
-    $sidebar = getGroupings($_SESSION['organization_id'], $app, NULL, $matchedGrouping, $parentGrouping);
+    $sidebar = getGroupings($_SESSION['organization_id'], $app, null, $matchedGrouping, $parentGrouping);
     
     $app->render('frontpage.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar,
@@ -39,12 +39,12 @@ $app->get('/portada/:id', function ($id) use ($app, $user) {
     if (!isset($_SESSION['organization_id'])) {
         $app->redirect($app->urlFor('organization'));
     }
-    $matchedGrouping = NULL;
-    $parentGrouping = NULL;
+    $matchedGrouping = null;
+    $parentGrouping = null;
     
     $sidebar = getGroupings($_SESSION['organization_id'], $app, $id, $matchedGrouping, $parentGrouping);
     
-    if ($matchedGrouping == NULL) {
+    if ($matchedGrouping == null) {
         $app->redirect($app->urlFor('frontpage'));
     }
     
@@ -69,7 +69,7 @@ $app->get('/portada/:id', function ($id) use ($app, $user) {
 function getGroupings($orgId, $app, $id, &$matchedGrouping, &$parentGrouping) {
     $return = array();
     $currentData = array();
-    $currentGrouping = NULL;
+    $currentGrouping = null;
     $match = false;
 
     $data = ORM::for_table('grouping')->
@@ -80,7 +80,7 @@ function getGroupings($orgId, $app, $id, &$matchedGrouping, &$parentGrouping) {
 
     foreach ($data as $grouping) {
         if ($grouping['grouping_level'] == 1) {
-            if ($currentGrouping != NULL) {
+            if ($currentGrouping != null) {
                 array_unshift($currentData,
                         array(
                             'caption' => $currentGrouping['display_name']
@@ -107,7 +107,7 @@ function getGroupings($orgId, $app, $id, &$matchedGrouping, &$parentGrouping) {
             $match = $match || $localMatch;
         }
     }
-    if ($currentGrouping != NULL) {
+    if ($currentGrouping != null) {
         array_unshift($currentData,
                 array(
                     'caption' => $currentGrouping['display_name']
@@ -148,11 +148,11 @@ function getParsedGroupingFolders($groupingId) {
     
     $return = array();
     $currentData = array();
-    $currentFolderId = NULL;
+    $currentFolderId = null;
 
     foreach ($data as $delivery) {
         if ($delivery['folder_id'] !== $currentFolderId) {
-            if ($currentData != NULL) {
+            if ($currentData != null) {
                 $return[] = array(
                     'id' => $currentFolderId,
                     'data' => $currentData
@@ -165,7 +165,7 @@ function getParsedGroupingFolders($groupingId) {
             $currentData[] = $delivery;
         }
     }
-    if ($currentData != NULL) {
+    if ($currentData != null) {
         $return[] = array(
             'id' => $currentFolderId,
             'data' => $currentData

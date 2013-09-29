@@ -16,7 +16,7 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see [http://www.gnu.org/licenses/]. */
 
-$app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config, $organization) {
+$app->get('/actividades(/:id)', function ($id = null) use ($app, $user, $config, $organization) {
     if (!$user) {
         $app->redirect($app->urlFor('login'));
     }
@@ -32,9 +32,9 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config,
         array('caption' => 'Mis actividades', 'icon' => 'calendar'),
     );
     if (count($profiles, COUNT_NORMAL)>1) {
-       $profile_bar[] = array('caption' => 'Ver todas', 'active' => ($id == NULL), 'target' => $app->urlFor('activities'));
+       $profile_bar[] = array('caption' => 'Ver todas', 'active' => ($id == null), 'target' => $app->urlFor('activities'));
     }
-    $current = NULL;
+    $current = null;
     $detail = '';
     $profile_ids = array();
     $profile_group_ids = array();
@@ -86,12 +86,12 @@ $app->get('/actividades(/:id)', function ($id = NULL) use ($app, $user, $config,
     }
 
     // si hay un perfil como parámetro que no está asociado al usuario, redirigir
-    if ((NULL != $id) && (NULL == $current)) {
+    if ((null != $id) && (null == $current)) {
         $app->redirect($app->urlFor('activities'));
     }
 
     // barra superior de navegación
-    if (NULL != $id) {
+    if (null != $id) {
         $breadcrumb = array(
             array('display_name' => 'Actividades', 'target' => $app->urlFor('activities')),
             array('display_name' => $detail)
@@ -161,7 +161,7 @@ $app->map('/grupoactividad/:id', function ($id) use ($app, $user, $config, $orga
         }
         $local->set('organization_id', $organization['id']);
         $local->set('display_name', $_POST['displayname']);
-        $local->set('description', strlen($_POST['description'])>0 ? $_POST['description'] : NULL);
+        $local->set('description', strlen($_POST['description'])>0 ? $_POST['description'] : null);
         
         if ($local->save()) {      
             $app->flash('save_ok', 'ok');
@@ -215,7 +215,7 @@ function getUserProfiles($user_id, $org_id, $extended) {
         $data = array_merge($data,
             ORM::for_table('person_profile')->
                 select('profile.profile_group_id')->
-                select_expr('NULL', 'display_name')->
+                select_expr('null', 'display_name')->
                 select('profile.order_nr')->
                 select('profile_group.id', 'id')->
                 select('profile_group.display_name_neutral')->
@@ -295,11 +295,11 @@ function parseEvents($events,
     $currentFirst = array();
     $currentSecond = array();
 
-    $lastItem = NULL;
+    $lastItem = null;
 
     $old = array(
-        'first' => NULL,
-        'second' => NULL
+        'first' => null,
+        'second' => null
     );
 
     foreach ($events as $event) {

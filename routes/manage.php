@@ -62,11 +62,11 @@ $app->map('/modificar/:folderid/:id', function ($folderId, $id) use ($app, $user
     }
     else {
         foreach ($uploadProfiles as $item) {
-            if (NULL == $item['display_name']) {
+            if (null == $item['display_name']) {
                 $data = parseArray(getSubprofiles($item['id']));
                 if (count($data)>1) {
                     foreach($data as $subItem) {
-                        if (NULL != $subItem['display_name']) {
+                        if (null != $subItem['display_name']) {
                             $uploadAs[$subItem['id']] = $subItem;
                         }
                     }
@@ -85,7 +85,7 @@ $app->map('/modificar/:folderid/:id', function ($folderId, $id) use ($app, $user
     
     if (isset($_POST['save'])) {
         $delivery->set('display_name', $_POST['displayname']);
-        $delivery->set('description', strlen($_POST['displayname']) > 0 ? $_POST['displayname'] : NULL);
+        $delivery->set('description', strlen($_POST['displayname']) > 0 ? $_POST['displayname'] : null);
         $delivery->save();
         $app->flash('save_ok', 'ok');
         $app->redirect($app->request()->getPathInfo());

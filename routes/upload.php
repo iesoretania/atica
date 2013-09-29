@@ -49,11 +49,11 @@ $app->get('/enviar/:id', function ($id) use ($app, $user, $config, $organization
     }
     else {
         foreach ($uploadProfiles as $item) {
-            if (NULL == $item['display_name']) {
+            if (null == $item['display_name']) {
                 $data = parseArray(getSubprofiles($item['id']));
                 if (count($data)>1) {
                     foreach($data as $subItem) {
-                        if (NULL != $subItem['display_name']) {
+                        if (null != $subItem['display_name']) {
                             $uploadAs[$subItem['id']] = $subItem;
                         }
                     }
@@ -105,7 +105,7 @@ $app->post('/enviar/:id', function ($id) use ($app, $user, $preferences, $organi
     
     // TODO: Comprobar perfil
     $profileIsSet = $folder['is_divided'];
-    $profileId = $profileIsSet ? $_POST['profile'] : NULL;
+    $profileId = $profileIsSet ? $_POST['profile'] : null;
 
     // buscar si hay una lista de entrega
     $list = $profileIsSet ?
@@ -191,7 +191,7 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
     
     // TODO: Comprobar perfil
     $profileIsSet = $folder['is_divided'];
-    $profileId = $profileIsSet ? $_POST['profile'] : NULL;
+    $profileId = $profileIsSet ? $_POST['profile'] : null;
 
     // buscar si hay una lista de entrega
     $list = $profileIsSet ?
@@ -217,7 +217,7 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
         
         $tempDestination = $preferences['upload.folder'] . "temp/" . $hash;
         
-        $itemId = NULL;
+        $itemId = null;
         
         if (file_exists($tempDestination)) {
             
@@ -266,7 +266,7 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
                 $filesize = filesize($tempDestination);
                 $documentDestination = createDocumentFolder($preferences['upload.folder'], $hash);
                 if (rename($tempDestination, $preferences['upload.folder'] . $documentDestination)) {
-                    if (false == createDelivery($id, $user['id'], $profileId, $filename, $description, NULL, $itemId, $documentDestination, $hash, $filesize)) {
+                    if (false == createDelivery($id, $user['id'], $profileId, $filename, $description, null, $itemId, $documentDestination, $hash, $filesize)) {
                         $ok = false;
                         $type = 'danger';
                         $message = 'cannot register';

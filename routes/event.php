@@ -30,13 +30,13 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
     }
     
     // marcar evento como no completado
-    if ($event['is_manual'] && ($event['completed_date'] != NULL) && isset($_POST['unmark'])) {
+    if ($event['is_manual'] && ($event['completed_date'] != null) && isset($_POST['unmark'])) {
         deleteCompletedEvent($id, $user['id']);
         $app->redirect($app->urlFor('activities', array('id' => $pid)));
     }
     
     // marcar evento como completado
-    if ($event['is_manual'] && ($event['completed_date'] == NULL) && isset($_POST['mark'])) {
+    if ($event['is_manual'] && ($event['completed_date'] == null) && isset($_POST['mark'])) {
         addCompletedEvent($id, $user['id']);
         $app->redirect($app->urlFor('activities', array('id' => $pid)));
     }
@@ -55,9 +55,9 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
         array('caption' => 'Mis actividades', 'icon' => 'calendar'),
     );
     if (count($profiles, COUNT_NORMAL)>1) {
-       $profile_bar[] = array('caption' => 'Ver todas', 'active' => ($id == NULL), 'target' => $app->urlFor('activities'));
+       $profile_bar[] = array('caption' => 'Ver todas', 'active' => ($id == null), 'target' => $app->urlFor('activities'));
     }
-    $current = NULL;
+    $current = null;
     $detail = '';
     $isMine = true;
     $profile_ids = array();
@@ -111,7 +111,7 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
     }
     
     // si hay un perfil como parámetro que no está asociado al usuario, redirigir
-    if (NULL == $current) {
+    if (null == $current) {
         $app->redirect($app->urlFor('activities'));
     }
 
@@ -188,7 +188,7 @@ $app->map('/actividad/:id', function ($id) use ($app, $user, $organization) {
         }
         $local->set('organization_id', $organization['id']);
         $local->set('display_name', $_POST['displayname']);
-        $local->set('description', strlen($_POST['description'])>0 ? $_POST['description'] : NULL);
+        $local->set('description', strlen($_POST['description'])>0 ? $_POST['description'] : null);
         $local->set('is_visible', $_POST['visible']);
         $local->set('is_manual', $_POST['manual']);
         $local->set('is_automatic', $_POST['automatic']);
@@ -397,8 +397,8 @@ function getParsedFolderTree($orgId) {
     $data = getAllFoldersByOrganization($orgId);
     $return = array();
     $currentData = array();
-    $currentCategory = NULL;
-    $currentCategoryDisplayName = NULL;
+    $currentCategory = null;
+    $currentCategoryDisplayName = null;
     $first = true;
     
     foreach($data as $folder) {
@@ -452,8 +452,8 @@ function getParsedDeliveriesByOrganization($orgId) {
     
     $return = array();
     $currentData = array();
-    $currentCategory = NULL;
-    $currentCategoryDisplayName = NULL;
+    $currentCategory = null;
+    $currentCategoryDisplayName = null;
     $first = true;
     
     foreach($data as $delivery) {

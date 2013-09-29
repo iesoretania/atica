@@ -63,7 +63,7 @@ $data = ORM::for_table('configuration')->where_not_null('content_type')->
         where_null('organization_id')->find_array();
 
 // Leer datos de la organización
-$organization = NULL;
+$organization = null;
 if (isset($_SESSION['organization_id'])) {
     $organization =
             ORM::for_table('organization')->
@@ -89,7 +89,7 @@ if (isset($_SESSION['organization_id'])) {
 }
 
 // Leer configuración local de la organización
-if (NULL != $organization) {
+if (null != $organization) {
     $data = array_merge($data, ORM::for_table('configuration')->
             where_equal('organization_id', $_SESSION['organization_id'])->
             where_not_null('content_type')->
@@ -104,7 +104,7 @@ if (($data) && (count($data)>0)) {
 }
 
 // Leer datos del usuario activo
-$user = NULL;
+$user = null;
 if (isset($_SESSION['person_id'])) {
     $user = ORM::for_table('person')->
             find_one($_SESSION['person_id'])->as_array();
@@ -118,7 +118,7 @@ if (isset($_SESSION['person_id'])) {
 
     // si no pertenece, sacar al usuario porque no debería ocurrir
     if (!$membership) {
-        $user = NULL;
+        $user = null;
         unset($_SESSION['person_id']);
     }
     else {

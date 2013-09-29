@@ -20,7 +20,7 @@ $app->get('/centros', function () use ($app, $user) {
     if (isset($user)) {
         $app->redirect($app->urlFor('activities'));
     }
-    $breadcrumb = NULL;
+    $breadcrumb = null;
     $organizations = ORM::for_table('organization')->
             order_by_asc('display_name')->find_array();
     $app->render('organization.html.twig', array('navigation' => $breadcrumb,
@@ -84,8 +84,8 @@ $app->post('/entrar', function () use ($app, $preferences, $organization) {
 
             // poner a cero la cuenta de intentos infructuosos
             $user->set('retry_count' ,0);
-            $user->set('blocked_access', NULL);
-            $firstLogin = ($user['last_login'] == NULL);
+            $user->set('blocked_access', null);
+            $firstLogin = ($user['last_login'] == null);
 
             if ($membership) {
                 if ($membership['is_active']) {
@@ -110,7 +110,7 @@ $app->post('/entrar', function () use ($app, $preferences, $organization) {
                 }
             }
             else {
-                doRegisterAction($app, $user, NULL, 'session', 2, 'login_error', 'no organization');
+                doRegisterAction($app, $user, null, 'session', 2, 'login_error', 'no organization');
                 $app->flash('login_error', 'no organization');
             }
             // guardar cambios aunque haya ocurrido un error
@@ -120,13 +120,13 @@ $app->post('/entrar', function () use ($app, $preferences, $organization) {
             if ($login_security) {
                 // comprobar el número de intentos infructuosos
                 $login_security->set('retry_count', $login_security['retry_count']+1);
-                doRegisterAction($app, $user, NULL, 'session', 3, 'login_error', 'bad password');
+                doRegisterAction($app, $user, null, 'session', 3, 'login_error', 'bad password');
                 if ($login_security['retry_count'] >= $preferences['login.retries']) {
                     // bloquear al usuario
                     $until = new DateTime;
                     $until->modify("+" . $preferences['login.block'] . " min");
                     $login_security->set('blocked_access', $until->format('Y-m-d H:i:s'));
-                    doRegisterAction($app, $user, NULL, 'session', 4, 'login_error', 'blocked');
+                    doRegisterAction($app, $user, null, 'session', 4, 'login_error', 'blocked');
                 }
                 $login_security->save();
             }
@@ -152,17 +152,17 @@ $app->get('/salir', function () use ($app, $user, $organization) {
 })->name('logout');
 
 function doRegisterAction($app, $user, $organization, $module, $command, $action,
-        $info, $data = NULL,
-        $time = NULL, $activityId = NULL, $eventId = NULL, $groupingId = NULL,
-        $folderId = NULL, $profileId = NULL, $deliveryId = NULL,
-        $revisionId = NULL, $documentId = NULL, $deliveryItemId = NULL) {
+        $info, $data = null,
+        $time = null, $activityId = null, $eventId = null, $groupingId = null,
+        $folderId = null, $profileId = null, $deliveryId = null,
+        $revisionId = null, $documentId = null, $deliveryItemId = null) {
     
-    if (NULL == $time) {
+    if (null == $time) {
         $time = date('c');
     }
     
-    $personId = is_null($user) ? NULL : $user['id'];
-    $orgId = is_null($organization) ? NULL : $organization['id'];
+    $personId = is_null($user) ? null : $user['id'];
+    $orgId = is_null($organization) ? null : $organization['id'];
     
     $log = ORM::for_table('log')->create();
     $log->set(array(

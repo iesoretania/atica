@@ -16,7 +16,7 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see [http://www.gnu.org/licenses/]. */
 
-$app->get('/arbol(/:id)', function ($id = NULL) use ($app, $user, $organization) {
+$app->get('/arbol(/:id)', function ($id = null) use ($app, $user, $organization) {
     if (!$user) {
         $app->redirect($app->urlFor('login'));
     }
@@ -31,7 +31,7 @@ $app->get('/arbol(/:id)', function ($id = NULL) use ($app, $user, $organization)
 
     $sidebar = getTree($organization['id'], $app, $id, $category, $parent);
 
-    if (NULL !== $id) {
+    if (null !== $id) {
         $data = getParsedDeliveriesByCategory($organization['id'], $id, $profileGender);//getParsedFoldersByCategory($id, $profileGender);
         // TODO: Optimizar leyendo todos los permisos de golpe para todas las
         // carpetas y colocándolos en un array
@@ -62,7 +62,7 @@ $app->get('/arbol(/:id)', function ($id = NULL) use ($app, $user, $organization)
         'folders' => $folders));
 })->name('tree');
 
-$app->get('/descargar/:kind/:cid/:id/(:p1/)(:p2/)', function ($kind, $cid, $id, $p1 = NULL, $p2 = NULL) use ($app, $user, $preferences) {
+$app->get('/descargar/:kind/:cid/:id/(:p1/)(:p2/)', function ($kind, $cid, $id, $p1 = null, $p2 = null) use ($app, $user, $preferences) {
 
     // $kind =
     // 1 -> la descarga se produce desde una carpeta del árbol, $cid = category.id
@@ -100,7 +100,7 @@ $app->get('/descargar/:kind/:cid/:id/(:p1/)(:p2/)', function ($kind, $cid, $id, 
 
     $res = $app->response();
     $res['Content-Description'] = 'File Transfer';
-    $res['Content-Type'] = ($delivery['mime'] == NULL) ?
+    $res['Content-Type'] = ($delivery['mime'] == null) ?
             'application/octet-stream' : $delivery['mime'];
     $res['Content-Disposition'] ='attachment; filename=' . basename($delivery['download_filename']);
     $res['Content-Transfer-Encoding'] = 'binary';
@@ -111,7 +111,7 @@ $app->get('/descargar/:kind/:cid/:id/(:p1/)(:p2/)', function ($kind, $cid, $id, 
     readfile($file);
 })->name('download');
 
-$app->map('/carpeta/:id(/:catid)', function ($id, $catid = NULL) use ($app, $user, $organization) {
+$app->map('/carpeta/:id(/:catid)', function ($id, $catid = null) use ($app, $user, $organization) {
     if (!$user) {
         $app->redirect($app->urlFor('login'));
     }
@@ -138,7 +138,7 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = NULL) use ($app, $use
         }
         $local->set('category_id', $_POST['category']);
         $local->set('display_name', $_POST['displayname']);
-        $local->set('description', strlen($_POST['description'])>0 ? $_POST['description'] : NULL);
+        $local->set('description', strlen($_POST['description'])>0 ? $_POST['description'] : null);
         $local->set('is_visible', $_POST['visible']);
         $local->set('is_divided', $_POST['divided']);
         $local->set('is_restricted', $_POST['restrictedaccess']);
@@ -183,7 +183,7 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = NULL) use ($app, $use
         $folder['category_id'] = $catid;
     }
     
-    if (NULL == $catid) {
+    if (null == $catid) {
         $catid = $folder['category_id'];
     }
     
@@ -215,7 +215,7 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = NULL) use ($app, $use
         'folder' => $folder));
 })->name('managefolder')->via('GET', 'POST');
 
-$app->get('/opcarpeta/:id/:oper(/:data)', function ($id, $oper, $data = NULL) use ($app, $user, $organization) {
+$app->get('/opcarpeta/:id/:oper(/:data)', function ($id, $oper, $data = null) use ($app, $user, $organization) {
     if (!$user['is_admin']) {
         $app->redirect($app->urlFor('login'));
     }
@@ -251,7 +251,7 @@ $app->get('/opcarpeta/:id/:oper(/:data)', function ($id, $oper, $data = NULL) us
 function getTree($orgId, $app, $id, &$matchedCategory, &$parentCategory) {
     $return = array();
     $currentData = array();
-    $currentCategory = NULL;
+    $currentCategory = null;
     $match = false;
 
     $data = ORM::for_table('category')->
@@ -262,7 +262,7 @@ function getTree($orgId, $app, $id, &$matchedCategory, &$parentCategory) {
 
     foreach ($data as $category) {
         if ($category['category_level'] == 1) {
-            if ($currentCategory != NULL) {
+            if ($currentCategory != null) {
                 $return[] = array(
                     'caption' => $currentCategory['display_name'],
                     'active' => $match,
@@ -289,7 +289,7 @@ function getTree($orgId, $app, $id, &$matchedCategory, &$parentCategory) {
             $match = $match || $localMatch;
         }
     }
-    if ($currentCategory != NULL) {
+    if ($currentCategory != null) {
         $return[] = array(
             'caption' => $currentCategory['display_name'],
             'active' => $match,
@@ -374,7 +374,7 @@ return ORM::for_table('folder')->
 }
 
 function getFolder($orgId, $folderId) {
-    if ((NULL == $folderId) || (0 == $folderId)) {
+    if ((null == $folderId) || (0 == $folderId)) {
         return false;
     }
     return getFolderObjectById($orgId, $folderId)->as_array();
@@ -389,12 +389,12 @@ function getCategories($orgId) {
     
     $return = array();
     
-    $current = NULL;
+    $current = null;
     $currentData = array();
     
     foreach($data as $element) {
         if ($element['category_level'] == 1) {
-            if ($current != NULL) {
+            if ($current != null) {
                 $return[] = array(
                     'info' => $current,
                     'data' => $currentData
@@ -407,7 +407,7 @@ function getCategories($orgId) {
             $currentData[] = $element;
         }
     }
-    if ($current != NULL) {
+    if ($current != null) {
         $return[] = array(
                     'info' => $current,
                     'data' => $currentData

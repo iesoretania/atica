@@ -49,8 +49,8 @@ class TwigExtensionTest extends PHPUnit_Framework_TestCase {
                 'halfmonths' => array('1ª quincena ', '2ª quincena ')
             );
             
-            $this->assertEquals($ext->parsePeriod(NULL, 3, $strings) , '');
-            $this->assertEquals($ext->parsePeriod(3, NULL, $strings) , '');
+            $this->assertEquals($ext->parsePeriod(null, 3, $strings) , '');
+            $this->assertEquals($ext->parsePeriod(3, null, $strings) , '');
             $this->assertEquals($ext->parsePeriod(0, 0, $strings) , '1ª sem. enero');
             $this->assertEquals($ext->parsePeriod(0, 3, $strings) , 'enero');
             $this->assertEquals($ext->parsePeriod(0, 1, $strings) , '1ª quincena enero');

@@ -22,7 +22,7 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
     }
 
     // ¿se busca la información del usuario activo?
-    $itsMe = ($id == NULL) || ($id == $user['id']);
+    $itsMe = ($id == null) || ($id == $user['id']);
 
     // si es un nuevo usuario, la única sección admitida es la cero
     if (($id == 0) && ($section != 0)) {
@@ -63,7 +63,7 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
         if (isset($_POST['displayname'])) {
             $local->set('display_name', $_POST['displayname']);
         }
-        if (isset($_POST['description']) && (NULL != $_POST['description'])) {
+        if (isset($_POST['description']) && (null != $_POST['description'])) {
             $local->set('description', $_POST['description']);
         }
         if (isset($_POST['firstname'])) {
@@ -89,7 +89,7 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
                 $local->set('user_name', $_POST['username']);
             }
             if (isset($_POST['description'])) {
-                $local->set('description', strlen($_POST['description']) > 0 ? $_POST['description'] : NULL);
+                $local->set('description', strlen($_POST['description']) > 0 ? $_POST['description'] : null);
             }
             // los flags de usuario activo y administrador local se grabarán
             // luego si es un usuario nuevo
