@@ -27,6 +27,8 @@ ORM::configure('driver_options', array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAME
 $preferences = array(
     'appname' => 'ÁTICA',
     'upload.folder' => "../data/",
+    // poner a true si sólo queremos enviar cookies a través de https
+    'security.securecookies' => false,
     'salt' => 'v2j4d+-),qh@80q]}6XLqbYrq=)`::HVh9VU9j~jDX?', // ¡¡¡cambiar por favor!!!
     'login.retries' => 5,   // 5 intentos infructuosos de entrar antes del bloqueo
     'login.block' => 5      // 5 minutos de bloqueo

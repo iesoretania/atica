@@ -19,6 +19,11 @@
 require '../vendor/autoload.php';
 require_once '../config/config.php';
 
+session_set_cookie_params(0, null, null,
+        isset($preferences['security.securecookies']) ?
+            $preferences['security.securecookies'] : false,
+        true);
+
 session_name('ATICAID');
 session_cache_limiter(false);
 session_start();
