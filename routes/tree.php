@@ -62,8 +62,11 @@ $app->get('/arbol(/:id)', function ($id = null) use ($app, $user, $organization)
         'folders' => $folders));
 })->name('tree');
 
-$app->get('/descargar/:kind/:cid/:id/(:p1/)(:p2/)', function ($kind, $cid, $id, $p1 = null, $p2 = null) use ($app, $user, $preferences) {
+$app->get('/descargar/:kind/:cid/:id/(:p1/)(:p2/)', function ($kind, $cid, $id, $p1 = null, $p2 = null) use ($app, $user, $preferences, $organization) {
 
+    $catId = null;
+    $groupId = null;
+    $eventId = null;
     // $kind =
     // 1 -> la descarga se produce desde una carpeta del árbol, $cid = category.id
     // 2 -> la descarga se produce desde un agrupamiento, $cid = grouping.id
@@ -74,12 +77,15 @@ $app->get('/descargar/:kind/:cid/:id/(:p1/)(:p2/)', function ($kind, $cid, $id, 
             if (!$user) {
                 $app->redirect($app->urlFor('login'));
             }
+            $catId = $cid;
             $errorUrl = $app->urlFor('tree', array('id' => $cid));
             break;
         case 2:
+            $groupId = $cid;
             $errorUrl = $app->urlFor('grouping', array('id' => $cid));
             break;
         case 3:
+            $eventId = $cid;
             $errorUrl = $app->urlFor('event', array('id' => $cid, 'pid' => $p1, 'aid' => $p2));
             break;
         default:
@@ -88,12 +94,18 @@ $app->get('/descargar/:kind/:cid/:id/(:p1/)(:p2/)', function ($kind, $cid, $id, 
 
     $delivery = getDelivery($id, $user['id']);
     if (!$delivery) {
+       doRegisterAction($app, $user, $organization, 'tree', 1, 'download_error', 'no delivery',
+               null, null, null, $eventId, $groupId, null, null, $id,
+               $delivery['current_delivery_id'], null, null);
        $app->flash('home_error', 'no_delivery');
        $app->redirect($errorUrl);
     }
     $file = $preferences['upload.folder'] . $delivery['download_path'];
 
     if (!file_exists($file)) {
+       doRegisterAction($app, $user, $organization, 'tree', 1, 'download_error', 'no document',
+               null, null, null, $eventId, $groupId, null, null, $id,
+               $delivery['current_delivery_id'], null, null);
        $app->flash('home_error', 'no_document');
        $app->redirect($errorUrl);
     }
@@ -108,6 +120,11 @@ $app->get('/descargar/:kind/:cid/:id/(:p1/)(:p2/)', function ($kind, $cid, $id, 
     $res['Cache-Control'] = 'must-revalidate';
     $res['Pragma'] = 'public';
     $res['Content-Length'] = $delivery['download_filesize'];
+    doRegisterAction($app, $user, $organization, 'tree', 0, 'download',
+            $delivery['download_filename'],
+            null, null, null, $eventId, $groupId, null, null, $id,
+            $delivery['current_delivery_id'], null, null);
+    
     readfile($file);
 })->name('download');
 
