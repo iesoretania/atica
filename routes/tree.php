@@ -137,7 +137,7 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = null) use ($app, $use
     $parent = array();
 
     $data = getCategories($organization['id']);
-    $allProfiles = getProfilesByOrganization($organization['id']);
+    $allProfiles = getProfilesByOrganization($organization['id'], true, true);
     $uploadProfiles = parseArray(getPermissionProfiles($id, 1));
     $managerProfiles = parseArray(getPermissionProfiles($id, 0));
     $restrictedProfiles = parseArray(getPermissionProfiles($id, 2));
