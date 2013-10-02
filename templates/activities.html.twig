@@ -52,7 +52,7 @@
             {% for event in activity.data %}
             {% set from = (event.from_week-base+48) % 48 %}
             {% set to = (event.to_week-base+48) % 48 %}
-            <tr {% if event.completed_date %}class="success"{% elseif (now>=from) and (now<=to) %}class="warning"{% elseif (event.is_automatic or event.is_manual) and ((now>=from) and (now>to)) %}class="danger"{% endif %}>
+            <tr {% if event.completed_date %}class="success"{% elseif (now>=from) and (now<=to) %}class="warning"{% elseif isMine and (event.is_automatic or event.is_manual) and ((now>=from) and (now>to)) %}class="danger"{% endif %}>
                 <td>{{ event.period_description }} {{ parsePeriod(event.from_week, event.to_week, period_labels) }}</td>
                 <td><a href="{{ urlFor('event', { 'id': event.id, 'aid': activity.info.activity_id, 'pid': profile.info.profile_id }) }}">{{ event.display_name }}</a>{% if user['is_admin'] %} <a class="delivery-tools hidden-print" title="Modificar actividad" href="{{ urlFor('manageevent', { 'id': event.id }) }}"><span class="icon-pencil"></span></a>{% endif %}</td>
                 {% if isMine %}

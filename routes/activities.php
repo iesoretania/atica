@@ -49,7 +49,7 @@ $app->get('/actividades(/:id)', function ($id = null) use ($app, $user, $config,
         else {
             $active = false;
         }
-        array_push($profile_ids, $profile['profile_group_id']);
+        array_push($profile_ids, $profile['id']);
         if (!in_array($profile['profile_group_id'], $profile_group_ids)) {
             $profile_group_ids[] = $profile['profile_group_id'];
         }
@@ -106,13 +106,20 @@ $app->get('/actividades(/:id)', function ($id = null) use ($app, $user, $config,
     if ($id) {
         // si es un perfil del usuario, extraer el perfil contenedor
         // si no, dejarlo como estaba
-        $idParam = isset($profiles[$id]) ? $profiles[$id]['profile_group_id'] : $id;
-        $profile_ids = array( $idParam );
+        if (isset($profiles[$id])) {
+            $profile_ids = array ( $id );
+            $profile_group_ids = array ($profiles[$id]['profile_group_id'] );    
+        }
+        else {
+            $profile_ids = array();
+            $profile_group_ids = array( $id );
+            $isMine = false;
+        }
     }
-
+    
     // obtener actividades
-    $events = getEventsForProfiles($profile_ids, $user, $config['calendar.base_week']);
-
+    $events = getEventsForProfiles($profile_ids, $profile_group_ids, $user, $config['calendar.base_week']);
+    
     // formatear los eventos en grupos de perfiles de arrays
     $parsedEvents = parseEvents($events,
             'profile_id', array('profile_display_name', 'profile_group_display_name', 'profile_id'),
@@ -244,7 +251,7 @@ function getUserOtherProfiles($user_id, $org_id, $current) {
     return $data;
 }
 
-function getEventsForProfiles($profile_ids, $user, $base = 33) {
+function getEventsForProfiles($profile_ids, $profile_group_ids, $user, $base = 33) {
     $genderChoice = array ('display_name_neutral', 'display_name_male', 'display_name_female');
     $data = ORM::for_table('event')->
             select('event.*')->
@@ -254,6 +261,7 @@ function getEventsForProfiles($profile_ids, $user, $base = 33) {
             select('activity.description', 'activity_description')->
             select('profile.display_name', 'profile_display_name')->
             select('profile_group.' . $genderChoice[$user['gender']], 'profile_group_display_name')->
+            select('profile.is_container')->
             select('completed_event.completed_date')->
             select_expr('(event.from_week+48-' . $base . ') % 48', 'n_from_week')->
             select_expr('(event.to_week+48-' . $base . ') % 48', 'n_to_week')->
@@ -268,10 +276,24 @@ function getEventsForProfiles($profile_ids, $user, $base = 33) {
             order_by_asc('n_from_week')->
             order_by_asc('n_to_week');
 
-    if ($profile_ids) {
-        $data = $data->where_in('profile_id', $profile_ids);
+    if (($profile_ids) || ($profile_group_ids)) {
+        $condition = '(';
+        if ($profile_ids) {
+            $placeholders1 = '?' . str_repeat(', ?', count($profile_ids)-1);
+            $condition .= 'profile_id IN (' . $placeholders1 . ')';
+        }
+        if ($profile_group_ids) {
+            $placeholders2 = ($profile_group_ids) ? '?' . str_repeat(', ?', count($profile_group_ids)-1) : '';
+            if ($profile_ids) {
+                $condition .= ' OR ';
+            }
+            $condition .= 'is_container=1 AND profile_group_id IN (' . $placeholders2 . ')';
+        }
+        $condition .= ')';
+        $data = $data->where_raw($condition,
+                array_merge($profile_ids, $profile_group_ids));
     }
-
+    
     return $data->find_array();
 }
 
