@@ -1,0 +1,55 @@
+{#  ATICA - Web application for supporting Quality Management Systems
+    Copyright (C) 2009-2013: Luis-Ramón López López
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
+
+{% macro select_date(prefix, current, showtime, classes) %}
+{% set year = current | slice(0, 4) %}
+{% set month = current | slice(4, 2) %}
+{% set day = current | slice(6, 2) %}
+{% set months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+                 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'] %}
+{% if classes %}
+<div class="row form-group">
+<div class="{{ classes }}">
+{% endif %}
+<select id="{{ prefix }}_year" class="form-control select">
+    {% for n in (year-20)..(year+20) %}
+    <option value="{{ n }}" {{ year == n ? ' selected'}}>{{n}}</option>
+    {% endfor %}
+</select>
+{% if classes %}
+</div>
+<div class="{{ classes }}">
+{% endif %}
+<select id="{{ prefix }}_month" class="form-control select {{ classes }}">
+    {% for n in 1..12 %}
+    <option value="{{ n }}" {{ month == n ? ' selected'}}>{{ months[n-1] }}</option>
+    {% endfor %}
+</select>
+{% if classes %}
+</div>
+<div class="{{ classes }}">
+{% endif %}
+<select id="{{ prefix }}_day" class="form-control select {{ classes }}">
+    {% for n in 1..31 %}
+    <option value="{{ n }}" {{ day == n ? ' selected'}}>{{n}}</option>
+    {% endfor %}
+</select>
+{% if classes %}
+</div>
+</div>
+{% endif %}
+
+{% endmacro %}

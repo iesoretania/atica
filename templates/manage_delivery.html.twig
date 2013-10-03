@@ -16,6 +16,7 @@
 
 {% extends "upload.html.twig" %}
 {% block upload_main_content %}
+{% import "macros.twig" as m %}
 <div class="panel panel-info">
     <div class="panel-heading">
         <h1>Modificación de una entrega: {{ delivery['display_name'] }}</h1>
@@ -30,9 +31,9 @@
         <div class="panel-body">
             <h3>Entrega</h3>
             <div class="form-group">
-                <label for="profile">Entrega realizada el</label>
+                <label for="profile">Entrega realizada el {{delivery['creation_date'] | date('Ymd')}}</label>
                 {% if user['is_admin'] %}
-                <p>{{ delivery['creation_date'] | date('Y-m-d') }}</p>
+                {{ m.select_date('creation', delivery['creation_date'] | date('YmdHM'), 'col-sm-3') }}
                 {% else %}
                 <p>{{ delivery['creation_date'] | date('Y-m-d') }}</p>
                 {% endif %}
