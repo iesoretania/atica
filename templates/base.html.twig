@@ -98,7 +98,10 @@
         {% block scripts %}
         {% endblock %}
         <script type="text/javascript">
-            $(function() { $('.showjs').css('display', 'block'); });
+            $(function() {
+                $('.showjs').css('display', 'block');
+                $('.showjs-inline').css('display', 'inline');
+            });
         </script>
     </body>
 </html>

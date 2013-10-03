@@ -238,6 +238,10 @@ footer {
     a:link:after, a:visited:after { content:"" }
 }
 
+.showjs-inline {
+    display: none;
+}
+
 /* select2 fixes */
 .form-control .select2-choice {
     border: 0;

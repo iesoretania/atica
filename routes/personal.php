@@ -257,6 +257,16 @@ $app->map('/listado(/:sort(/:filter))', function ($sort = 0, $filter = 1) use ($
         array('display_name' => $organization['display_name'])
     ));
     
+    if (isset($_POST['enable']) || isset($_POST['disable'])) {
+        if (enablePersons($organization['id'], $_POST['user'], isset($_POST['enable']))) {
+            $app->flash('save_ok', 'ok');
+        }
+        else {
+            $app->flash('save_error', 'error');
+        }
+        $app->redirect($app->request()->getPathInfo());
+    }
+    
     // lanzar plantilla
     $app->render('personal.html.twig', array(
         'navigation' => $breadcrumb,
@@ -426,4 +436,14 @@ function setUserProfiles($userId, $profiles) {
     }
     
     return $ok;
+}
+
+function enablePersons($orgId, $persons, $status) {
+    $organization = ORM::get_db()->quote($orgId);
+    $active = $status ? 1 : 0;
+    $list = ORM::get_db()->quote(implode(',', $persons));
+    return ORM::get_db()->exec('UPDATE person_organization SET is_active=' . $active . 
+            ' WHERE organization_id=' . $organization . ' AND '.
+            'person_id IN (' . $list . ');');
+    
 }
