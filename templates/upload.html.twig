@@ -22,8 +22,16 @@
 <script src="lib/select2/select2.min.js"></script>
 <script src="lib/select2/select2_locale_es.js"></script>
 <script>
-    $(document).ready(function() { $(".select").select2(); });
+    $(document).ready(function() {
+        $(".select").select2();
+        $(".auto-enable").attr('disabled', 'disabled');
+        $(".trigger").on('change', function() {
+            $(".auto-enable").removeAttr('disabled');
+        });
+    });
 </script>
+{% block morescripts %}
+{% endblock %}
 {% endblock %}
 {% block maincontent %}
 {% if flash['upload'] %}
@@ -125,10 +133,10 @@
             {% endif %}
             <div class="form-group">
                 <label for="document">Documento(s) a entregar</label>
-                <input type="file" multiple class="form-control" name="document[]">
+                <input type="file" multiple class="form-control trigger" name="document[]">
                 </div>
             <div class="form-group">
-                <button type="submit" class="btn btn-primary">Entregar en la plataforma</button>
+                <button type="submit" class="btn btn-primary auto-enable">Entregar en la plataforma</button>
                 <a class="btn btn-info" href="{{ urlFor('tree', { 'id': category.id } ) }}">Volver sin entregar</a>
             </div>
         </form>

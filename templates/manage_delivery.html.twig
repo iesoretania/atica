@@ -64,37 +64,29 @@
             <blockquote><p>Desde este apartado podrá añadir o modificar revisiones</p></blockquote>
             <div class="form-group">
                 <label for="document">Enviar un documento nuevo a la plataforma</label>
-                <input type="file" class="form-control" name="document[]">
+                <input type="file" class="form-control trigger" name="document[]">
                 <p class="help-block">El documento enviado podrá ser almacenado como una nueva revisión si se pulsa el botón de abajo o bien podrá reemplazar otro envío anterior de la lista.</p>
             </div>
             <div class="form-group">
-                <button type="submit" name="new" class="btn btn-primary">Entregar como nueva revisión</button>
+                <button type="submit" name="new" class="btn btn-primary auto-enable">Entregar como nueva revisión</button>
             </div>
         </div>
-        <table class="table table-striped table-condensed table-hover">
-            <thead>
-                <tr>
-                    <th class="col-md-1">Rev.</th>
-                    <th class="col-md-5">Nombre del documento</th>
-                    <th class="col-md-2">Fecha</th>
-                    <th class="col-md-2">Enviado por</th>
-                    <th class="col-md-1"></th>
-                    <th class="col-md-1"></th>
-                </tr>
-            </thead>
-            <tbody>    
+        <ul class="list-group">
             {% for revision in revisions %}
-                <tr{{ delivery['current_revision_id'] == revision['id'] ? ' class="warning"' }}>
-                    <td>{{ delivery['current_revision_id'] == revision['id'] ? '<strong>' }}{{ revision['revision_nr'] }}{{ delivery['current_revision_id'] == revision['id'] ? '</strong>' }}</td>
-                    <td>{{ revision['download_filename'] }}</td>
-                    <td>{{ revision['upload_date'] | date('Y-m-d') }}</td>
-                    <td>{{ uploaders[revision['uploader_person_id']]['display_name'] }}</td>
-                    <td><button class="btn btn-warning" name="replace{{ revision['id'] }}" disabled title="Cambia esta revisión por el documento indicado más arriba">Reemplazar</button></td>
-                    <td><button class="btn btn-danger" name="remove{{ revision['id'] }}" disabled title="Elimina esta revisión de la plataforma">Eliminar</button></td>
-                </tr>
+                <li class="list-group-item{{ delivery['current_revision_id'] == revision['id'] ? ' warning' }}">
+                    <h4>{{ delivery['current_revision_id'] == revision['id'] ? '<strong>' }}Rev. {{ revision['revision_nr'] }} - {{ revision['upload_date'] | date('Y-m-d') }}
+                    - {{ revision['download_filename'] }}{{ delivery['current_revision_id'] == revision['id'] ? '</strong>' }}</h4>
+                    <p>
+                    Entregado por <a href="{{ urlFor('personal', { 'id': revision['uploader_person_id'], 'section': 0 }) }}">{{ uploaders[revision['uploader_person_id']]['display_name'] }}</a></p>
+                    <p><button class="btn btn-warning auto-enable" name="replace{{ revision['id'] }}" title="Cambia esta revisión por el documento indicado más arriba">Reemplazar</button>
+                    <button class="btn btn-danger" name="remove{{ revision['id'] }}" title="Elimina esta revisión de la plataforma">Eliminar</button>
+                    {% if delivery['current_revision_id'] != revision['id'] %}
+                        <button class="btn btn-info" name="default{{ revision['id'] }}" title="Establecer como la revisión activa">Establecer como revisión activa</button>
+                    {% endif %}
+                    </p>
+                </li>
             {% endfor %}
-            </tbody>
-        </table>
+        </ul>
     </div>
 </form>
 {% endblock %}
