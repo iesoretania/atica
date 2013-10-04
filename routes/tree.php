@@ -357,9 +357,9 @@ function getFolders() {
             select('folder.*')->
             select_expr('sum(folder_permission.permission=0)','manage_permission')->
             select_expr('sum(folder_permission.permission=1)','upload_permission')->
-            inner_join('folder_permission', array('folder_permission.folder_id', '=', 'folder.id'))->
-            inner_join('profile', array('profile.id', '=', 'folder_permission.profile_id'))->
-            inner_join('person_profile', array('person_profile.profile_id', '=', 'profile.id'))->
+            left_outer_join('folder_permission', array('folder_permission.folder_id', '=', 'folder.id'))->
+            left_outer_join('profile', array('profile.id', '=', 'folder_permission.profile_id'))->
+            left_outer_join('person_profile', array('person_profile.profile_id', '=', 'profile.id'))->
             where('folder.is_visible', 1)->
             group_by('folder.id');
 }
