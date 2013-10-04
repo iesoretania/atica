@@ -168,11 +168,20 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = null) use ($app, $use
             if (isset($_POST['managers'])) {
                 $ok = $ok && setFolderProfiles($id, 0, $_POST['managers']);
             }
+            else {
+                $ok = $ok && setFolderProfiles($id, 0, array());
+            }
             if (isset($_POST['uploaders'])) {
                 $ok = $ok && setFolderProfiles($id, 1, $_POST['uploaders']);
             }
+            else {
+                $ok = $ok && setFolderProfiles($id, 1, array());
+            }
             if (isset($_POST['restricted'])) {
                 $ok = $ok && setFolderProfiles($id, 2, $_POST['restricted']);
+            }
+            else {
+                $ok = $ok && setFolderProfiles($id, 2, array());
             }
             if ($ok) {
                 $app->flash('save_ok', 'ok');
