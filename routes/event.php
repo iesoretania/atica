@@ -126,7 +126,7 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
         $profileGender = array();
         $data = getParsedFolderById($organization['id'], $folder['id'], $profileGender);
         $folderProfiles = getProfilesByFolderId($folder['id']);
-        $folders = getFoldersById($folder['id'], $user);
+        $folders = getFoldersById($folder['id']);
         $persons = getFolderPersonsByFolderId($folder['id']);
     }
     else {
@@ -355,6 +355,13 @@ function addCompletedEvent($eventId, $personId) {
     $completedEvent->set('completed_date', date('c'));
     
     return $completedEvent->save();
+}
+
+function removeCompletedEvent($eventId, $personId) {
+    return ORM::for_table('completed_event')->
+            where('event_id', $eventId)->
+            where('person_id', $personId)->
+            delete_many();
 }
 
 function getActivities($orgId) {

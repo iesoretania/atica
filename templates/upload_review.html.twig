@@ -92,7 +92,7 @@
                     <select class="form-control select" name="element{{ loop.index }}">
                     <option value="0">No entregar, descartar este documento</option>
                     {% for i in deliveries if i.c == 0 %}
-                        <option value="{{ i.id }}">{{ i.display_name }}</option>
+                        <option value="{{ i.id }}" {{ loop.parent.loop.index == loop.index ? ' selected' }} >{{ i.display_name }}</option>
                     {% endfor %}
                     </select>
                 </div>

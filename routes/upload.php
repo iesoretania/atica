@@ -112,34 +112,77 @@ $app->post('/enviar/:id', function ($id) use ($app, $user, $preferences, $organi
             parseArray(getFolderProfileDeliveryItems($profileId, $id)) :
             array();
 
-    $loop = 0;  
+    // si es falso, mostrar revisión de los documentos enviados
+    $finished = false;
+    
+    $loop = 0;
+    $failed = 0;
+    $success = 0;
     while (isset($_FILES['document']['name'][$loop])) {
+        $ok = true;
+        $type = "";
         if ( is_uploaded_file($_FILES['document']['tmp_name'][$loop]) ) {
             $hash = sha1_file($_FILES['document']['tmp_name'][$loop]);
             $filesize = filesize($_FILES['document']['tmp_name'][$loop]);
 
-            // Mover a una carpeta temporal
-            @mkdir($preferences['upload.folder'] . "temp/", 0770, true);
-            $tempDestination = $preferences['upload.folder'] . "temp/" . $hash;
-            move_uploaded_file($_FILES['document']['tmp_name'][$loop], $tempDestination);
+            if (!$list) {
+                $documentDestination = createDocumentFolder($preferences['upload.folder'], $hash);
+                if (move_uploaded_file($_FILES['document']['tmp_name'][$loop], $preferences['upload.folder'] . $documentDestination)) 
+                    $description = str_replace ('_', ' ', $_FILES['document']['name'][$loop]);
+                    if (false == createDelivery($id, $user['id'], $profileId, $_FILES['document']['name'][$loop], $description, null, null, $documentDestination, $hash, $filesize)) {
+                        $ok = false;
+                        $type = 'danger';
+                        $message = 'cannot register';
+                    }               
+                    else {
+                        $ok = true;
+                        $type = 'ok';
+                    }
+            }
+            else {
+                // Mover a una carpeta temporal
+                @mkdir($preferences['upload.folder'] . "temp/", 0770, true);
+                $tempDestination = $preferences['upload.folder'] . "temp/" . $hash;
+                move_uploaded_file($_FILES['document']['tmp_name'][$loop], $tempDestination);
 
-            $filename = $_FILES['document']['name'][$loop];
-            $info = pathinfo( $filename );
-            $description = $info['filename'];
-            $items[] = array(
-                'name' => $filename,
-                'description' => $description,
-                'hash' => $hash,
-                'filesize' => $filesize
-            );
-
+                $filename = $_FILES['document']['name'][$loop];
+                $info = pathinfo( $filename );
+                $description = $info['filename'];
+                $items[] = array(
+                    'name' => $filename,
+                    'description' => $description,
+                    'hash' => $hash,
+                    'filesize' => $filesize
+                );
+            }
         }
         else {
-            // TODO: error
+            $ok = false;
+            $type = 'danger';
+            $message = 'cannot move';
+        }
+        if ($type) {
+            if ($type == 'danger') {
+                $app->flash('upload_status_' . $failed, $type);
+                $app->flash('upload_name_' . $failed, $_FILES['document']['name'][$loop]);
+                $app->flash('upload_error_' . $failed, $message);
+                $failed++;
+            }
+            else {
+                $success++;
+            }
+            $finished = true;
         }
         $loop++;
     }
-
+    
+    if ($finished) {
+        $app->flash('upload', $failed);
+        if ($success>0) {
+            $app->flash('upload_ok', $success);
+        }
+        $app->redirect($app->urlFor('tree', array( 'id' => $folder['category_id'])));
+    }
     if (count($items)>0) {
         $category = array();
         $parent = array();
@@ -302,8 +345,9 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
     if ($success>0) {
         $app->flash('upload_ok', $success);
     }
-    $app->redirect($app->urlFor('upload', array('id' => $id)));
-
+    $app->redirect($app->urlFor('tree', array( 'id' => $folder['category_id'])));
+    //$app->redirect($app->urlFor('upload', array('id' => $id)));
+    
 })->name('confirm');
 
 function getDelivery($deliveryId) {
