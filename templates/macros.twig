@@ -18,38 +18,52 @@
 {% set year = current | slice(0, 4) %}
 {% set month = current | slice(4, 2) %}
 {% set day = current | slice(6, 2) %}
+{% set hour = current | slice(8, 2) %}
+{% set minute = current | slice(10, 2) %}
 {% set months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
                  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'] %}
-{% if classes %}
-<div class="row form-group">
-<div class="{{ classes }}">
-{% endif %}
-<select id="{{ prefix }}_year" class="form-control select">
-    {% for n in (year-20)..(year+20) %}
-    <option value="{{ n }}" {{ year == n ? ' selected'}}>{{n}}</option>
-    {% endfor %}
-</select>
-{% if classes %}
-</div>
-<div class="{{ classes }}">
-{% endif %}
-<select id="{{ prefix }}_month" class="form-control select {{ classes }}">
-    {% for n in 1..12 %}
-    <option value="{{ n }}" {{ month == n ? ' selected'}}>{{ months[n-1] }}</option>
-    {% endfor %}
-</select>
-{% if classes %}
-</div>
-<div class="{{ classes }}">
-{% endif %}
-<select id="{{ prefix }}_day" class="form-control select {{ classes }}">
-    {% for n in 1..31 %}
-    <option value="{{ n }}" {{ day == n ? ' selected'}}>{{n}}</option>
-    {% endfor %}
-</select>
-{% if classes %}
-</div>
-</div>
-{% endif %}
 
+<div class="row">
+    <div class="col-sm-2">
+        <select name="{{ prefix }}_year" class="form-control select {{ classes }}">
+            {% for n in (year-20)..(year+20) %}
+            <option value="{{ n }}" {{ year == n ? ' selected'}}>{{n}}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-sm-3">
+        <select name="{{ prefix }}_month" class="form-control select {{ classes }}">
+            {% for n in 1..12 %}
+            {% set dn = (n<10 ? '0') ~ n %}
+            <option value="{{ dn }}" {{ month == n ? ' selected'}}>{{ months[n-1] }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-sm-2">
+        <select name="{{ prefix }}_day" class="form-control select {{ classes }}">
+            {% for n in 1..31 %}
+            {% set dn = (n<10 ? '0') ~ n %}
+            <option value="{{ dn }}" {{ day == n ? ' selected'}}>{{n}}</option>
+            {% endfor %}
+        </select>
+    </div>
+    {% if showtime %}
+    <div class="col-sm-2">
+        <select name="{{ prefix }}_hour" class="form-control select {{ classes }}">
+            {% for n in 0..23 %}
+            {% set dn = (n<10 ? '0') ~ n %}
+            <option value="{{ dn }}" {{ hour == n ? ' selected'}}>{{ dn }} h.</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-sm-2">
+        <select name="{{ prefix }}_minute" class="form-control select {{ classes }}">
+            {% for n in 0..59 %}
+            {% set dn = (n<10 ? '0') ~ n %}
+            <option value="{{ dn }}" {{ minute == n ? ' selected'}}>{{ dn }} m.</option>
+            {% endfor %}
+        </select>
+    </div>    
+    {% endif %}
+</div>
 {% endmacro %}

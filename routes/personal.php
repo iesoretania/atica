@@ -168,25 +168,25 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
 
     // las secciones vienen en este array
     $options = array(
-        0 => array('caption' => 'Personal', 'template' => 'user_personal')/*,
+        0 => array('caption' => 'Personal', 'template' => 'user_personal', 'select2' => true)/*,
         2 => array('caption' => 'Envíos realizados', 'template' => 'user_deliveries') */
     );
 
     // si el usuario es administrador, permitir ver el informe de actividad
     if ($user['is_admin']) {
-        $options[3] = array('caption' => 'Registro de actividad', 'template' => 'user_personal');
+        $options[3] = array('caption' => 'Registro de actividad', 'template' => 'user_personal', 'select2' => false);
     }
 
     // si el usuario es administrador global, permitir asignar organizaciones
     if ($user['is_global_administrator']) {
-        $options[5] = array('caption' => 'Pertenencia a centros', 'template' => 'user_personal');
+        $options[5] = array('caption' => 'Pertenencia a centros', 'template' => 'user_personal', 'select2' => false);
     }
 
     // si el usuario es él mismo o es administrador, permitir cambiar la contraseña
     // y ver el informe de actividad
     if ($itsMe || $user['is_admin']) {
         //$options[3] = array('caption' => 'Registro de actividad', 'template' => 'personal');
-        $options[4] = array('caption' => 'Cambiar contraseña', 'template' => 'user_password');
+        $options[4] = array('caption' => 'Cambiar contraseña', 'template' => 'user_password', 'select2' => false);
     }
     
     // comprobar que la sección existe
@@ -234,6 +234,7 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
     $app->render($options[$section]['template'] . '.html.twig', array(
         'navigation' => $breadcrumb,
         'sidebar' => $sidebar,
+        'select2' => $options[$section]['select2'],
         'url' => $app->request()->getPathInfo(),
         'userData' => $userData,
         'profiles' => $profiles,

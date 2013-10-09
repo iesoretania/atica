@@ -79,6 +79,7 @@ $app->get('/enviar/:id', function ($id) use ($app, $user, $config, $organization
 
     $app->render('upload.html.twig', array(
         'navigation' => $breadcrumb, 'search' => false, 'sidebar' => $sidebar,
+        'select2' => true,
         'category' => $category,
         'folder' => $folder,
         'upload_profiles' => $uploadProfiles,
@@ -204,6 +205,7 @@ $app->post('/enviar/:id', function ($id) use ($app, $user, $preferences, $organi
 
         $app->render('upload_review.html.twig', array(
             'navigation' => $breadcrumb, 'search' => false, 'sidebar' => $sidebar,
+            'select2' => true,
             'category' => $category,
             'folder' => $folder,
             'items' => $list,

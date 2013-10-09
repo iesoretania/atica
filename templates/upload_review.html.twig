@@ -15,16 +15,6 @@
     along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
 
 {% extends "tree.html.twig" %}
-{% block stylesheets %}
- <link rel="stylesheet" href="lib/select2/select2.css">
-{% endblock %}
-{% block scripts %}
-<script src="lib/select2/select2.min.js"></script>
-<script src="lib/select2/select2_locale_es.js"></script>
-<script>
-    $(document).ready(function() { $(".select").select2(); });
-</script>
-{% endblock %}
 {% block maincontent %}
 <div class="panel panel-info">
     <div class="panel-heading">

@@ -230,6 +230,7 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = null) use ($app, $use
     
     $app->render('manage_folder.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar,
+        'select2' => true,
         'category' => $category,
         'url' => $app->request()->getPathInfo(),
         'data' => $data,

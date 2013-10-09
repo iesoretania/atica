@@ -15,24 +15,6 @@
     along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
 
 {% extends "tree.html.twig" %}
-{% block stylesheets %}
- <link rel="stylesheet" href="lib/select2/select2.css">
-{% endblock %}
-{% block scripts %}
-<script src="lib/select2/select2.min.js"></script>
-<script src="lib/select2/select2_locale_es.js"></script>
-<script>
-    $(document).ready(function() {
-        $(".select").select2();
-        $(".auto-enable").attr('disabled', 'disabled');
-        $(".trigger").on('change', function() {
-            $(".auto-enable").removeAttr('disabled');
-        });
-    });
-</script>
-{% block morescripts %}
-{% endblock %}
-{% endblock %}
 {% block maincontent %}
 {% block upload_main_content %}
 <div class="panel panel-info">

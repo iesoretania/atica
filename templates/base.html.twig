@@ -30,6 +30,9 @@
         <link rel="stylesheet" href="lib/bootstrap/css/font-awesome.min.css">
         <link rel="shortcut icon" href="img/favicon.ico" />
         <link rel="apple-touch-icon" href="img/mobile-favicon.png" />
+        {% if select2 %}
+        <link rel="stylesheet" href="lib/select2/select2.css">
+        {% endif %}
         {% block stylesheets %}
         {% endblock %}        
         <link rel="stylesheet" href="css/app.css" />
@@ -95,6 +98,19 @@
         <!--[if lt IE 9]>
           <script src="lib/respond/respond.min.js"></script>
         <![endif]-->
+        {% if select2 %}
+        <script src="lib/select2/select2.min.js"></script>
+        <script src="lib/select2/select2_locale_es.js"></script>
+        <script>
+            $(document).ready(function() {
+                $(".select").select2();
+                $(".auto-enable").attr('disabled', 'disabled');
+                $(".trigger").on('change', function() {
+                    $(".auto-enable").removeAttr('disabled');
+                });
+            });
+        </script>
+        {% endif %}
         {% block scripts %}
         {% endblock %}
         <script type="text/javascript">

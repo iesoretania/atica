@@ -261,6 +261,7 @@ $app->map('/actividad/:id', function ($id) use ($app, $user, $organization) {
     // generar página
     $app->render('manage_event.html.twig', array(
         'navigation' => $breadcrumb,
+        'select2' => true,
         'sidebar' => $sidebar,
         'url' => $app->request()->getPathInfo(),
         'folders' => $folders,
