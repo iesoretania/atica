@@ -504,11 +504,11 @@ function getDeliveriesFromFolders($folders, &$profileGender) {
                 inner_join('person', array('person.id', '=', 'revision.uploader_person_id'))->
                 where('folder_delivery.folder_id', $folder['id'])->
                 order_by_asc('delivery.profile_id')->
-                order_by_asc('order_nr');
+                order_by_asc('order_nr')->find_array();
         
         $return[] = array(
             'id' => $folder['id'],
-            'data' => $deliveries->find_array()
+            'data' => $deliveries
         );
         foreach($deliveries as $delivery) {
             if (isset($profileGender[$delivery['profile_id']])) {
