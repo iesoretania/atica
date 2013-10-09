@@ -136,6 +136,7 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
         $folders = array();
         $persons = array();        
     }
+    $app->flash('last_url', $app->request()->getPathInfo());
     
     // generar página
     $app->render('event.html.twig', array(

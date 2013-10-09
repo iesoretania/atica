@@ -109,6 +109,7 @@
                 </select>
             </div>
             <button type="submit" name="savefolder" class="btn btn-success">{{ folder.new ? 'Crear carpeta' : 'Guardar cambios' }}</button>
+            <a href="{{ flash['last_url'] }}" class="btn btn-info">Volver sin guardar los cambios</a>
         </form>
     </div>
 </div>

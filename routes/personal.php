@@ -123,11 +123,17 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
         if ($ok) {
             $app->flash('save_ok', 'ok');
             ORM::get_db()->commit();
+            
+            $url = isset($_SESSION['slim.flash']['last_url']) ?
+                $_SESSION['slim.flash']['last_url'] :
+                $app->urlFor('personal', array('id' => $id, 'section' => 0));
+        
+            $app->redirect($url);
+            
         } else {
             $app->flash('save_error', 'error');
             ORM::get_db()->rollBack();
         }
-        $app->redirect($app->urlFor('personal', array('id' => $id, 'section' => $section)));
     }
 
     // cambio de contraseña
@@ -157,9 +163,14 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
             $local->set('password', sha1($preferences['salt'] . $_POST['password1']));
             $local->save();
             $app->flash('save_ok', 'ok');
-            $app->redirect($app->urlFor('personal', array('id' => $id, 'section' => 0)));
+            $url = isset($_SESSION['slim.flash']['last_url']) ?
+                $_SESSION['slim.flash']['last_url'] :
+                $app->urlFor('personal', array('id' => $id, 'section' => 0));
+        
+            $app->redirect($url);
         }
     }
+    $app->flashKeep();
 
     // menú lateral de secciones
     $menu = array(
@@ -267,7 +278,8 @@ $app->map('/listado(/:sort(/:filter))', function ($sort = 0, $filter = 1) use ($
         }
         $app->redirect($app->request()->getPathInfo());
     }
-    
+    $app->flash('last_url', $app->request()->getPathInfo());
+        
     // lanzar plantilla
     $app->render('personal.html.twig', array(
         'navigation' => $breadcrumb,

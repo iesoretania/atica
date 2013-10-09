@@ -51,6 +51,7 @@ $app->get('/arbol(/:id)', function ($id = null) use ($app, $user, $organization)
             array('display_name' => 'Árbol', 'target' => '#')
         );
     }
+    $app->flash('last_url', $app->request()->getPathInfo());
     
     $app->render('tree.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar,
@@ -196,8 +197,11 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = null) use ($app, $use
             $app->flash('save_error', 'error');
             ORM::get_db()->rollBack();
         }
+        $url = isset($_SESSION['slim.flash']['last_url']) ?
+                $_SESSION['slim.flash']['last_url'] :
+                $app->request()->getPathInfo();
         
-        $app->redirect($app->request()->getPathInfo());
+        $app->redirect($url);
     }
     
     $folder = getFolder($organization['id'], $id);
@@ -227,6 +231,8 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = null) use ($app, $use
         array('display_name' => $category['display_name'], 'target' => $app->urlFor('tree', array('id' => $catid))),
         array('display_name' => 'Gestionar carpeta')
     );
+    
+    $app->flashKeep();
     
     $app->render('manage_folder.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar,

@@ -77,6 +77,8 @@ $app->get('/enviar/:id', function ($id) use ($app, $user, $config, $organization
         array('display_name' => 'Enviar documento')
     );
 
+    $app->flashKeep();
+    
     $app->render('upload.html.twig', array(
         'navigation' => $breadcrumb, 'search' => false, 'sidebar' => $sidebar,
         'select2' => true,
@@ -128,8 +130,11 @@ $app->post('/enviar/:id', function ($id) use ($app, $user, $preferences, $organi
 
             if (!$list) {
                 $documentDestination = createDocumentFolder($preferences['upload.folder'], $hash);
-                if (move_uploaded_file($_FILES['document']['tmp_name'][$loop], $preferences['upload.folder'] . $documentDestination)) 
-                    $description = str_replace ('_', ' ', $_FILES['document']['name'][$loop]);
+                if (move_uploaded_file($_FILES['document']['tmp_name'][$loop], $preferences['upload.folder'] . $documentDestination))
+                    $filename = $_FILES['document']['name'][$loop];
+                    $info = pathinfo( $filename );
+                    $description = str_replace ('_', ' ', $info['filename']);
+                    
                     if (false == createDelivery($id, $user['id'], $profileId, $_FILES['document']['name'][$loop], $description, null, null, $documentDestination, $hash, $filesize)) {
                         $ok = false;
                         $type = 'danger';
@@ -182,37 +187,43 @@ $app->post('/enviar/:id', function ($id) use ($app, $user, $preferences, $organi
         if ($success>0) {
             $app->flash('upload_ok', $success);
         }
-        $app->redirect($app->urlFor('tree', array( 'id' => $folder['category_id'])));
+        $url = isset($_SESSION['slim.flash']['last_url']) ?
+            $_SESSION['slim.flash']['last_url'] :
+            $app->urlFor('tree', array( 'id' => $folder['category_id']));
+        
+        $app->redirect($url);
     }
-    if (count($items)>0) {
-        $category = array();
-        $parent = array();
 
-        $sidebar = getTree($organization['id'], $app, $folder['category_id'], $category, $parent);
+    $category = array();
+    $parent = array();
 
-        $breadcrumb = array(
-            array('display_name' => 'Árbol', 'target' => $app->urlFor('tree')),
-            array('display_name' => $parent['display_name'], 'target' => $app->urlFor('tree')),
-            array('display_name' => $category['display_name'], 'target' => $app->urlFor('tree', array('id' => $category['id']))),
-            array('display_name' => 'Revisar documento')
-        );
+    $sidebar = getTree($organization['id'], $app, $folder['category_id'], $category, $parent);
 
-        $profile = $profileIsSet ? getProfile($profileId) : array();
+    $breadcrumb = array(
+        array('display_name' => 'Árbol', 'target' => $app->urlFor('tree')),
+        array('display_name' => $parent['display_name'], 'target' => $app->urlFor('tree')),
+        array('display_name' => $category['display_name'], 'target' => $app->urlFor('tree', array('id' => $category['id']))),
+        array('display_name' => 'Revisar documento')
+    );
 
-        $deliveries = $profileIsSet ?
-                getFolderProfileDeliveredItems($profileId, $id) :
-                array();
+    $profile = $profileIsSet ? getProfile($profileId) : array();
 
-        $app->render('upload_review.html.twig', array(
-            'navigation' => $breadcrumb, 'search' => false, 'sidebar' => $sidebar,
-            'select2' => true,
-            'category' => $category,
-            'folder' => $folder,
-            'items' => $list,
-            'profile' => $profile,
-            'deliveries' => $deliveries,
-            'data' => $items));
-    }
+    $deliveries = $profileIsSet ?
+            getFolderProfileDeliveredItems($profileId, $id) :
+            array();
+
+    $app->flashKeep();
+
+    $app->render('upload_review.html.twig', array(
+        'navigation' => $breadcrumb, 'search' => false, 'sidebar' => $sidebar,
+        'select2' => true,
+        'category' => $category,
+        'folder' => $folder,
+        'items' => $list,
+        'profile' => $profile,
+        'deliveries' => $deliveries,
+        'data' => $items));
+
 });
 
 $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $organization) {

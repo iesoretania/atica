@@ -91,7 +91,7 @@
                 </div>
             <div class="form-group">
                 <button type="submit" class="btn btn-primary auto-enable">Entregar en la plataforma</button>
-                <a class="btn btn-info" href="{{ urlFor('tree', { 'id': category.id } ) }}">Volver sin entregar</a>
+                <a class="btn btn-info" href="{{ flash['last_url'] }}">Volver sin entregar</a>
             </div>
         </form>
     </div>
