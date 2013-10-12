@@ -28,31 +28,29 @@
 </div>
 <form class="form" enctype="multipart/form-data" role="form" method="post" action="{{ url }}">
     <div class="panel panel-default">
-        <div class="panel-body">
+        <div class="panel-body form-horizontal">
             <h3>Entrega</h3>
             <div class="form-group">
-                <label for="profile">Entrega realizada el </label>
-                {% if user['is_admin'] %}
-                {{ m.select_date('creation', delivery['creation_date'] | date('YmdHi'), true) }}
-                {% else %}
-                <p>{{ delivery['creation_date'] | date('Y-m-d') }}</p>
-                {% endif %}
+                <label class="col-md-2 control-label" for="creation">Realizada el </label>
+                    <div class="col-md-10">
+                    {% if user['is_admin'] %}
+                    {{ m.select_date('creation', delivery['creation_date'] | date('YmdHi'), true) }}
+                    {% else %}
+                    <p>{{ delivery['creation_date'] | date('Y-m-d') }}</p>
+                    {% endif %}
+                </div>
             </div>            {% if folder['is_divided'] %}
             <div class="form-group">
-                <label for="profile">Entregado como</label>
-                <select class="form-control select" name="profile">
-                    {% for profile in upload_as %}<option value="{{ profile['id'] }}" {{ (delivery['profile_id'] == profile['id']) ? " selected" : "" }}>{{ [profile['display_name_neutral'], profile['display_name_male'], profile['display_name_female']][user['gender']] }}{% if profile['display_name'] %} ({{ profile['display_name'] }}){% endif %}</option>{% endfor %}
-                </select>
+                <label class="col-md-2 control-label" for="profile">Asociada al perfil</label>
+                <div class="col-md-10">
+                    <select class="form-control select" name="profile">
+                        {% for profile in upload_as %}<option value="{{ profile['id'] }}" {{ (delivery['profile_id'] == profile['id']) ? " selected" : "" }}>{{ [profile['display_name_neutral'], profile['display_name_male'], profile['display_name_female']][user['gender']] }}{% if profile['display_name'] %} ({{ profile['display_name'] }}){% endif %}</option>{% endfor %}
+                    </select>
+                </div>
             </div>
             {% endif %}
-            <div class="form-group">
-                <label for="displayname">Nombre a mostrar</label>
-                <input type="text" class="form-control" name="displayname" value="{{ delivery['display_name'] }}"></input>
-            </div>
-            <div class="form-group">
-                <label for="description">Descripción detallada</label>
-                <textarea class="form-control" rows="3" name="description" value="{{ delivery['description'] }}"></textarea>
-            </div>
+            {{ m.input_text('displayname', 10, 'Nombre a mostrar', 'Nombre con el que se mostrará la entrega en los listados', delivery['display_name']) }}
+            {{ m.input_textarea('description', 3, 'Descripción detallada', 'Notas adicionales sobre la entrega', delivery['description']) }}
         </div>
         <div class="panel-footer">
             <button type="submit" name="save" class="btn btn-success">Guardar cambios de la entrega</button>

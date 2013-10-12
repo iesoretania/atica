@@ -14,6 +14,56 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
 
+{% macro input_text(name, mdLength, description, placeholder, value, enabled = true, maxlength, textclass, other) %}
+<div class="form-group{{ textclass ? ' text-' ~ textclass }}">
+    <label for="{{ name }}" class="col-md-2 control-label">{{ description }}</label>
+    <div class="col-md-{{mdLength}}">
+        <input type="text" class="form-control" name="{{ name }}" id="{{ name }}" placeholder="{{ placeholder }}"{% if value %} value="{{ value }}"{% endif %}{% if maxlength %} maxlength="{{ maxlength }}"{% endif %}{% if not enabled %} disabled="disabled"{% endif %} {{ other | raw }}>
+    </div>
+</div> 
+{% endmacro %}
+{% macro input_radio(name, description, value1, description1, value2, description2, current, enabled = true, textclass) %}
+<div class="form-group{{ textclass ? ' text-' ~ textclass }}">
+    <label class="col-md-2 control-label">{{ description }}</label>
+    <div class="col-md-10">
+        <label class="radio-inline"><input type="radio" name="{{ name }}" value="{{ value1 }}" {% if (value1 == current) %} checked="checked"{% endif %}{{ enabled ? '' : ' disabled' }}> {{ description1 }}</label>
+        <label class="radio-inline"><input type="radio" name="{{ name }}" value="{{ value2 }}" {% if (value2 == current) %} checked="checked"{% endif %}{{ enabled ? '' : ' disabled' }}> {{ description2 }}</label>
+    </div>
+</div>
+{% endmacro %}
+{% macro input_textarea(name, rows, description, placeholder, value, enabled = true, textclass) %}
+<div class="form-group{{ textclass ? ' text-' ~ textclass }}">
+    <label for="{{ name }}" class="col-md-2 control-label">{{ description }}</label>
+    <div class="col-md-10">
+        <textarea class="form-control" name="{{ name }}" id="{{ name }}" rows="{{ rows }}" placeholder="{{ placeholder }}"{{ enabled ? '' : ' disabled' }}>{{ value }}</textarea>
+    </div>
+</div>
+{% endmacro %}
+{% macro input_password(name, mdLength, description, placeholder, value, enabled = true, maxlength, textclass, other) %}
+<div class="form-group{{ textclass ? ' text-' ~ textclass }}">
+    <label for="{{ name }}" class="col-md-2 control-label">{{ description }}</label>
+    <div class="col-md-{{mdLength}}">
+        <input type="password" class="form-control" name="{{ name }}" id="{{ name }}" placeholder="{{ placeholder }}"{% if value %} value="{{ value }}"{% endif %}{% if maxlength %} maxlength="{{ maxlength }}"{% endif %}{% if not enabled %} disabled="disabled"{% endif %} {{ other | raw }}>
+    </div>
+</div>
+{% endmacro %}     
+{% macro input_profiles(name, description, profiles, allProfiles, gender, enabled = true, textclass) %}
+<div class="form-group{{ textclass ? ' text-' ~ textclass }}">
+    <label class="col-md-2 control-label">{{ description }}</label>
+    <div class="col-md-10">
+        {% if enabled %}
+            <select class="form-control select" multiple name="{{name}}[]">
+            {% for prof in allProfiles %}
+            <option value="{{ prof['id'] }}" {% if profiles[prof['id']] %} selected {% endif %}>{{ [prof['display_name_neutral'], prof['display_name_male'], prof['display_name_female']][gender] }}{% if prof['display_name'] %} ({{ prof['display_name'] }}){% endif %}</option>
+            {% endfor %}
+            </select>
+        {% else %}
+            <textarea class="form-control" disabled rows="3">{% for profile in profiles %}{{ [profile['display_name_neutral'], profile['display_name_male'], profile['display_name_female']][gender] }}{% if profile['display_name'] %} ({{ profile['display_name'] }}){% endif %}{{ loop.last ? '' : ', ' }}{% endfor %}</textarea>
+        {% endif %}
+    </div>
+</div>
+{% endmacro %}
+
 {% macro select_date(prefix, current, showtime, classes) %}
 {% set year = current | slice(0, 4) %}
 {% set month = current | slice(4, 2) %}

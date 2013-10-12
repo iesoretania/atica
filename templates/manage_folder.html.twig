@@ -16,6 +16,7 @@
 
 {% extends "tree.html.twig" %}
 {% block maincontent %}
+{% import "macros.twig" as m %}
 <div class="panel panel-info">
     <div class="panel-heading">
     <h1>{{ new ? 'Nueva carpeta' : 'Gestionar carpeta: ' ~ folder['display_name'] }}</h1>
@@ -27,87 +28,28 @@
         <form class="form-horizontal" role="form" method="post" action="{{ url }}">
             <div class="form-group">
                 <label for="category" class="col-md-2 control-label">Pertenece a</label>
-                <select class="select col-md-10" id="category" name="category">
-                    {% for categories in data %}
-                    <optgroup label="{{ categories.info.display_name }}">
-                        {% for category in categories.data %}
-                        <option value="{{ category['id'] }}" {% if category['id'] == folder['category_id'] %} selected {% endif %}>{{ category['display_name'] }}</option>
+                <div class="col-md-10">
+                    <select class="form-control select" id="category" name="category">
+                        {% for categories in data %}
+                        <optgroup label="{{ categories.info.display_name }}">
+                            {% for category in categories.data %}
+                            <option value="{{ category['id'] }}" {% if category['id'] == folder['category_id'] %} selected {% endif %}>{{ category['display_name'] }}</option>
+                            {% endfor %}
+                        </optgroup>
                         {% endfor %}
-                    </optgroup>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="displayname" class="col-md-2 control-label">Nombre de la carpeta</label>
-                <div class="col-md-10">
-                    <input type="text" class="form-control" name="displayname" id="displayname" placeholder="Nombre de la carpeta que se mostrará" value="{{ folder.display_name }}">
+                    </select>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="description" class="col-md-2 control-label">Más información</label>
-                <div class="col-md-10">
-                    <textarea class="form-control" name="description" id="description" rows="3" placeholder="Descripción del contenido de la carpeta e instrucciones de uso">{{ folder.description }}</textarea>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-2 control-label">Visible</label>
-                <div class="col-md-10">
-                    <label class="radio-inline"><input type="radio" name="visible" value="0" {{folder.is_visible ? '' : ' checked="checked"' }}> Oculta</label>
-                    <label class="radio-inline"><input type="radio" name="visible" value="1" {{folder.is_visible ? ' checked="checked"' : ''}}> Visible</label>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-2 control-label">Almacenar perfil en envío</label>
-                <div class="col-md-10">
-                    <label class="radio-inline"><input type="radio" name="divided" value="0" {{folder.is_divided ? '' : ' checked="checked"' }}> No</label>
-                    <label class="radio-inline"><input type="radio" name="divided" value="1" {{folder.is_divided ? ' checked="checked"' : ''}}> Sí, se organizan por perfil</label>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-2 control-label">Mostrar nº de revisión</label>
-                <div class="col-md-10">
-                    <label class="radio-inline"><input type="radio" name="revisionnr" value="0" {{folder.show_revision_nr ? '' : ' checked="checked"' }}> No</label>
-                    <label class="radio-inline"><input type="radio" name="revisionnr" value="1" {{folder.show_revision_nr ? ' checked="checked"' : ''}}> Sí</label>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-2 control-label">Al comenzar un nuevo curso</label>
-                <div class="col-md-10">
-                    <label class="radio-inline"><input type="radio" name="autoclean" value="0" {{folder.show_revision_nr ? '' : ' checked="checked"' }}> Mantener el contenido</label>
-                    <label class="radio-inline"><input type="radio" name="autoclean" value="1" {{folder.show_revision_nr ? ' checked="checked"' : ''}}> Guardar un histórico y vaciar las entregas</label>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="managers" class="col-md-2 control-label">Responsables</label>
-                <select class="select col-md-10" multiple id="managers" name="managers[]">
-                    {% for profile in allProfiles %}
-                    <option value="{{ profile['id'] }}" {% if managers[profile['id']] %} selected {% endif %}>{{ profile['display_name_neutral'] }}{% if profile['display_name'] %} ({{ profile['display_name'] }}){% endif %}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="uploaders" class="col-md-2 control-label">Pueden entregar</label>
-                <select class="select col-md-10" multiple id="uploaders" name="uploaders[]">
-                     {% for profile in allProfiles %}
-                    <option value="{{ profile['id'] }}" {% if uploaders[profile['id']] %} selected {% endif %}>{{ profile['display_name_neutral'] }}{% if profile['display_name'] %} ({{ profile['display_name'] }}){% endif %}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="col-md-2 control-label">Acceso restringido</label>
-                <div class="col-md-10">
-                    <label class="radio-inline"><input type="radio" name="restrictedaccess" value="0" {{folder.is_restricted ? '' : ' checked="checked"' }}> No, todos pueden ver el contenido</label>
-                    <label class="radio-inline"><input type="radio" name="restrictedaccess" value="1" {{folder.is_restricted ? ' checked="checked"' : ''}}> Sí, sólo algunos perfiles pueden ver el contenido</label>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="uploaders" class="col-md-2 control-label">Tienen acceso si está restringido</label>
-                <select class="select col-md-10" multiple id="restricted" name="restricted[]">
-                     {% for profile in allProfiles %}
-                    <option value="{{ profile['id'] }}" {% if restricted[profile['id']] %} selected {% endif %}>{{ profile['display_name_neutral'] }}{% if profile['display_name'] %} ({{ profile['display_name'] }}){% endif %}</option>
-                    {% endfor %}
-                </select>
-            </div>
+            {{ m.input_text('displayname', 10, 'Nombre de la carpeta', 'Nombre de la carpeta que se mostrará', folder['display_name']) }}
+            {{ m.input_textarea('description', 8, 'Más información', 'Descripción del contenido de la carpeta e instrucciones de uso', folder['description']) }}
+            {{ m.input_radio('visible', 'Visibilidad', '0', 'Carpeta oculta', '1', 'Carpeta visible', folder['is_visible']) }}
+            {{ m.input_radio('divided', 'Almacenar perfil en la entrega', '0', 'No', '1', 'Sí, las entregas se organizarán por perfiles', folder['is_divided']) }}
+            {{ m.input_radio('revisionnr', 'Mostrar nº de revisión', '0', 'No mostrarlo', '1', 'Sí, se mostrará en los listados el nº de revisión actual', folder['show_revision_nr']) }}
+            {{ m.input_radio('autoclean', 'Al comenzar un nuevo curso', '0', 'Mantener el contenido', '1', 'Guardar un histórico y vaciar las entregas', folder['auto_clean']) }}
+            {{ m.input_profiles('managers', 'Responsables', managers, allProfiles, 0) }}
+            {{ m.input_profiles('uploaders', 'Pueden entregar', uploaders, allProfiles, 0) }}
+            {{ m.input_radio('restrictedaccess', 'Acceso restringido', '0', 'No, todos pueden ver el contenido', '1', 'Sí, sólo algunos perfiles pueden ver el contenido', folder['is_restricted']) }}
+            {{ m.input_profiles('restricted', 'Tienen acceso si está restringido', restricted, allProfiles, 0) }}
             <button type="submit" name="savefolder" class="btn btn-success">{{ folder.new ? 'Crear carpeta' : 'Guardar cambios' }}</button>
             <a href="{{ flash['last_url'] }}" class="btn btn-info">Volver sin guardar los cambios</a>
         </form>

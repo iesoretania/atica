@@ -16,13 +16,10 @@
 
 {% extends "layout.html.twig" %}
 {% block maincontent %}
+{% import 'macros.twig' as m %}
 {% set edit = local or user['is_admin'] %}
-{% set email_enabled = (userData['email_enabled'] == 1) %}
-{% set male = (userData['gender'] == 1) %}
-{% set female = (userData['gender'] == 2) %}
 {% set global_admin = (userData['is_global_administrator'] == 1) %}
 {% set local_admin = (userData['is_local_administrator'] == 1) %}
-{% set active = (userData['is_active'] == 1) %}
 <div class="panel panel-info">
     <div class="panel-heading">
 {% if local %}
@@ -37,103 +34,25 @@
 {% endif %}
         <form class="form-horizontal" role="form" method="post" action="{{ url }}">
             {% if user.is_admin %}
-            <div class="form-group">
-                <label for="username" class="col-md-2 control-label">Nombre de usuario</label>
-                <div class="col-md-10">
-                    <input type="text" class="form-control" name="username" id="username" placeholder="Nombre de usuario para entrar en la plataforma" value="{{ userData.user_name }}">
-                </div>
-            </div>              
+            {{ m.input_text('username', '10', 'Nombre de usuario', 'Nombre de usuario para entrar en la plataforma', userData.user_name, edit) }}
             {% endif %}
-            <div class="form-group">
-                <label class="col-md-2 control-label">Estado</label>
-                <div class="col-md-10">
-                    <label class="radio-inline"><input type="radio" name="active" value="0" {{active ? '' : ' checked="checked"' }}{{ (user.is_admin and not local) ? '' : ' disabled' }}> Usuario no activo</label>
-                    <label class="radio-inline"><input type="radio" name="active" value="1" {{active ? ' checked="checked"' : ''}}{{ (user.is_admin and not local) ? '' : ' disabled' }}> Usuario activo</label>
-                </div>
-            </div>                
-            <div class="form-group">
-                <label for="displayname" class="col-md-2 control-label">Nombre visible</label>
-                <div class="col-md-10">
-                    <input type="text" class="form-control" name="displayname" id="displayname" placeholder="Nombre con el que aparecerá en la plataforma" value="{{ userData.display_name }}"{{ edit ? '' : ' disabled' }}>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="firstname" class="col-md-2 control-label">Nombre</label>
-                <div class="col-md-10">
-                    <input type="text" class="form-control" name="firstname" id="firstname" placeholder="Nombre completo sin abreviaturas" value="{{ userData.first_name }}"{{ edit ? '' : ' disabled' }}>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="lastname" class="col-md-2 control-label">Apellidos</label>
-                <div class="col-md-10">
-                    <input type="text" class="form-control" name="lastname" id="lastname" placeholder="Apellidos completos" value="{{ userData.last_name }}"{{ edit ? '' : ' disabled' }}>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="initials" class="col-md-2 control-label">Iniciales</label>
-                <div class="col-md-5">
-                    <input type="text" maxlength="5" class="form-control" name="initials" id="initials" placeholder="Iniciales en mayúsculas sin espacios ni puntos" value="{{ userData.initials }}"{{ edit ?: ' disabled' }}>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-2 control-label">Sexo</label>
-                <div class="col-md-10">
-                    <label class="radio-inline"><input type="radio" name="gender" id="male" value="1" {{male ? ' checked="checked"' }}{{ edit ? '' : ' disabled' }}> Hombre</label>
-                    <label class="radio-inline"><input type="radio" name="gender" id="female" value="2" {{female ? ' checked="checked"' : ''}}{{ edit ? '' : ' disabled' }}> Mujer</label>
-                </div>
-            </div>
+            {{ m.input_radio('active', 'Estado', '0', 'Usuario no activo', '1', 'Usuario activo', userData['is_active'], (user.is_admin and not local)) }}
+            {{ m.input_text('displayname', '10', 'Nombre visible', 'Nombre con el que aparecerá en la plataforma', userData.display_name, edit) }}
+            {{ m.input_text('firstname', '10', 'Nombre', 'Nombre completo sin abreviaturas', userData.first_name, edit) }}
+            {{ m.input_text('lastname', '10', 'Apellidos', 'Apellidos completos', userData.last_name, edit) }}
+            {{ m.input_text('initials', '5', 'Iniciales', 'Iniciales en mayúsculas sin espacios ni puntos', userData.initials, edit, 5) }}
+            {{ m.input_radio('gender', 'Sexo', '1', 'Hombre', '2', 'Mujer', userData['gender'], edit) }}
             {% if edit %}
-            <div class="form-group">
-                <label for="email" class="col-md-2 control-label">Correo electrónico</label>
-                <div class="col-md-6">
-                    <input type="text" class="form-control" name="email" id="email" placeholder="Correo electrónico donde recibir las notificaciones" value="{{ userData.email }}"{{ edit ? '' : ' disabled' }}>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-2 control-label">Notificaciones por correo</label>
-                <div class="col-md-10">
-                    <label class="radio-inline"><input type="radio" name="notify" id="dont_notify" value="0"{{email_enabled ? '' : ' checked="checked"' }}> No quiero recibir notificaciones</label>
-                    <label class="radio-inline"><input type="radio" name="notify" id="do_notify" value="1"{{email_enabled ? ' checked="checked"' }}> Sí, quiero recibirlas</label>
-                </div>
-            </div>
+            {{ m.input_text('email', '6', 'Correo electrónico', 'Correo electrónico donde recibir las notificaciones', userData.email, edit) }}
+            {{ m.input_radio('notify', 'Notificaciones por correo', '0', 'No quiero recibir notificaciones', '1', 'Sí, quiero recibirlas', userData['email_enabled'], edit) }}
             {% endif %}
-            <div class="form-group">
-                <label class="col-md-2 control-label">Perfiles asociados</label>
-                <div class="col-md-10">
-                    {% if user.is_admin %}
-                        <select class="form-control select" multiple id="profiles" name="profiles[]">
-                        {% for prof in allProfiles %}
-                        <option value="{{ prof['id'] }}" {% if profiles[prof['id']] %} selected {% endif %}>{{ [prof['display_name_neutral'], prof['display_name_male'], prof['display_name_female']][userData['gender']] }}{% if prof['display_name'] %} ({{ prof['display_name'] }}){% endif %}</option>
-                        {% endfor %}
-                        </select>
-                    {% else %}
-                        <textarea class="form-control" name="profilelist" disabled rows="3">{% for profile in profiles %}{{ [profile['display_name_neutral'], profile['display_name_male'], profile['display_name_female']][userData['gender']] }}{% if profile['display_name'] %} ({{ profile['display_name'] }}){% endif %}{{ loop.last ? '' : ', ' }}{% endfor %}</textarea>
-                    {% endif %}
-                </div>
-            </div>             
+            {{ m.input_profiles('profiles', 'Perfiles asociados', profiles, allProfiles, userData['gender'], user.is_admin) }}
             {% if user.is_admin %}
-            <div class="form-group text-danger">
-                <label class="col-md-2 control-label">Administración local</label>
-                <div class="col-md-10">
-                    <label class="radio-inline"><input type="radio" name="localadmin" value="0"{{local_admin ? '' : ' checked="checked"' }}> No</label>
-                    <label class="radio-inline"><input type="radio" name="localadmin" value="1"{{local_admin ? ' checked="checked"' }}> Sí, puede administrar este centro</label>
-                </div>
-            </div>                
+            {{ m.input_radio('localadmin', 'Administración local', '0', 'No', '1', 'Sí, puede administrar este centro', local_admin, edit, 'danger') }}
             {% if user.is_global_administrator %}
-            <div class="form-group text-danger">
-                <label class="col-md-2 control-label">Administración global</label>
-                <div class="col-md-10">
-                    <label class="radio-inline"><input type="radio" name="globaladmin" value="0"{{global_admin ? '' : ' checked="checked"' }}{{ local ? ' disabled' }}> No</label>
-                    <label class="radio-inline"><input type="radio" name="globaladmin" value="1"{{global_admin ? ' checked="checked"' }}{{ local ? ' disabled' }}> Sí, puede administrar la plataforma completa</label>
-                </div>
-            </div>
+            {{ m.input_radio('globaladmin', 'Administración global', '0', 'No', '1', 'Sí, puede administrar la plataforma completa', global_admin, not local, 'danger') }}
             {% endif %}
-            <div class="form-group">
-                <label for="description" class="col-md-2 control-label">Otra información</label>
-                <div class="col-md-10">
-                    <textarea class="form-control" name="description" id="description" rows="3" placeholder="Notas internas para los administradores">{{ userData['description'] }}</textarea>
-                </div>
-            </div>
+            {{ m.input_textarea('description', 3, 'Otra información', 'Notas internas para los administradores', userData['description'], true) }}
             {% endif %}
             {% if edit %}
                 <button type="submit" name="savepersonal" class="btn btn-success">{{ userData.new ? 'Crear usuario' : 'Guardar cambios' }}</button>
