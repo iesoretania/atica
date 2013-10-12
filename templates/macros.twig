@@ -20,7 +20,7 @@
     <div class="col-md-{{mdLength}}">
         <input type="text" class="form-control" name="{{ name }}" id="{{ name }}" placeholder="{{ placeholder }}"{% if value %} value="{{ value }}"{% endif %}{% if maxlength %} maxlength="{{ maxlength }}"{% endif %}{% if not enabled %} disabled="disabled"{% endif %} {{ other | raw }}>
     </div>
-</div> 
+</div>
 {% endmacro %}
 {% macro input_radio(name, description, value1, description1, value2, description2, current, enabled = true, textclass) %}
 <div class="form-group{{ textclass ? ' text-' ~ textclass }}">
@@ -46,7 +46,7 @@
         <input type="password" class="form-control" name="{{ name }}" id="{{ name }}" placeholder="{{ placeholder }}"{% if value %} value="{{ value }}"{% endif %}{% if maxlength %} maxlength="{{ maxlength }}"{% endif %}{% if not enabled %} disabled="disabled"{% endif %} {{ other | raw }}>
     </div>
 </div>
-{% endmacro %}     
+{% endmacro %}
 {% macro input_profiles(name, description, profiles, allProfiles, gender, enabled = true, textclass) %}
 <div class="form-group{{ textclass ? ' text-' ~ textclass }}">
     <label class="col-md-2 control-label">{{ description }}</label>
@@ -73,47 +73,40 @@
 {% set months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
                  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'] %}
 
-<div class="row">
-    <div class="col-sm-2">
-        <select name="{{ prefix }}_year" class="form-control select {{ classes }}">
-            {% for n in (year-20)..(year+20) %}
-            <option value="{{ n }}" {{ year == n ? ' selected'}}>{{n}}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <div class="col-sm-3">
-        <select name="{{ prefix }}_month" class="form-control select {{ classes }}">
-            {% for n in 1..12 %}
-            {% set dn = (n<10 ? '0') ~ n %}
-            <option value="{{ dn }}" {{ month == n ? ' selected'}}>{{ months[n-1] }}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <div class="col-sm-2">
-        <select name="{{ prefix }}_day" class="form-control select {{ classes }}">
-            {% for n in 1..31 %}
-            {% set dn = (n<10 ? '0') ~ n %}
-            <option value="{{ dn }}" {{ day == n ? ' selected'}}>{{n}}</option>
-            {% endfor %}
-        </select>
-    </div>
-    {% if showtime %}
-    <div class="col-sm-2">
-        <select name="{{ prefix }}_hour" class="form-control select {{ classes }}">
-            {% for n in 0..23 %}
-            {% set dn = (n<10 ? '0') ~ n %}
-            <option value="{{ dn }}" {{ hour == n ? ' selected'}}>{{ dn }} h.</option>
-            {% endfor %}
-        </select>
-    </div>
-    <div class="col-sm-2">
-        <select name="{{ prefix }}_minute" class="form-control select {{ classes }}">
-            {% for n in 0..59 %}
-            {% set dn = (n<10 ? '0') ~ n %}
-            <option value="{{ dn }}" {{ minute == n ? ' selected'}}>{{ dn }} m.</option>
-            {% endfor %}
-        </select>
-    </div>    
-    {% endif %}
-</div>
+    <select name="{{ prefix }}_day" class="select {{ classes }}">
+        {% for n in 1..31 %}
+        {% set dn = (n<10 ? '0') ~ n %}
+        <option value="{{ dn }}" {{ day == n ? ' selected'}}>{{n}}</option>
+        {% endfor %}
+    </select>
+
+    <select name="{{ prefix }}_month" class="select {{ classes }}">
+        {% for n in 1..12 %}
+        {% set dn = (n<10 ? '0') ~ n %}
+        <option value="{{ dn }}" {{ month == n ? ' selected'}}>{{ months[n-1] }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="{{ prefix }}_year" class="select {{ classes }}">
+        {% for n in (year-20)..(year+20) %}
+        <option value="{{ n }}" {{ year == n ? ' selected'}}>{{n}}</option>
+        {% endfor %}
+    </select>
+
+{% if showtime %}
+    <select name="{{ prefix }}_hour" class="select {{ classes }}">
+        {% for n in 0..23 %}
+        {% set dn = (n<10 ? '0') ~ n %}
+        <option value="{{ dn }}" {{ hour == n ? ' selected'}}>{{ dn }} h.</option>
+        {% endfor %}
+    </select>
+
+    <select name="{{ prefix }}_minute" class="select {{ classes }}">
+        {% for n in 0..59 %}
+        {% set dn = (n<10 ? '0') ~ n %}
+        <option value="{{ dn }}" {{ minute == n ? ' selected'}}>{{ dn }} m.</option>
+        {% endfor %}
+    </select>
+{% endif %}
+
 {% endmacro %}
