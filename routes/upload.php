@@ -414,16 +414,6 @@ function getFolderProfileDeliveryItems($profileId, $folderId) {
             where('is_visible', 1)->
             order_by_asc('order_nr')->
             find_many();
-    if ($data == false) {
-        $data = ORM::for_table('folder_profile_delivery_item')->
-                select('folder_profile_delivery_item.*')->
-                inner_join('profile', array('folder_profile_delivery_item.profile_id', '=', 'profile.profile_group_id'))->
-                where('folder_profile_delivery_item.folder_id', $folderId)->
-                where('profile.id', $profileId)->
-                where('folder_profile_delivery_item.is_visible', 1)->
-                order_by_asc('folder_profile_delivery_item.order_nr')->
-                find_many();
-    }
     return $data;
 }
 
