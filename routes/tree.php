@@ -362,8 +362,8 @@ function getFoldersByCategory($categoryId) {
 function getFolders() {
     return ORM::for_table('folder')->
             select('folder.*')->
-            select_expr('sum(folder_permission.permission=0)','manage_permission')->
-            select_expr('sum(folder_permission.permission=1)','upload_permission')->
+            select_expr('sum(person_profile.profile_id IS NOT NULL AND folder_permission.permission=0)','manage_permission')->
+            select_expr('sum(person_profile.profile_id IS NOT NULL AND folder_permission.permission=1)','upload_permission')->
             left_outer_join('folder_permission', array('folder_permission.folder_id', '=', 'folder.id'))->
             left_outer_join('profile', array('profile.id', '=', 'folder_permission.profile_id'))->
             left_outer_join('person_profile', array('person_profile.profile_id', '=', 'profile.id'))->
