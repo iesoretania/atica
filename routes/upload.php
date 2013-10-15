@@ -299,6 +299,14 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
                             // correcto
                             $itemId = $_POST['element' . $loop];
                             $description = $list[$itemId]['display_name'];
+                            if ($list[$itemId]['document_name']) {
+                                $profile = getProfile($profileId);
+                                $ext = pathinfo($filename, PATHINFO_EXTENSION);
+                                if ($ext) {
+                                    $ext = '.' . $ext;
+                                }
+                                $filename = parseVariables($list[$itemId]['document_name'], $organization, $user, $profile) . $ext;
+                            }
                         }
                     }
                     else {
@@ -473,6 +481,7 @@ function getProfile($profileId) {
             select('profile.id')->
             select('profile.display_name')->
             select('profile.profile_group_id')->
+            select('profile.initials')->
             select('profile_group.display_name_neutral')->
             select('profile_group.display_name_male')->
             select('profile_group.display_name_female')->
@@ -616,4 +625,38 @@ function createRevision($deliveryId, $userId, $fileName, $dataPath, $dataHash, $
     
     return $revision;
     
+}
+
+function parseVariables($string, $organization, $user, $profile) {
+    return preg_replace_callback('~(\\{[^}]+\\})~',
+            function($token_array) use ($organization, $user, $profile) {
+                $token = trim($token_array[0], '{}');
+                switch ($token) {
+                    case 'user.initials':
+                        return $user['initials'];
+                    case 'user.name':
+                        return $user['display_name'];
+                    case 'profile.initials':
+                        return $profile['initials'];
+                    case 'profile.name':
+                        return $profile['display_name'];
+                }
+                
+                // probar con las variables de la tabla 'variables'
+                // específico para esta organización
+                $data = ORM::for_table('variable')->
+                        where('name', $token)->
+                        where('organization_id', $organization['id'])->
+                        find_one();
+                
+                // probar con las variables de la tabla 'variables'
+                // en genérico si no hay nada específico
+                if (!$data) {
+                    $data = ORM::for_table('variable')->
+                        where('name', $token)->
+                        where_null('organization_id')->
+                        find_one();
+                }
+                return $data ? $data['content'] : NULL;
+        }, $string);
 }
