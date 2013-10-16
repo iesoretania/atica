@@ -52,6 +52,7 @@
             {{ m.input_profiles('restricted', 'Tienen acceso si está restringido', restricted, allProfiles, 0) }}
             <button type="submit" name="savefolder" class="btn btn-success">{{ folder.new ? 'Crear carpeta' : 'Guardar cambios' }}</button>
             <a href="{{ flash['last_url'] }}" class="btn btn-info">Volver sin guardar los cambios</a>
+            <a href="{{ urlFor('manageitem', { 'id': folder['id'], 'profileid': 0 }) }}" class="btn btn-warning">Ver elementos de los perfiles</a>
         </form>
     </div>
 </div>
