@@ -43,7 +43,7 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
     
     // obtener carpeta
     $folder = getFolder($organization['id'], $event['folder_id']);
-    
+
     // obtener entregas asociadas
     $deliveries = getDeliveriesFromEvent($id);
     
@@ -321,7 +321,7 @@ function getParsedFolderById($orgId, $folderId, &$profileGender, $filter = true)
     $folders = getFoldersByOrganization($orgId, $filter)->
                 where('id', $folderId)->
                 find_array();
-    
+
     return getDeliveriesFromFolders($folders, $profileGender);
 }
 
