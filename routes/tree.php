@@ -683,7 +683,7 @@ function getNextFolderObject($folder) {
 }
 
 function createFolderItem($id, $profileId, $displayName, $documentName) {
-    $order = ORM::for_table('folder_profile_delivery_item')->create()->
+    $order = ORM::for_table('folder_profile_delivery_item')->
             where('profile_id', $profileId)->
             where('folder_id', $id)->max('order_nr');
     
@@ -712,10 +712,11 @@ function orderFolderItems($id, $profileId) {
     $ok = true;
     $order = 0;
     
-    $items = ORM::for_table('folder_profile_delivery_item')->create()->
+    $items = ORM::for_table('folder_profile_delivery_item')->
             where('profile_id', $profileId)->
             where('folder_id', $id)->
-            order_by_asc('display_name')->find_many();
+            order_by_asc('display_name')->
+            find_many();
     
     foreach($items as $item) {
         $ok = $ok && $item->set('order_nr', $order)->save();
