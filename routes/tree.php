@@ -500,7 +500,7 @@ function getFolders() {
             select_expr('sum(person_profile.profile_id IS NOT NULL AND folder_permission.permission=0)','manage_permission')->
             select_expr('sum(person_profile.profile_id IS NOT NULL AND folder_permission.permission=1)','upload_permission')->
             left_outer_join('folder_permission', array('folder_permission.folder_id', '=', 'folder.id'))->
-            left_outer_join('profile', array('folder_permission.profile_id', '=', 'profile.profile_group_id'))->
+            left_outer_join('profile', 'folder_permission.profile_id IN (profile.profile_group_id, profile.id)')->
             left_outer_join('person_profile', array('person_profile.profile_id', '=', 'profile.id'))->
             where('folder.is_visible', 1)->
             group_by('folder.id');

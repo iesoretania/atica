@@ -1,6 +1,6 @@
 {% for folder in data %}
 {% set info = folders[folder.id] %}
-{% set buttons = user['is_admin'] or info['upload_permission'] %}
+{% set buttons = user['is_admin'] or info['upload_permission'] or info['manage_permission'] %}
 <div class="panel panel-default">
     <div class="panel-heading">
         <h2>{{ info['display_name'] }}

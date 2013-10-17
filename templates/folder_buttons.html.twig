@@ -1,5 +1,5 @@
 {% if buttons %}
 <form class="form-inline" role="form">
-    {% if info['upload_permission'] or user['is_admin'] %} <a class="btn btn-info" href="{{ urlFor('upload', { 'id': folder.id }) }}">Subir nuevo documento</a>{% endif %}
+    {% if info['upload_permission'] or info['manage_permission'] or user['is_admin'] %} <a class="btn btn-info" href="{{ urlFor('upload', { 'id': folder.id }) }}">Subir nuevo documento</a>{% endif %}
 </form>
 {% endif %}
