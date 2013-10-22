@@ -115,7 +115,7 @@ $app->get('/descargar/:kind/:cid/:id/(:p1/)(:p2/)', function ($kind, $cid, $id, 
     $res['Content-Description'] = 'File Transfer';
     $res['Content-Type'] = ($delivery['mime'] == null) ?
             'application/octet-stream' : $delivery['mime'];
-    $res['Content-Disposition'] ='attachment; filename=' . basename($delivery['download_filename']);
+    $res['Content-Disposition'] ='attachment; filename=' . trim(basename($delivery['download_filename']));
     $res['Content-Transfer-Encoding'] = 'binary';
     $res['Expires'] = '0';
     $res['Cache-Control'] = 'must-revalidate';
@@ -301,7 +301,7 @@ $app->map('/elemento/:id/:profileid(/:catid)', function ($id, $profileid, $catid
         $ok = true;
         ORM::get_db()->beginTransaction();
         foreach($lines as $line) {
-            $item = explode("*", $line);
+            $item = explode("*", trim($line));
             $ok = $ok && createFolderItem($id, $_POST['profile'], $item[0], isset($item[1]) ? $item[1] : null);
         }
         if ($ok) {
