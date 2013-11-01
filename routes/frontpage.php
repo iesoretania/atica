@@ -55,8 +55,7 @@ $app->get('/portada/:id', function ($id) use ($app, $user) {
     );
     
     $folders = getGroupingFolders($id);
-    
-    $data = getParsedGroupingFolders($id);
+    $data = getParsedDeliveriesFromGroupingFolders($folders);
     
     $app->render('grouping.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar,
@@ -126,51 +125,29 @@ function getGroupingFolders($groupingId) {
         inner_join('grouping_folder', array('grouping_folder.folder_id', '=', 'folder.id'))->
         where('grouping_folder.grouping_id', $groupingId)->
         order_by_asc('grouping_folder.order_nr')->
-        find_array());
+        find_many());
 }
 
 
-function getParsedGroupingFolders($groupingId) {
-
-    $data = ORM::for_table('delivery')->
-            select('delivery.*')->
-            select('folder.id', 'folder_id')->
-            select('revision.upload_date')->
-            inner_join('folder_delivery', array('folder_delivery.delivery_id','=','delivery.id'))->
-            inner_join('folder', array('folder.id', '=', 'folder_delivery.folder_id'))->
-            inner_join('revision', array('delivery.current_revision_id', '=', 'revision.id'))->
-            inner_join('grouping_folder', array('grouping_folder.folder_id', '=', 'folder.id'))->
-            where('grouping_folder.grouping_id', $groupingId)->
-            order_by_asc('grouping_folder.order_nr')->
-            order_by_asc('delivery.profile_id')->
-            order_by_asc('revision.upload_date')->
-            find_array();
+function getParsedDeliveriesFromGroupingFolders($folders) {
     
     $return = array();
-    $currentData = array();
-    $currentFolderId = null;
-
-    foreach ($data as $delivery) {
-        if ($delivery['folder_id'] !== $currentFolderId) {
-            if ($currentData != null) {
-                $return[] = array(
-                    'id' => $currentFolderId,
-                    'data' => $currentData
-                );
-            }
-            $currentData = array();
-            $currentFolderId = $delivery['folder_id'];
-        }
-        else {
-            $currentData[] = $delivery;
-        }
-    }
-    if ($currentData != null) {
+    foreach($folders as $folder) {
+        $deliveries = ORM::for_table('delivery')->
+                select('delivery.*')->
+                select('folder_delivery.order_nr')->
+                select('revision.upload_date')->
+                inner_join('folder_delivery', array('folder_delivery.delivery_id', '=', 'delivery.id'))->
+                inner_join('revision', array('delivery.current_revision_id', '=', 'revision.id'))->
+                inner_join('person', array('person.id', '=', 'revision.uploader_person_id'))->
+                where('folder_delivery.folder_id', $folder['id'])->
+                order_by_asc('delivery.profile_id')->
+                order_by_asc('order_nr')->find_array();
+        
         $return[] = array(
-            'id' => $currentFolderId,
-            'data' => $currentData
+            'id' => $folder['id'],
+            'data' => $deliveries
         );
     }
-
     return $return;
 }
