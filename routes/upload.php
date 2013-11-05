@@ -298,9 +298,9 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
                         else {
                             // correcto
                             $itemId = $_POST['element' . $loop];
-                            $description = $list[$itemId]['display_name'];
+                            $profile = getProfile($profileId);
+                            $description = parseVariables($list[$itemId]['display_name'], $organization, $user, $profile);
                             if ($list[$itemId]['document_name']) {
-                                $profile = getProfile($profileId);
                                 $ext = pathinfo($filename, PATHINFO_EXTENSION);
                                 if ($ext) {
                                     $ext = '.' . $ext;
