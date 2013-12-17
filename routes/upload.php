@@ -537,6 +537,7 @@ function checkItemUpdateStatus($folderId, $profileId) {
             // están todos los elementos: marcar como completados los eventos
             // de todos los usuarios
             foreach($persons as $person) {
+                removeCompletedEvent($person['event_id'], $person['id']);
                 addCompletedEvent($person['event_id'], $person['id']);
             }
         }
