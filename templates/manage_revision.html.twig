@@ -1,0 +1,82 @@
+{#  ATICA - Web application for supporting Quality Management Systems
+    Copyright (C) 2009-2013: Luis-Ramón López López
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
+
+{% extends "upload.html.twig" %}
+{% block upload_main_content %}
+{% import "macros.twig" as m %}
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <h1>Modificación de una revisión: {{ document['download_filename'] }}</h1>
+    </div>
+    <div class="panel-body">
+        <h3>Entrega: {{ delivery['display_name'] }}</h3>
+        <h3>Carpeta: {{ folder['display_name'] }}</h3>
+        {% if folder.description %}<h4>{{ folder.description | nl2br }}</h4>{% endif %}
+    </div>
+</div>
+<form class="form" enctype="multipart/form-data" role="form" method="post" action="{{ url }}">
+    <div class="panel panel-default">
+        <div class="panel-body form-horizontal">
+            <h3>Revisión</h3>
+            <div class="form-group">
+                <label class="col-md-2 control-label" for="revision">Número de revisión </label>
+                    <div class="col-md-2">
+                        <select class="form-control select" name="revisionnr">
+                            {% for nr in revisions %}<option value="{{ nr }}" {{ (revision['revision_nr'] == nr) ? " selected" : "" }}>{{ nr }}</option>{% endfor %}
+                        </select>
+                    </div>
+            </div>
+            {{ m.input_text('downloadname', 10, 'Nombre del documento', 'Nombre con el que se descargará el documento', document['download_filename']) }}
+            <div class="form-group">
+                <label class="col-md-2 control-label" for="creation">Realizada el </label>
+                    <div class="col-md-10">
+                    {{ m.select_date('upload', revision['upload_date'] | date('YmdHi'), true) }}
+                    </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label" for="uploader">Documento subido por </label>
+                <div class="col-md-10">
+                    <select class="form-control select" name="uploader">
+                        {% for person in persons %}<option value="{{ person['id'] }}" {{ (person['id'] == revision['uploader_person_id']) ? " selected" : "" }}>{{ person['display_name'] }}</option>{% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="panel-footer">
+            <button type="submit" name="save" class="btn btn-success">Guardar cambios</button>
+            {% if delivery['current_revision_id'] != revision['id'] %}
+            <button type="submit" name="delete" class="btn btn-danger">Eliminar la revisión</button>
+            {% else %}
+            <button name="disabled-delete" class="btn btn-danger" disabled="1">No se puede eliminar la revisión activa</button>
+            {% endif %}
+            <a class="btn btn-info" href="{{ urlFor('modify', {'id': delivery['id'], 'folderid': folder['id'] }) }}">Volver sin realizar cambios</a>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <h3>Documento almacenado</h3>
+            <div class="form-group">
+                <label for="document">Sustituir revisión actual por un nuevo documento</label>
+                <input type="file" class="form-control trigger" name="document[]">
+                <p class="help-block">El documento enviado reemplazará al existente actualmente en la base de datos.</p>
+            </div>
+            <div class="form-group">
+                <button type="submit" name="replace" class="btn btn-primary auto-enable">Sustituir documento</button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

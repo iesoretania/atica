@@ -53,35 +53,48 @@
             {{ m.input_textarea('description', 3, 'Descripción detallada', 'Notas adicionales sobre la entrega', delivery['description']) }}
         </div>
         <div class="panel-footer">
-            <button type="submit" name="save" class="btn btn-success">Guardar cambios de la entrega</button>
+            <button type="submit" name="save" class="btn btn-success">Guardar cambios</button>
             <button type="submit" name="delete" class="btn btn-danger">Eliminar la entrega</button>
             <a class="btn btn-info" href="{{ flash['last_url'] }}">Volver sin realizar cambios</a>
         </div>
     </div>
     <div class="panel panel-default">
         <div class="panel-body">
-            <h3>Revisiones almacenadas</h3>
-            <blockquote><p>Desde este apartado podrá añadir o modificar revisiones</p></blockquote>
+            <h3>Entregar una nueva revisión</h3>
+            <blockquote><p>Desde este apartado podrá enviar nuevas versiones de la entrega</p></blockquote>
             <div class="form-group">
                 <label for="document">Enviar un documento nuevo a la plataforma</label>
                 <input type="file" class="form-control trigger" name="document[]">
-                <p class="help-block">El documento enviado podrá ser almacenado como una nueva revisión si se pulsa el botón de abajo o bien podrá reemplazar otro envío anterior de la lista.</p>
+                <p class="help-block">El documento enviado podrá ser almacenado como una nueva revisión</p>
             </div>
             <div class="form-group">
                 <button type="submit" name="new" class="btn btn-primary auto-enable">Entregar como nueva revisión</button>
             </div>
         </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <h3>Revisiones almacenadas</h3>
+            <blockquote><p>Desde este apartado podrá modificar las revisiones almacenadas</p></blockquote>
+        </div>
         <ul class="list-group">
             {% for revision in revisions %}
                 <li class="list-group-item{{ delivery['current_revision_id'] == revision['id'] ? ' warning' }}">
-                    <h4>{{ delivery['current_revision_id'] == revision['id'] ? '<strong>' }}Rev. {{ revision['revision_nr'] }} - {{ revision['upload_date'] | date('Y-m-d') }}
-                    - {{ revision['download_filename'] }}{{ delivery['current_revision_id'] == revision['id'] ? '</strong>' }}</h4>
+                    <h4>
+                        {{ delivery['current_revision_id'] == revision['id'] ? '<strong>' }}Rev. {{ revision['revision_nr'] }} - {{ revision['upload_date'] | date('Y-m-d') }}
+                        - {{ revision['download_filename'] }}{{ delivery['current_revision_id'] == revision['id'] ? '</strong>' }}
+                        {% if user['is_admin'] %}<a class="delivery-tools hidden-print" title="Modificar entrega" href="{{ urlFor('revision', {'id': revision['id'], 'folderid': folder['id'] }) }}"><span class="icon-pencil"></span></a>{% endif %}
+                    </h4>
                     <p>
                     Entregado por <a href="{{ urlFor('personal', { 'id': revision['uploader_person_id'], 'section': 0 }) }}">{{ uploaders[revision['uploader_person_id']]['display_name'] }}</a></p>
-                    <p><button class="btn btn-warning auto-enable" name="replace{{ revision['id'] }}" title="Cambia esta revisión por el documento indicado más arriba">Reemplazar</button>
-                    <button class="btn btn-danger" name="remove{{ revision['id'] }}" title="Elimina esta revisión de la plataforma">Eliminar</button>
+                    <p>
                     {% if delivery['current_revision_id'] != revision['id'] %}
-                        <button class="btn btn-info" name="default{{ revision['id'] }}" title="Establecer como la revisión activa">Establecer como revisión activa</button>
+                    <button class="btn btn-danger" name="remove" value="{{ revision['id'] }}" title="Elimina esta revisión de la plataforma">Eliminar</button>
+                    {% else %}
+                    <button name="disabled-delete" class="btn btn-danger" disabled="1">No se puede eliminar la revisión activa</button>
+                    {% endif %}
+                    {% if delivery['current_revision_id'] != revision['id'] %}
+                        <button class="btn btn-info" name="default" value="{{ revision['id'] }}" title="Establecer como la revisión activa">Establecer como revisión activa</button>
                     {% endif %}
                     </p>
                 </li>

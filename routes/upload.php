@@ -504,6 +504,14 @@ function getDocumentDataByHash($hash) {
             find_one();
 }
 
+function getDocumentByHash($hash) {
+    return ORM::for_table('document')->
+            select('document.*')->
+            inner_join('document_data', array('document_data.id', '=', 'document.document_data_id'))->
+            where('document_data.data_hash', $hash)->
+            find_one();
+}
+
 function getExtension($ext) {
     return ORM::for_table('file_extension')->
             find_one($ext);
@@ -592,6 +600,16 @@ function createRevision($deliveryId, $userId, $fileName, $dataPath, $dataHash, $
     $revision->set('revision_nr', $revisionNr);
     $revision->save();
     
+    $document = createDocument($revision['id'], $fileName, $dataHash, $dataPath, $filesize);
+    
+    $revision->set('original_document_id', $document['id']);
+    $revision->save();
+    
+    return $revision;
+}
+
+function createDocument($revisionId, $fileName, $dataHash, $dataPath, $filesize) {
+    
     $documentData = getDocumentDataByHash($dataHash);
     
     if (false === $documentData) {
@@ -618,14 +636,10 @@ function createRevision($deliveryId, $userId, $fileName, $dataPath, $dataHash, $
     $document->set('document_data_id', $documentData['id']);
     $document->set('download_filename', $fileName);
     $document->set('extension_id', $extension['id']);
-    $document->set('revision_id', $revision['id']);
+    $document->set('revision_id', $revisionId);
     $document->save();
 
-    $revision->set('original_document_id', $document['id']);
-    $revision->save();
-    
-    return $revision;
-    
+    return $document;
 }
 
 function parseVariables($string, $organization, $user, $profile) {
