@@ -21,6 +21,9 @@ These are the requirements for running ATICA:
   * For the client: IE 8.0+, Firefox 4+ or Webkit-based browser (Safari 3+, Chrome 10+, iOS 3+, Android Browser 2.2+), etc.
 
 ## Install
+
+**WARNING: This app is not production ready yet!!!**
+
 Follow these easy steps:
 
   * Unpack the source code into a folder which is accesible by the web server.
@@ -28,7 +31,7 @@ Follow these easy steps:
   * Optional: for security reasons, please use the *public/* folder as the DocumentRoot.
   * Create a database schema and a database user which has all privileges on that schema.
   * Open a browser.
-  * Run the setup wizard (WIP).
+  * Run the setup wizard (not avaliable yet!).
 
 ## Acknowledgments
 This application uses the following libraries and frameworks:
