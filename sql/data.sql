@@ -15,6 +15,9 @@ INSERT INTO `configuration` (`id`, `item_id`, `organization_id`, `content_type`,
 (7, 'calendar.base_week', NULL, 3, NULL, 100, 'Semana inicial del curso', '33', 1, 1),
 (8, 'user.welcome', NULL, 10, NULL, 100, 'Bienvenida de los usuarios', '<p>Desde aquí podrá acceder a información sobre el Sistema de Gestión de la Calidad del centro. Haga clic con el ratón en la sección de la barra lateral que desee consultar.</p>\r\n\r\n<p>Para cualquier cuestión sobre los datos de la aplicación busque a un miembro de la Comisión de Calidad, le atenderemos gustosamente.</p>\r\n\r\n<p><i>Le saluda atentamente la Comisión de Calidad.</i></p>', 1, 0);
 
+INSERT INTO `module` (`id`, `name`, `version`, `cron`, `last_cron`, `is_active`) VALUES
+(1, 'core', '2014050501', 0, 0, 1);
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
