@@ -33,9 +33,10 @@ function switchChecks(e) {
 {% import "macros.twig" as m %}
 <div class="panel panel-info">
     <div class="panel-heading">
-    <h1>Gestionar elementos de la carpeta: {{ folder['display_name'] }}</h1>
+    <h1>Gestionar elementos del evento: {{ event['display_name'] }}</h1>
+    <h2>Carpeta de entrega: {{ folder['display_name'] }}</h2>
     </div>
-    {% if folder['description'] %}<div class="panel-body"><h4>{{  folder['description'] | nl2br }}</h4></div>{% endif %}
+    {% if event['description'] %}<div class="panel-body"><h4>{{  event['description'] | nl2br }}</h4></div>{% endif %}
 </div>
 <form class="form-horizontal" role="form" method="post" action="{{ url }}">
     <div class="panel panel-default">

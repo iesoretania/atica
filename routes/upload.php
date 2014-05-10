@@ -109,12 +109,15 @@ $app->post('/enviar/:id', function ($id) use ($app, $user, $preferences, $organi
     // TODO: Comprobar perfil
     $profileIsSet = $folder['is_divided'];
     $profileId = $profileIsSet ? $_POST['profile'] : null;
+    $profile = $profileIsSet ? getProfile($profileId) : array();
 
     // buscar si hay una lista de entrega
     $list = $profileIsSet ?
             parseArray(getFolderProfileDeliveryItems($profileId, $id)) :
             array();
 
+    $list = parseVariablesArray($list, $organization, $user, $profile);
+    
     // si es falso, mostrar revisión de los documentos enviados
     $finished = false;
     
@@ -206,12 +209,11 @@ $app->post('/enviar/:id', function ($id) use ($app, $user, $preferences, $organi
         array('display_name' => 'Revisar documento')
     );
 
-    $profile = $profileIsSet ? getProfile($profileId) : array();
-
     $deliveries = $profileIsSet ?
-            getFolderProfileDeliveredItems($profileId, $id) :
+            getFolderProfileDeliveredItems($profileId, $id, $organization, $user, $profile) :
             array();
-
+    $deliveries = parseVariablesArray($deliveries, $organization, $user, $profile);
+    
     $app->flashKeep();
 
     $app->render('upload_review.html.twig', array(
@@ -253,7 +255,7 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
     $list = $profileIsSet ?
             parseArray(getFolderProfileDeliveryItems($profileId, $id)) :
             array();
-    
+
     $loop = 1;
     $success = 0;
     $failed = 0;
@@ -416,8 +418,10 @@ function createDocumentFolder($prefix, $hash) {
 }
 
 function getFolderProfileDeliveryItems($profileId, $folderId) {
-    $data = ORM::for_table('folder_profile_delivery_item')->
-            where('folder_id', $folderId)->
+    $data = ORM::for_table('event_profile_delivery_item')->
+            select('event_profile_delivery_item.*')->
+            inner_join('event', array('event.id', '=', 'event_profile_delivery_item.event_id'))->
+            where('event.folder_id', $folderId)->
             where('profile_id', $profileId)->
             where('is_visible', 1)->
             order_by_asc('order_nr')->
@@ -426,21 +430,22 @@ function getFolderProfileDeliveryItems($profileId, $folderId) {
 }
 
 function getFolderProfileDeliveryStatsBase($folderId) {
-    $data = ORM::for_table('folder_profile_delivery_item')->
-            select('folder_profile_delivery_item.id')->
-            select('folder_profile_delivery_item.profile_id')->
+    $data = ORM::for_table('event_profile_delivery_item')->
+            select('event_profile_delivery_item.id')->
+            select('event_profile_delivery_item.profile_id')->
             select('profile.display_name')->
             select('profile_group.display_name_neutral')->
-            select_expr('COUNT(folder_profile_delivery_item.profile_id)', 'total')->
+            select_expr('COUNT(event_profile_delivery_item.profile_id)', 'total')->
             select_expr('COUNT(delivery.item_id)', 'c')->
-            inner_join('profile', array('profile.id', '=', 'folder_profile_delivery_item.profile_id'))->
+            inner_join('profile', array('profile.id', '=', 'event_profile_delivery_item.profile_id'))->
             inner_join('profile_group', array('profile_group.id', '=', 'profile.profile_group_id'))->
-            left_outer_join('delivery', array('delivery.item_id', '=', 'folder_profile_delivery_item.id'))->
-            where('folder_id', $folderId)->
-            where('folder_profile_delivery_item.is_visible', 1)->
-            group_by('folder_profile_delivery_item.profile_id')->
-            order_by_asc('folder_profile_delivery_item.id')->
-            order_by_asc('folder_profile_delivery_item.order_nr');
+            inner_join('event', array('event.id', '=', 'event_profile_delivery_item.event_id'))->
+            left_outer_join('delivery', array('delivery.item_id', '=', 'event_profile_delivery_item.id'))->
+            where('event.folder_id', $folderId)->
+            where('event_profile_delivery_item.is_visible', 1)->
+            group_by('event_profile_delivery_item.profile_id')->
+            order_by_asc('event_profile_delivery_item.id')->
+            order_by_asc('event_profile_delivery_item.order_nr');
     
     return $data;
 }
@@ -458,19 +463,20 @@ function getFolderProfileDeliveryStatsByProfile($folderId, $profileId) {
     return $data;
 }
 
-function getFolderProfileDeliveredItems($profileId, $folderId) {
-    $data = ORM::for_table('folder_profile_delivery_item')->
-            select('folder_profile_delivery_item.id')->
-            select('folder_profile_delivery_item.display_name')->
-            select('folder_profile_delivery_item.profile_id')->
+function getFolderProfileDeliveredItems($profileId, $folderId, $organization, $user, $profile) {
+    $data = ORM::for_table('event_profile_delivery_item')->
+            inner_join('event', array('event.id', '=', 'event_id'))->
+            select('event_profile_delivery_item.id')->
+            select('event_profile_delivery_item.display_name')->
+            select('event_profile_delivery_item.profile_id')->
             select('delivery.creation_date')->
             select_expr('COUNT(delivery.item_id)', 'c')->
-            left_outer_join('delivery', array('delivery.item_id', '=', 'folder_profile_delivery_item.id'))->
-            where('folder_id', $folderId)->
-            where('folder_profile_delivery_item.profile_id', $profileId)->
-            where('folder_profile_delivery_item.is_visible', 1)->
-            group_by('folder_profile_delivery_item.id')->
-            order_by_asc('folder_profile_delivery_item.order_nr')->
+            left_outer_join('delivery', array('delivery.item_id', '=', 'event_profile_delivery_item.id'))->
+            where('event.folder_id', $folderId)->
+            where('event_profile_delivery_item.profile_id', $profileId)->
+            where('event_profile_delivery_item.is_visible', 1)->
+            group_by('event_profile_delivery_item.id')->
+            order_by_asc('event_profile_delivery_item.order_nr')->
             find_array();
 
     return $data;
@@ -522,11 +528,11 @@ function getPersonsWithEventByFolderAndProfile($folderId, $profileId) {
             select('person.id')->
             select('event.id', 'event_id')->
             inner_join('person_profile', array('person_profile.person_id', '=', 'person.id'))->
-            inner_join('folder_profile_delivery_item', array('folder_profile_delivery_item.profile_id', '=', 'person_profile.profile_id'))->
-            inner_join('folder', array('folder.id', '=', 'folder_profile_delivery_item.folder_id'))->
-            inner_join('event', array('event.folder_id', '=', 'folder_profile_delivery_item.folder_id'))->
-            where('folder_profile_delivery_item.folder_id', $folderId)->
-            where('folder_profile_delivery_item.profile_id', $profileId)->
+            inner_join('event_profile_delivery_item', array('event_profile_delivery_item.profile_id', '=', 'person_profile.profile_id'))->
+            inner_join('event', array('event.id', '=', 'event_profile_delivery_item.event_id'))->
+            inner_join('folder', array('folder.id', '=', 'event.folder_id'))->
+            where('event.folder_id', $folderId)->
+            where('event_profile_delivery_item.profile_id', $profileId)->
             where('event.is_automatic', 1)->
             find_array();
 }
@@ -674,4 +680,11 @@ function parseVariables($string, $organization, $user, $profile) {
                 }
                 return $data ? $data['content'] : NULL;
         }, $string);
+}
+
+function parseVariablesArray($data, $organization, $user, $profile) {
+    foreach ($data as $k => $item) {
+        $data[$k]['display_name'] = parseVariables($data[$k]['display_name'], $organization, $user, $profile);
+    }
+    return $data;
 }
