@@ -159,11 +159,11 @@ require('../routes/admin.php');
 // Ejecutar aplicación
 $app->run();
 
-function parseArray($data) {
+function parseArray($data, $column='id') {
     $return = array();
     
     foreach($data as $item) {
-        $return[$item['id']] = $item;
+        $return[$item[$column]] = $item;
     }
     
     return $return;

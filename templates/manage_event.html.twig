@@ -97,6 +97,7 @@
                 </select>
             </div>
             <button type="submit" name="saveevent" class="btn btn-success">{{ new ? 'Crear actividad' : 'Guardar cambios' }}</button>
+            {% if not new %}<a href="{{ urlFor('manageitem', { 'id': event['id'], 'profileid': 0 }) }}" class="btn btn-warning">Ver elementos de entrega automática</a>{% endif %}
         </form>
     </div>
 </div>

@@ -170,7 +170,9 @@ $app->map('/actividad/:id', function ($id) use ($app, $user, $organization) {
     }
     else {
         $event = array(
-            'is_visible' => 1
+            'is_visible' => 1,
+            'is_manual' => 0,
+            'is_automatic' => 0
         );
     }
     
