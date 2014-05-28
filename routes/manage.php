@@ -24,7 +24,7 @@ $app->map('/modificar/:folderid/:id', function ($folderId, $id) use ($app, $user
     if (false == $delivery) {
         $app->redirect($app->urlFor('tree'));
     }
-    $revisions = getRevisionsObjectByDelivery($id);
+    $revisions = parseArray(getRevisionsObjectByDelivery($id));
     $uploaders = getDeliveryUploadersById($id);
     
     $data = array();
