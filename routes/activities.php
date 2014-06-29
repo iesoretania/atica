@@ -272,6 +272,7 @@ function getEventsForProfiles($profile_ids, $profile_group_ids, $user, $base = 3
             inner_join('profile_group', array('profile_group.id', '=', 'profile.profile_group_id'))->
             left_outer_join('completed_event', 'completed_event.event_id = event.id AND completed_event.person_id = ' . $user['id'])->
             order_by_asc('profile_group.display_name_neutral')->
+            order_by_asc('profile.display_name')->
             order_by_asc('activity.id')->
             order_by_asc('n_from_week')->
             order_by_asc('n_to_week');
