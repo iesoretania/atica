@@ -31,8 +31,16 @@ $app->get('/arbol(/:id)', function ($id = null) use ($app, $user, $organization)
 
     $sidebar = getTree($organization['id'], $app, $id, $category, $parent);
 
+    // obtener lista de perfiles para controlar la visibilidad de la carpeta
+    $userProfiles = getUserProfiles($user['id'], $organization['id'], true);
+    $userProfilesList = array();
+    foreach($userProfiles as $prof) {
+        $userProfilesList[] = $prof['id'];
+        $userProfilesList[] = $prof['profile_group_id'];
+    }
+    
     if (null !== $id) {
-        $data = getParsedDeliveriesByCategory($organization['id'], $id, $profileGender);//getParsedFoldersByCategory($id, $profileGender);
+        $data = getParsedDeliveriesByCategory($organization['id'], $id, $profileGender, $userProfilesList);//getParsedFoldersByCategory($id, $profileGender);
         // TODO: Optimizar leyendo todos los permisos de golpe para todas las
         // carpetas y colocándolos en un array
         $allFolders = getFoldersByCategory($id);
@@ -602,7 +610,7 @@ function getMaxFolderOrder($catId) {
 
 function getFoldersByOrganization($orgId, $filter = true) {
     $folders = ORM::for_table('folder')->
-            select('folder.id')->
+            select('folder.*')->
             inner_join('category', array('category.id', '=', 'folder.category_id'))->
             where('category.organization_id', $orgId)->
             order_by_asc('order_nr');
@@ -614,49 +622,64 @@ function getFoldersByOrganization($orgId, $filter = true) {
     return $folders;
 }
 
-function getDeliveriesFromFolders($folders, &$profileGender) {
+function getDeliveriesFromFolders($folders, &$profileGender, $userProfiles) {
     
     $return = array();
     foreach($folders as $folder) {
-        $deliveries = ORM::for_table('delivery')->
-                select('delivery.*')->
-                select('folder_delivery.order_nr')->
-                select('revision.upload_date')->
-                select('revision.uploader_person_id')->
-                select('revision.revision_nr')->
-                select('person.gender')->
-                inner_join('folder_delivery', array('folder_delivery.delivery_id', '=', 'delivery.id'))->
-                inner_join('revision', array('delivery.current_revision_id', '=', 'revision.id'))->
-                inner_join('person', array('person.id', '=', 'revision.uploader_person_id'))->
-                where('folder_delivery.folder_id', $folder['id'])->
-                order_by_asc('delivery.profile_id')->
-                order_by_asc('order_nr')->find_array();
-        
-        $return[] = array(
-            'id' => $folder['id'],
-            'data' => $deliveries
-        );
-        foreach($deliveries as $delivery) {
-            if (isset($profileGender[$delivery['profile_id']])) {
-                if ($profileGender[$delivery['profile_id']] != $delivery['gender']) {
-                    $profileGender[$delivery['profile_id']] = 0;
-                }
+        // comprobar si la carpeta es de acceso restringido
+        $skip = false;
+        if ($folder['is_restricted']) {
+            $visible = ORM::for_table('folder_permission')->
+                    where('folder_id', $folder['id'])->
+                    where('permission', 2)->
+                    where_in('profile_id', $userProfiles)->
+                    count();
+            
+            if ($visible == 0) {
+                $skip = true;
             }
-            else {
-                $profileGender[$delivery['profile_id']] = $delivery['gender'];
+        }
+        if ($skip == false) {
+            $deliveries = ORM::for_table('delivery')->
+                    select('delivery.*')->
+                    select('folder_delivery.order_nr')->
+                    select('revision.upload_date')->
+                    select('revision.uploader_person_id')->
+                    select('revision.revision_nr')->
+                    select('person.gender')->
+                    inner_join('folder_delivery', array('folder_delivery.delivery_id', '=', 'delivery.id'))->
+                    inner_join('revision', array('delivery.current_revision_id', '=', 'revision.id'))->
+                    inner_join('person', array('person.id', '=', 'revision.uploader_person_id'))->
+                    where('folder_delivery.folder_id', $folder['id'])->
+                    order_by_asc('delivery.profile_id')->
+                    order_by_asc('order_nr')->find_array();
+
+            $return[] = array(
+                'id' => $folder['id'],
+                'data' => $deliveries
+            );
+            foreach($deliveries as $delivery) {
+                if (isset($profileGender[$delivery['profile_id']])) {
+                    if ($profileGender[$delivery['profile_id']] != $delivery['gender']) {
+                        $profileGender[$delivery['profile_id']] = 0;
+                    }
+                }
+                else {
+                    $profileGender[$delivery['profile_id']] = $delivery['gender'];
+                }
             }
         }
     }
     return $return;
 }
 
-function getParsedDeliveriesByCategory($orgId, $catId, &$profileGender, $filter = true) {
+function getParsedDeliveriesByCategory($orgId, $catId, &$profileGender, $userProfiles, $filter = true) {
     
     $folders = getFoldersByOrganization($orgId, $filter)->
                 where('category_id', $catId)->
                 find_array();
     
-    return getDeliveriesFromFolders($folders, $profileGender);
+    return getDeliveriesFromFolders($folders, $profileGender, $userProfiles);
 }
 
 function getNextFolderObject($folder) {
