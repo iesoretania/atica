@@ -1,0 +1,37 @@
+{#  ATICA - Web application for supporting Quality Management Systems
+    Copyright (C) 2009-2013: Luis-Ramón López López
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
+
+{% extends "layout.html.twig" %}
+{% block maincontent %}
+{% import 'macros.twig' as m %}
+<form class="form-horizontal" role="form" method="post" action="{{ url }}">
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h1>Elemento del perfil "{{ profileGroup.display_name_neutral }}"</h1>
+        </div>
+        <div class="panel-body">
+            {{ m.input_text('displayname', '10', 'Nombre del elemento', 'Nombre con el que aparecerá en la plataforma', profile.display_name) }}
+            {{ m.input_text('initials', '2', 'Iniciales', 'Hasta 5 letras', profile.initials, true, 5) }}
+            {{ m.input_radio('isactive', 'Está activo', '0', 'No aparecerá en los listados', '1', 'Aparecerá en la lista de perfiles disponibles', profile.is_active, true) }}
+            {{ m.input_textarea('description', 5, 'Descripción', 'Detalles sobre el elemento', profile['description'], true) }}            
+            {{ m.input_persons('persons', 'Usuarios asociados', persons, allPersons, true) }}
+                
+            <button type="submit" name="saveprofile" class="btn btn-success">{{ new ? 'Crear elemento y volver' : 'Guardar cambios' }}</button>
+            <a class="btn btn-info" href="{{ urlFor('profile', {'id': profile.profile_group_id} ) }}">Volver sin realizar cambios</a>
+        </div>
+    </div>
+</form>
+{% endblock %}

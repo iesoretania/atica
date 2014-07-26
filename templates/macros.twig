@@ -63,6 +63,22 @@
     </div>
 </div>
 {% endmacro %}
+{% macro input_persons(name, description, persons, allPersons, enabled = true, textclass) %}
+<div class="form-group{{ textclass ? ' text-' ~ textclass }}">
+    <label class="col-md-2 control-label">{{ description }}</label>
+    <div class="col-md-10">
+        {% if enabled %}
+            <select class="form-control select" multiple name="{{name}}[]">
+                {% for pers in allPersons %}
+                <option value="{{ pers['id'] }}" {% if persons[pers['id']] %} selected {% endif %}>{{ pers['display_name'] }}{% if not pers['is_active'] %} (desactivado){% endif %}</option>
+                {% endfor %}
+            </select>
+        {% else %}
+            <textarea class="form-control" disabled rows="3">{% for person in persons %}{{ person['display_name'] }}{% if not person['is_active'] %} (desactivado){% endif %}{{ loop.last ? '' : ', ' }}{% endfor %}</textarea>
+        {% endif %}
+    </div>
+</div>
+{% endmacro %}
 
 {% macro select_date(prefix, current, showtime, classes) %}
 {% set year = current | slice(0, 4) %}
