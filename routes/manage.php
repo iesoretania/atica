@@ -89,7 +89,7 @@ $app->map('/modificar/:folderid/:id', function ($folderId, $id) use ($app, $user
     
     if (isset($_POST['save'])) {
         $delivery->set('display_name', $_POST['displayname']);
-        $delivery->set('description', strlen($_POST['displayname']) > 0 ? $_POST['displayname'] : null);
+        $delivery->set('description', strlen($_POST['description']) > 0 ? $_POST['description'] : null);
         if (isset($_POST['creation_year'])) {
             $delivery->set('creation_date', $_POST['creation_year'] . '-'. $_POST['creation_month'] . '-' . $_POST['creation_day'] . ' ' .$_POST['creation_hour'] . ':' . $_POST['creation_minute'] . ':00');
         }
