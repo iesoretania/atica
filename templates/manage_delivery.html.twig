@@ -54,7 +54,7 @@
         </div>
         <div class="panel-footer">
             <button type="submit" name="save" class="btn btn-success">Guardar cambios</button>
-            <button type="submit" name="delete" class="btn btn-danger">Eliminar la entrega</button>
+            <button type="submit" name="delete" class="btn btn-danger" onClick="javascript:return confirm('La operación de borrado no se puede deshacer. ¿Desea continuar?');">Eliminar la entrega</button>
             <a class="btn btn-info" href="{{ flash['last_url'] }}">Volver sin realizar cambios</a>
         </div>
     </div>
@@ -89,7 +89,7 @@
                     Entregado por <a href="{{ urlFor('personal', { 'id': revision['uploader_person_id'], 'section': 0 }) }}">{{ uploaders[revision['uploader_person_id']]['display_name'] }}</a></p>
                     <p>
                     {% if delivery['current_revision_id'] != revision['id'] %}
-                    <button class="btn btn-danger" name="remove" value="{{ revision['id'] }}" title="Elimina esta revisión de la plataforma">Eliminar</button>
+                    <button class="btn btn-danger" name="remove" value="{{ revision['id'] }}" title="Elimina esta revisión de la plataforma" onClick="javascript:return confirm('La operación de borrado no se puede deshacer. ¿Desea continuar?');">Eliminar</button>
                     {% else %}
                     <button name="disabled-delete" class="btn btn-danger" disabled="1">No se puede eliminar la revisión activa</button>
                     {% endif %}
