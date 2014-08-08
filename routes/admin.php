@@ -20,19 +20,23 @@ $app->map('/upgrade', function () use ($app, $user, $config, $organization) {
     if (!$user || !$user['is_global_administrator']) {
         $app->redirect($app->urlFor('login'));
     }
-    
+
     $ok = false;
     $simulate = !isset($_POST['upgrade']);
-    
+
     $initial = getModuleVersion('core');
     $updates = array();
-    
+
     $core = $initial;
-    
+
     if ($core) {
         $ok = true;
+
+        if ($ok && ($core < '2014081001')) {
+            include('../sql/upgrades/2014081001.php');
+        }
     }
-    
+
     if ($simulate) {
         $app->render('upgrade.html.twig', array(
             'initial' => $initial,
@@ -51,7 +55,7 @@ $app->map('/upgrade', function () use ($app, $user, $config, $organization) {
         }
         $app->redirect($app->urlFor('frontpage'));
     }
-    
+
 })->name('upgrade')->via('GET', 'POST');
 
 function getModuleVersion($id) {
