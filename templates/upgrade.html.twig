@@ -1,0 +1,66 @@
+{#  ATICA - Web application for supporting Quality Management Systems
+    Copyright (C) 2009-2013: Luis-Ramón López López
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
+
+{% extends "layout.html.twig" %}
+{% block maincontent %}
+<div class="panel panel-info">
+    <div class="panel-heading">
+    <h1>Actualización de la aplicación</h1>
+    </div>
+</div>
+<form role="form" method="post" action="{{ url }}">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <h1>Versión actual: {{ initial }}</h1>
+            {% if items %}
+            <h2>Se instalarán las siguientes actualizaciones:</h2>
+            {% else %}
+            <h2>No hay actualizaciones pendientes</h2>
+            {% endif %}
+        </div>
+        {% if items %}
+        <table class="table table-striped table-condensed table-hover">
+            <thead>
+                <tr>
+                    <th class="col-md-5">Actualización</th>
+                    <th class="col-md-7">Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>
+                        <span class="icon-check"></span> {{ item['id'] }}
+                    </td>
+                    <td>
+                        {{ item['description'] }}
+                    </td>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="panel-footer hidden-print">
+            <button type="submit" name="upgrade" class="btn btn-success">Actualizar</button>
+            <a class="btn btn-info" href="{{ urlFor('frontpage') }}">Volver sin realizar cambios</a>
+        </div>
+        {% else %}
+        <div class="panel-footer hidden-print">
+            <a class="btn btn-info" href="{{ urlFor('frontpage') }}">Volver</a>
+        </div>    
+        {% endif %}
+    </div>
+</form>
+{% endblock %}

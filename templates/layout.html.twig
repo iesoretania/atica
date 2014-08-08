@@ -143,6 +143,8 @@
                         <strong>No se realizó el cambio de contraseña.</strong> La nueva contraseña es demasiado corta. Inténtelo de nuevo.
                         {% elseif flash['save_error'] == 'delete' %}
                         <strong>No se ha eliminado el elemento.</strong> Ha ocurrido un error durante el proceso. Contacte con el administrador.
+                        {% elseif flash['save_error'] == 'upgrade' %}
+                        <strong>No se ha actualizado la base de datos.</strong> Ha ocurrido un error durante el proceso de actualización. Contacte con el administrador.
                         {% else %}
                         <strong>{{ flash['save_error_summary'] }}</strong> {{ flash['save_error_detail'] }}
                         {% endif %}

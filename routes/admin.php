@@ -16,11 +16,50 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see [http://www.gnu.org/licenses/]. */
 
-$app->get('/upgrade', function () use ($app, $user, $config, $organization) {
+$app->map('/upgrade', function () use ($app, $user, $config, $organization) {
     if (!$user || !$user['is_global_administrator']) {
         $app->redirect($app->urlFor('login'));
     }
-    $app->flash('save_ok', 'upgrade');
+    
+    $ok = false;
+    $simulate = !isset($_POST['upgrade']);
+    
+    $initial = getModuleVersion('core');
+    $updates = array();
+    
+    $core = $initial;
+    
+    if ($core) {
+        $ok = true;
+    }
+    
+    if ($simulate) {
+        $app->render('upgrade.html.twig', array(
+            'initial' => $initial,
+            'items' => $updates,
+            'url' => $app->request()->getPathInfo()
+        ));
+    }
+    else {
+        $final = getModuleVersion('core');
 
-    $app->redirect($app->urlFor('frontpage'));
-})->name('upgrade');
+        if ($ok) {
+            $app->flash('save_ok', 'upgrade');
+        }
+        else {
+            $app->flash('save_error', 'upgrade');
+        }
+        $app->redirect($app->urlFor('frontpage'));
+    }
+    
+})->name('upgrade')->via('GET', 'POST');
+
+function getModuleVersion($id) {
+    $data = ORM::for_table('module')->where('name', $id)->find_one();
+    return isset($data['version']) ? $data['version'] : null;
+}
+
+function setModuleVersion($id, $version) {
+    $data = ORM::for_table('module')->where('name', $id)->find_one();
+    return $data->set('version', $version)->save();
+}
