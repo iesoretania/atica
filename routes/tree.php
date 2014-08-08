@@ -29,7 +29,7 @@ $app->get('/arbol(/:id)', function ($id = null) use ($app, $user, $organization)
     $folderProfiles = array();
     $profileGender = array();
 
-    $sidebar = getTree($organization['id'], $app, $id, $category, $parent);
+    $topbar = getTree($organization['id'], $app, $id, $category, $parent);
 
     if (null !== $id) {
         $data = getParsedDeliveriesByCategory($organization['id'], $id, $profileGender);//getParsedFoldersByCategory($id, $profileGender);
@@ -54,7 +54,7 @@ $app->get('/arbol(/:id)', function ($id = null) use ($app, $user, $organization)
     $app->flash('last_url', $app->request()->getPathInfo());
     
     $app->render('tree.html.twig', array(
-        'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar,
+        'navigation' => $breadcrumb, 'search' => true, 'topbar' => $topbar,
         'category' => $category,
         'data' => $data,
         'persons' => $persons,
@@ -223,7 +223,7 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = null) use ($app, $use
         // intento de ataque
         $app->redirect($app->urlFor('frontpage'));
     }    
-    $sidebar = getTree($organization['id'], $app, $catid, $category, $parent);
+    $topbar = getTree($organization['id'], $app, $catid, $category, $parent);
 
     $breadcrumb = array(
         array('display_name' => 'Árbol', 'target' => $app->urlFor('tree')),
@@ -235,7 +235,7 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = null) use ($app, $use
     $app->flashKeep();
     
     $app->render('manage_folder.html.twig', array(
-        'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar,
+        'navigation' => $breadcrumb, 'search' => true, 'topbar' => $topbar,
         'select2' => true,
         'category' => $category,
         'url' => $app->request()->getPathInfo(),
@@ -372,7 +372,7 @@ $app->map('/elemento/:id/:profileid/(:actid)', function ($id, $profileid, $actid
     $items = parseArray(getEventProfileDeliveryItems($profileid, $id));
     
     // barra lateral
-    $sidebar = array(
+    $topbar = array(
         array(
             array('caption' => 'Gestión de actividades', 'icon' => 'calendar'),
             array('caption' => 'Gestionar actividad', 'active' => true, 'target' => $app->request()->getPathInfo())
@@ -388,7 +388,7 @@ $app->map('/elemento/:id/:profileid/(:actid)', function ($id, $profileid, $actid
     $app->flashKeep();
     
     $app->render('manage_item.html.twig', array(
-        'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar,
+        'navigation' => $breadcrumb, 'search' => true, 'topbar' => $topbar,
         'select2' => true,
         'url' => $app->request()->getPathInfo(),
         'uploaders' => $uploadAs,
@@ -418,7 +418,8 @@ function getTree($orgId, $app, $id, &$matchedCategory, &$parentCategory) {
                 $return[] = array(
                     'caption' => $currentCategory['display_name'],
                     'active' => $match,
-                    'data' => $currentData
+                    'target' => '#',
+                    'subitems' => $currentData
                 );
                 if ($match) {
                     $parentCategory = $currentCategory;
@@ -445,14 +446,15 @@ function getTree($orgId, $app, $id, &$matchedCategory, &$parentCategory) {
         $return[] = array(
             'caption' => $currentCategory['display_name'],
             'active' => $match,
-            'data' => $currentData
+            'target' => '#',
+            'subitems' => $currentData
         );
         if ($match) {
             $parentCategory = $currentCategory;
         }
     }
 
-    return $return;
+    return array($return);
 }
 
 function getFolderPersons() {

@@ -1,23 +1,22 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
-        "This file is @generated automatically"
+        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "0dcb0dcf66e14b6f4d2f71a554cdfb17",
+    "hash": "edd3145c6c757e1ed8fb400aff84cd8d",
     "packages": [
         {
             "name": "j4mie/idiorm",
-            "version": "v1.4.1",
+            "version": "v1.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/j4mie/idiorm.git",
-                "reference": "11e964157a6a2c6128a0546673ad5e99ac1a62cd"
+                "reference": "b0922d8719a94e3a0e0e4a0ca3876f4f91475dcf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/j4mie/idiorm/zipball/11e964157a6a2c6128a0546673ad5e99ac1a62cd",
-                "reference": "11e964157a6a2c6128a0546673ad5e99ac1a62cd",
+                "url": "https://api.github.com/repos/j4mie/idiorm/zipball/b0922d8719a94e3a0e0e4a0ca3876f4f91475dcf",
+                "reference": "b0922d8719a94e3a0e0e4a0ca3876f4f91475dcf",
                 "shasum": ""
             },
             "require": {
@@ -62,7 +61,7 @@
                 "orm",
                 "query builder"
             ],
-            "time": "2013-12-12 10:25:27"
+            "time": "2014-06-23 13:08:57"
         },
         {
             "name": "slim/extras",
@@ -98,7 +97,7 @@
                 {
                     "name": "Andrew Smith",
                     "email": "a.smith@silentworks.co.uk",
-                    "homepage": "http://www.silentworks.co.uk/"
+                    "homepage": "http://thoughts.silentworks.co.uk/"
                 },
                 {
                     "name": "Josh Lockhart",
@@ -117,21 +116,23 @@
         },
         {
             "name": "slim/slim",
-            "version": "2.3.5",
+            "version": "2.4.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/codeguy/Slim.git",
-                "reference": "3dec4f9ee2e9c204a9f334afd72abc174c1b792e"
+                "reference": "4906b77a07c7bd6ff1a99aea903e940a2d4fa106"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/codeguy/Slim/zipball/3dec4f9ee2e9c204a9f334afd72abc174c1b792e",
-                "reference": "3dec4f9ee2e9c204a9f334afd72abc174c1b792e",
+                "url": "https://api.github.com/repos/codeguy/Slim/zipball/4906b77a07c7bd6ff1a99aea903e940a2d4fa106",
+                "reference": "4906b77a07c7bd6ff1a99aea903e940a2d4fa106",
                 "shasum": ""
             },
             "require": {
-                "ext-mcrypt": "*",
                 "php": ">=5.3.0"
+            },
+            "suggest": {
+                "ext-mcrypt": "Required for HTTP cookie encryption"
             },
             "type": "library",
             "autoload": {
@@ -157,26 +158,30 @@
                 "rest",
                 "router"
             ],
-            "time": "2013-10-31 02:05:09"
+            "time": "2014-04-05 18:33:59"
         },
         {
             "name": "slim/views",
-            "version": "0.1.0",
+            "version": "0.1.2",
             "target-dir": "Slim/Views",
             "source": {
                 "type": "git",
                 "url": "https://github.com/codeguy/Slim-Views.git",
-                "reference": "0.1.0"
+                "reference": "f0a05ea0b654218e40de692ed7cddcad1cf4b828"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/codeguy/Slim-Views/zipball/0.1.0",
-                "reference": "0.1.0",
+                "url": "https://api.github.com/repos/codeguy/Slim-Views/zipball/f0a05ea0b654218e40de692ed7cddcad1cf4b828",
+                "reference": "f0a05ea0b654218e40de692ed7cddcad1cf4b828",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.0",
-                "slim/slim": ">=2.0.0"
+                "slim/slim": ">=2.4.0"
+            },
+            "suggest": {
+                "smarty/smarty": "Smarty templating system",
+                "twig/twig": "Twig templating system"
             },
             "type": "library",
             "autoload": {
@@ -192,7 +197,7 @@
                 {
                     "name": "Andrew Smith",
                     "email": "a.smith@silentworks.co.uk",
-                    "homepage": "http://thoughts.silentworks.co.uk/"
+                    "homepage": "http://www.silentworks.co.uk/"
                 },
                 {
                     "name": "Josh Lockhart",
@@ -200,14 +205,14 @@
                     "homepage": "http://www.joshlockhart.com/"
                 }
             ],
-            "description": "Twig View Parser package for the Slim Framework",
+            "description": "Smarty and Twig View Parser package for the Slim Framework",
             "homepage": "http://github.com/codeguy/Slim-Views",
             "keywords": [
                 "extensions",
                 "slimphp",
                 "templating"
             ],
-            "time": "2013-07-10 07:34:17"
+            "time": "2014-04-03 16:31:10"
         },
         {
             "name": "twig/twig",
@@ -636,17 +641,17 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v2.5.2",
+            "version": "v2.5.3",
             "target-dir": "Symfony/Component/Yaml",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/Yaml.git",
-                "reference": "f868ecdbcc0276b6158dfbf08b9e98ce07f014e1"
+                "reference": "5a75366ae9ca8b4792cd0083e4ca4dff9fe96f1f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/Yaml/zipball/f868ecdbcc0276b6158dfbf08b9e98ce07f014e1",
-                "reference": "f868ecdbcc0276b6158dfbf08b9e98ce07f014e1",
+                "url": "https://api.github.com/repos/symfony/Yaml/zipball/5a75366ae9ca8b4792cd0083e4ca4dff9fe96f1f",
+                "reference": "5a75366ae9ca8b4792cd0083e4ca4dff9fe96f1f",
                 "shasum": ""
             },
             "require": {
@@ -669,19 +674,17 @@
             ],
             "authors": [
                 {
-                    "name": "Fabien Potencier",
-                    "email": "fabien@symfony.com",
-                    "homepage": "http://fabien.potencier.org",
-                    "role": "Lead Developer"
-                },
-                {
                     "name": "Symfony Community",
                     "homepage": "http://symfony.com/contributors"
+                },
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
                 }
             ],
             "description": "Symfony Yaml Component",
             "homepage": "http://symfony.com",
-            "time": "2014-07-09 09:05:48"
+            "time": "2014-08-05 09:00:40"
         }
     ],
     "aliases": [
@@ -691,7 +694,6 @@
     "stability-flags": [
 
     ],
-    "prefer-stable": false,
     "platform": {
         "php": ">=5.3.0"
     },

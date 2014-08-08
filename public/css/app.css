@@ -14,7 +14,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see [http://www.gnu.org/licenses/]. */
 
-.navbar {
+.navbar-main {
     border: none;
     border-radius: 0;
     background: #3991c3; /* Old browsers */
@@ -40,26 +40,26 @@
     margin-right: 0px;
 }
 
-.navbar ul.navlinks li:hover > a {
+.navbar-main ul.navlinks li:hover > a {
     background-color: #1c4861;
     color: #fff;
 }
 
-.navbar ul.navlinks li.active > a{
+.navbar-main ul.navlinks li.active > a{
     background-color: #3382af;
     color: #fff;
 }
 
-.navbar ul.navlinks li.active:hover > a{
+.navbar-main ul.navlinks li.active:hover > a{
     background-color: #1c4861;
     color: #fff;
 }
 
-.navbar ul li.login:hover {
+.navbar-main ul li.login:hover {
     background-color: transparent;
 }
 
-.navbar ul li.login a.login {
+.navbar-main ul li.login a.login {
     margin-top: 6px;
     border-radius: 4px;
     padding-top: 8px;
@@ -73,6 +73,13 @@
     font-weight: 300;
 }
 
+.navbar-default .navbar-nav > .active > a {
+    background-color: #ddd;
+}
+
+.navbar-main {
+    z-index: 10000;
+}
 .breadcrumb>li+li:before {
     content: "\203A";
 }

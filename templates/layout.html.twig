@@ -23,6 +23,51 @@
         'halfmonths': ['1ª quincena ', '2ª quincena ']
     }
 %}
+{% block top %}
+{% if topbar %}
+{% for group in topbar %}
+    <nav class="navbar navbar-default navbar-lower" role="navigation">
+        <div class="container">
+            
+            <ul class="nav navbar-nav" role="tablist">
+                {% for element in group %}
+                {% set subitems = element.subitems %}
+                <li class="{% if element.active %}active {% endif %}{% if subitems %}dropdown{% endif %}">
+                    {% if element.target %}
+                    <a {% if subitems %}id="elem{{ loop.index }}" role="button" data-toggle="dropdown" data-target="#"{% endif %} href="{{ element.target }}">
+                        {% if element.icon %}<span class="icon-{{ element.icon }}"></span> {% endif %}
+                        {% if element.badge %}<span class="badge">{{ element.badge }}{% if element.badge_icon %} <span class="icon-{{ element.badge_icon }}"></span>{% endif %}</span>{% endif %}
+                        {{ element.caption }}
+                        {% if subitems %} <span class="icon-caret-down"></span>{% endif %}
+                    </a>
+                    {% if subitems %}
+                        <ul class="dropdown-menu" role="menu" aria-labelledby="elem{{ loop.index }}">
+                            {% for subitem in subitems %}
+                                <li role="presentation" {% if subitem.active %}class="active"{% endif %}>
+                                <a {% if subitem.target %} href="{{ subitem.target }}"{% endif %}>
+                                    {% if subitem.icon %}<span class="icon-{{ subitem.icon }}"></span> {% endif %}
+                                    {% if subitem.badge %}<span class="badge">{{ subitem.badge }}{% if subitem.badge_icon %} <span class="icon-{{ subitem.badge_icon }}"></span>{% endif %}</span>{% endif %}
+                                    {{ subitem.caption }}
+                                </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    {% else %}
+                    <p class="navbar-text">
+                        {% if element.icon %}<span class="icon-{{ element.icon }}"></span> {% endif %}
+                        {% if element.badge %}<span class="badge">{{ element.badge }}{% if element.badge_icon %} <span class="icon-{{ element.badge_icon }}"></span>{% endif %}</span>{% endif %}
+                        {{ element.caption }}
+                    </p>
+                    {% endif %}              
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </nav>
+{% endfor %}
+{% endif %}
+{% endblock %}
 {% block content %}
             {% if flash['home_info'] %}
             <div class="alert alert-info col-md-12 alert-dismissable">
@@ -49,6 +94,7 @@
             </div>
             {% endif %}
             <div class="row">
+                {% if sidebar %}
                 <div class="col-md-2 hidden-print">
                     {% block sidebar %}
                     {% if sidebar %}
@@ -68,7 +114,8 @@
                     {% endif %}
                     {% endblock %}
                 </div>
-                <div class="col-md-10">
+                {% endif %}
+                <div class="col-md-{{ sidebar ? "10" : "12" }}">
                     {% if flash['save_ok'] %}
                     <div class="alert alert-success col-md-12 alert-dismissable">
                         <button type="button" class="close" data-dismiss="alert">&times;</button>

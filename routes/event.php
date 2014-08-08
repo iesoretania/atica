@@ -49,71 +49,8 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
     
     // obtener perfiles
     $profiles = parseArray(getUserProfiles($user['id'], $organization['id'], false));
-
-    // barra lateral de perfiles
-    $profile_bar = array(
-        array('caption' => 'Mis actividades', 'icon' => 'calendar'),
-    );
-    if (count($profiles, COUNT_NORMAL)>1) {
-       $profile_bar[] = array('caption' => 'Ver todas', 'active' => ($id == null), 'target' => $app->urlFor('activities'));
-    }
-    $current = null;
-    $detail = '';
-    $isMine = true;
-    $profile_ids = array();
-    $profile_group_ids = array();
-    foreach ($profiles as $profile) {
-        $gender = array ($profile['display_name_neutral'], $profile['display_name_male'], $profile['display_name_female']);
-        $caption = $gender[$user['gender']] . " " . $profile['display_name'];
-        if (($profile['id'] == $pid) || ($profile['profile_group_id'] == $pid)) {
-            $current = $profile;
-            $detail = $caption;
-            $active = true;
-            $isMine = true;
-        }
-        else {
-            $active = false;
-        }
-        array_push($profile_ids, $profile['profile_group_id']);
-        if (!in_array($profile['profile_group_id'], $profile_group_ids)) {
-            $profile_group_ids[] = $profile['profile_group_id'];
-        }
-        array_push($profile_bar, array('caption' => $caption,
-            'active' => $active, 'target' => $app->urlFor('activities', array('id' => $profile['id']))));
-    }
-
-    $sidebar = array();
-
-    array_push($sidebar, $profile_bar);
-
-    // obtener otros perfiles
-    $otherProfiles = getUserOtherProfiles($user['id'], $organization['id'], $profile_group_ids);
-    if (count($otherProfiles, COUNT_NORMAL) > 0) {
-       $other_profile_bar = array(
-           array('caption' => 'Otras actividades', 'icon' => 'calendar-empty')
-        );
-
-        foreach ($otherProfiles as $profile) {
-            $captionOther = $profile['display_name_neutral'] . " " . $profile['display_name'];
-            if (($profile['id'] == $pid) || ($profile['profile_group_id'] == $pid)) {
-                $current = $profile;
-                $detail = $captionOther;
-                $activeOther = true;
-                $isMine = false;
-            }
-            else {
-                $activeOther = false;
-            }
-            array_push($other_profile_bar, array('caption' => $captionOther,
-                'active' => $activeOther, 'target' => $app->urlFor('activities', array('id' => $profile['id']))));
-        }
-        array_push($sidebar, $other_profile_bar);
-    }
     
-    // si hay un perfil como parámetro que no está asociado al usuario, redirigir
-    if (null == $current) {
-        $app->redirect($app->urlFor('activities'));
-    }
+    $isMine = isset($profiles[$pid]);
 
     $breadcrumb = array(
         array('display_name' => 'Actividades', 'target' => $app->urlFor('activities')),
@@ -144,7 +81,6 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
         'url' => $app->request()->getPathInfo(),
         'pid' => $pid,
         'aid' => $aid,
-        'sidebar' => $sidebar,
         'user' => $user,
         'profiles' => $profiles,
         'profileGender' => $profileGender,        

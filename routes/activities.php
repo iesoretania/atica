@@ -27,13 +27,13 @@ $app->get('/actividades(/:id)', function ($id = null) use ($app, $user, $config,
     // obtener perfiles
     $profiles = parseArray(getUserProfiles($user['id'], $organization['id'], false));
 
-    // barra lateral de perfiles
-    $profile_bar = array(
-        array('caption' => 'Mis actividades', 'icon' => 'calendar'),
-    );
+    // barra superior de perfiles
+    $profile_bar = array();
+    
     if (count($profiles, COUNT_NORMAL)>1) {
        $profile_bar[] = array('caption' => 'Ver todas', 'active' => ($id == null), 'target' => $app->urlFor('activities'));
     }
+    
     $current = null;
     $detail = '';
     $profile_ids = array();
@@ -57,16 +57,10 @@ $app->get('/actividades(/:id)', function ($id = null) use ($app, $user, $config,
             'active' => $active, 'target' => $app->urlFor('activities', array('id' => $profile['id']))));
     }
 
-    $sidebar = array();
-
-    array_push($sidebar, $profile_bar);
-
     // obtener otros perfiles
     $otherProfiles = getUserOtherProfiles($user['id'], $organization['id'], $profile_group_ids);
     if (count($otherProfiles, COUNT_NORMAL) > 0) {
-       $other_profile_bar = array(
-           array('caption' => 'Otras actividades', 'icon' => 'calendar-empty')
-        );
+        $other_profile_bar = array();
 
         foreach ($otherProfiles as $profile) {
             $captionOther = $profile['display_name_neutral'] . " " . $profile['display_name'];
@@ -82,8 +76,16 @@ $app->get('/actividades(/:id)', function ($id = null) use ($app, $user, $config,
             array_push($other_profile_bar, array('caption' => $captionOther,
                 'active' => $activeOther, 'target' => $app->urlFor('activities', array('id' => $profile['id']))));
         }
-        array_push($sidebar, $other_profile_bar);
+        array_push($profile_bar, array(
+            'caption' => 'Otros perfiles',
+            'target' => '/',
+            'subitems' => $other_profile_bar
+        ));
     }
+
+    $topbar = array();
+
+    array_push($topbar, $profile_bar);
 
     // si hay un perfil como parámetro que no está asociado al usuario, redirigir
     if ((null != $id) && (null == $current)) {
@@ -134,7 +136,7 @@ $app->get('/actividades(/:id)', function ($id = null) use ($app, $user, $config,
         'detail' => $detail,
         'base' => $config['calendar.base_week'],
         'current' => $currentWeek,
-        'sidebar' => $sidebar,
+        'topbar' => $topbar,
         'isMine' => $isMine,
         'events' => $parsedEvents));
 })->name('activities');
@@ -181,14 +183,6 @@ $app->map('/grupoactividad/:id', function ($id) use ($app, $user, $config, $orga
         $app->redirect($app->request()->getPathInfo());
     }
     
-    // barra lateral
-    $sidebar = array(
-        array(
-            array('caption' => 'Gestión de actividades', 'icon' => 'calendar'),
-            array('caption' => 'Gestionar agrupación', 'active' => true, 'target' => $app->request()->getPathInfo())
-        )
-    );
-    
     $breadcrumb = array(
         array('display_name' => 'Actividades', 'target' => $app->urlFor('activities')),
         array('display_name' => ($id == 0) ? 'Nueva agrupación de actividades' : $activity['display_name'])
@@ -197,7 +191,6 @@ $app->map('/grupoactividad/:id', function ($id) use ($app, $user, $config, $orga
     // generar página
     $app->render('manage_activity.html.twig', array(
         'navigation' => $breadcrumb,
-        'sidebar' => $sidebar,
         'url' => $app->request()->getPathInfo(),
         'new' => ($id == 0),
         'activity' => ($id == 0) ? array() : $activity));
