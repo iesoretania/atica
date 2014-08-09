@@ -70,6 +70,8 @@
             {{ m.input_radio('visible', 'Visibilidad', '0', 'Actividad oculta', '1', 'Actividad visible para los usuarios', event['is_visible']) }}
             {{ m.input_radio('automatic', 'Es automática', '0', 'No', '1', 'Sí, la actividad se marcará como completada de forma automática', event['is_automatic']) }}
             {{ m.input_radio('manual', 'Es manual', '0', 'No', '1', 'Sí, el usuario podrá marcar la actividad como completada de forma manual', event['is_manual']) }}
+            {{ m.input_radio('forceperiod', 'Forzar entrega en fecha', '0', 'No, el plazo de entrega es orientativo', '1', 'Sí, no se podrá entregar fuera del plazo indicado', event['force_period']) }}
+            {{ m.input_number('graceperiod', 2, 'Período de gracia (días)', 'Días', 0, 99, event['grace_period']) }}
             {{ m.input_profiles('profiles', 'Perfiles asociados', profiles, allProfiles, 0) }}
             <div class="form-group">
                 <label for="deliveries" class="col-md-2 control-label">Entregas relacionadas</label>

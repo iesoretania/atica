@@ -131,6 +131,9 @@ $app->map('/actividad/:id', function ($id) use ($app, $user, $organization) {
         $local->set('is_visible', $_POST['visible']);
         $local->set('is_manual', $_POST['manual']);
         $local->set('is_automatic', $_POST['automatic']);
+        $local->set('force_period', $_POST['forceperiod']);
+        $local->set('grace_period', $_POST['graceperiod']);
+        $local->set('is_automatic', $_POST['automatic']);
         if ($_POST['folder']) {
             $local->set('folder_id', $_POST['folder']);
         }
@@ -184,14 +187,6 @@ $app->map('/actividad/:id', function ($id) use ($app, $user, $organization) {
     // obtener las entregas asociadas
     $deliveries = ($id == 0) ? array() : parseArray(getDeliveriesFromEvent($id));
     
-    // barra lateral
-    $sidebar = array(
-        array(
-            array('caption' => 'Gestión de actividades', 'icon' => 'calendar'),
-            array('caption' => 'Gestionar actividad', 'active' => true, 'target' => $app->request()->getPathInfo())
-        )
-    );
-    
     $breadcrumb = array(
         array('display_name' => 'Actividades', 'target' => $app->urlFor('activities')),
         array('display_name' => ($id == 0) ? 'Nueva actividad' : $event['display_name'])
@@ -201,7 +196,6 @@ $app->map('/actividad/:id', function ($id) use ($app, $user, $organization) {
     $app->render('manage_event.html.twig', array(
         'navigation' => $breadcrumb,
         'select2' => true,
-        'sidebar' => $sidebar,
         'url' => $app->request()->getPathInfo(),
         'folders' => $folders,
         'profiles' => $profiles,
@@ -474,4 +468,18 @@ function setEventDeliveries($eventId, $deliveries) {
     }
     
     return $ok;
+}
+
+function getItemFromId($id) {
+    $data = ORM::for_table('event_profile_delivery_item')->
+            select('event_profile_delivery_item.*')->
+            select('event.display_name', 'event_display_name')->
+            select('event.from_week')->
+            select('event.to_week')->
+            select('event.force_period')->
+            select('event.grace_period')->
+            inner_join('event', array('event.id', '=', 'event_profile_delivery_item.event_id'))->
+            find_one($id);
+    
+    return $data;
 }

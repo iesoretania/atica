@@ -41,9 +41,12 @@
             </thead>
 
             <tbody>
+                {% set now = (current-base+48) % 48 %}
                 {% for item in deliveries %}
                 {% set complete = (item['c'] > 0) %}
-                <tr class="{{ complete ? 'success' : 'warning' }}">
+                {% set from = (item.from_week-base+48) % 48 %}
+                {% set to = (item.to_week-base+48) % 48 %}
+                <tr {% if complete %}class="success"{% elseif (now>=from) and (now<=to) %}class="warning"{% elseif (now>=from) and (now>to) %}class="danger"{% endif %}">
                     <td>
                         <span class="icon-{{ complete ? 'ok' : 'remove'}}"></span>
                         {{ item['display_name'] }}

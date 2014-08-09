@@ -36,10 +36,25 @@
                     {% if user['is_admin'] %}
                     {{ m.select_date('creation', delivery['creation_date'] | date('YmdHi'), true) }}
                     {% else %}
-                    <p>{{ delivery['creation_date'] | date('Y-m-d') }}</p>
+                    <p class="form-control-static">{{ delivery['creation_date'] | date('Y-m-d') }}</p>
                     {% endif %}
                 </div>
-            </div>            {% if folder['is_divided'] %}
+            </div>
+            {% if item %}
+            <div class="form-group">
+                <label class="col-md-2 control-label" for="creation">Asociada a la actividad </label>
+                    <div class="col-md-10">
+                    <p class="form-control-static">{{ item.event_display_name }}</p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label" for="creation">Se corresponde con </label>
+                    <div class="col-md-10">
+                    <p class="form-control-static">{{ item.display_name }}</p>
+                </div>
+            </div>
+            {% endif %}
+            {% if folder['is_divided'] %}
             <div class="form-group">
                 <label class="col-md-2 control-label" for="profile">Asociada al perfil</label>
                 <div class="col-md-10">
@@ -54,7 +69,14 @@
         </div>
         <div class="panel-footer">
             <button type="submit" name="save" class="btn btn-success">Guardar cambios</button>
+            {% set now = (current-base+48) % 48 %}
+            {% set from = (item.from_week-base+48) % 48 %}
+            {% set to = (item.to_week-base+48) % 48 %}
+            {% if item and ((not item.force_period) or is_manager or ((now>=from) and (now<=to))) %}
             <button type="submit" name="delete" class="btn btn-danger" onClick="javascript:return confirm('La operación de borrado no se puede deshacer. ¿Desea continuar?');">Eliminar la entrega</button>
+            {% else %}
+            <button type="button" class="btn btn-danger" disabled="1">No se puede eliminar, entregue una nueva revisión</button>
+            {% endif %}
             <a class="btn btn-info" href="{{ flash['last_url'] }}">Volver sin realizar cambios</a>
         </div>
     </div>
@@ -75,7 +97,7 @@
     <div class="panel panel-default">
         <div class="panel-body">
             <h3>Revisiones almacenadas</h3>
-            <blockquote><p>Desde este apartado podrá modificar las revisiones almacenadas</p></blockquote>
+            <blockquote><p>Desde este apartado podrá observar las revisiones almacenadas</p></blockquote>
         </div>
         <ul class="list-group">
             {% for revision in revisions %}
@@ -87,16 +109,18 @@
                     </h4>
                     <p>
                     Entregado por <a href="{{ urlFor('personal', { 'id': revision['uploader_person_id'], 'section': 0 }) }}">{{ uploaders[revision['uploader_person_id']]['display_name'] }}</a></p>
+                    {% if is_manager %}
                     <p>
-                    {% if delivery['current_revision_id'] != revision['id'] %}
-                    <button class="btn btn-danger" name="remove" value="{{ revision['id'] }}" title="Elimina esta revisión de la plataforma" onClick="javascript:return confirm('La operación de borrado no se puede deshacer. ¿Desea continuar?');">Eliminar</button>
-                    {% else %}
-                    <button name="disabled-delete" class="btn btn-danger" disabled="1">No se puede eliminar la revisión activa</button>
-                    {% endif %}
-                    {% if delivery['current_revision_id'] != revision['id'] %}
-                        <button class="btn btn-info" name="default" value="{{ revision['id'] }}" title="Establecer como la revisión activa">Establecer como revisión activa</button>
-                    {% endif %}
+                        {% if delivery['current_revision_id'] != revision['id'] %}
+                        <button class="btn btn-danger" name="remove" value="{{ revision['id'] }}" title="Elimina esta revisión de la plataforma" onClick="javascript:return confirm('La operación de borrado no se puede deshacer. ¿Desea continuar?');">Eliminar</button>
+                        {% else %}
+                        <button name="disabled-delete" class="btn btn-danger" disabled="1">No se puede eliminar la revisión activa</button>
+                        {% endif %}
+                        {% if delivery['current_revision_id'] != revision['id'] %}
+                            <button class="btn btn-info" name="default" value="{{ revision['id'] }}" title="Establecer como la revisión activa">Establecer como revisión activa</button>
+                        {% endif %}
                     </p>
+                    {% endif %}
                 </li>
             {% endfor %}
         </ul>

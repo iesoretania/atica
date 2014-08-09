@@ -80,7 +80,7 @@ $app->get('/enviar/:id', function ($id) use ($app, $user, $config, $organization
     $app->flashKeep();
     
     $app->render('upload.html.twig', array(
-        'navigation' => $breadcrumb, 'search' => false, 'sidebar' => $sidebar,
+        'navigation' => $breadcrumb, 'search' => false,
         'select2' => true,
         'category' => $category,
         'folder' => $folder,
@@ -92,7 +92,7 @@ $app->get('/enviar/:id', function ($id) use ($app, $user, $config, $organization
         'data' => $data));
 })->name('upload');
 
-$app->post('/enviar/:id', function ($id) use ($app, $user, $preferences, $organization) {
+$app->post('/enviar/:id', function ($id) use ($app, $user, $preferences, $organization, $config) {
     if (!$user) {
         $app->redirect($app->urlFor('login'));
     }
@@ -132,6 +132,7 @@ $app->post('/enviar/:id', function ($id) use ($app, $user, $preferences, $organi
             $filesize = filesize($_FILES['document']['tmp_name'][$loop]);
 
             if (!$list) {
+                // Entregar directamente pues no hay lista de entrega
                 $documentDestination = createDocumentFolder($preferences['upload.folder'], $hash);
                 if (move_uploaded_file($_FILES['document']['tmp_name'][$loop], $preferences['upload.folder'] . $documentDestination))
                     $filename = $_FILES['document']['name'][$loop];
@@ -200,7 +201,7 @@ $app->post('/enviar/:id', function ($id) use ($app, $user, $preferences, $organi
     $category = array();
     $parent = array();
 
-    $sidebar = getTree($organization['id'], $app, $folder['category_id'], $category, $parent);
+    getTree($organization['id'], $app, $folder['category_id'], $category, $parent);
 
     $breadcrumb = array(
         array('display_name' => 'Árbol', 'target' => $app->urlFor('tree')),
@@ -214,10 +215,15 @@ $app->post('/enviar/:id', function ($id) use ($app, $user, $preferences, $organi
             array();
     $deliveries = parseVariablesArray($deliveries, $organization, $user, $profile);
     
-    $app->flashKeep();
+    $now = getdate();
+    $currentWeek = ($now['mon']-1)*4 + floor(($now['mday']-1)/7);
 
+    $app->flashKeep();
+    
     $app->render('upload_review.html.twig', array(
-        'navigation' => $breadcrumb, 'search' => false, 'sidebar' => $sidebar,
+        'navigation' => $breadcrumb, 'search' => false,
+        'base' => $config['calendar.base_week'],
+        'current' => $currentWeek,
         'select2' => true,
         'category' => $category,
         'folder' => $folder,
@@ -420,10 +426,16 @@ function createDocumentFolder($prefix, $hash) {
 function getFolderProfileDeliveryItems($profileId, $folderId) {
     $data = ORM::for_table('event_profile_delivery_item')->
             select('event_profile_delivery_item.*')->
+            select('event.display_name', 'event_display_name')->
+            select('event.from_week')->
+            select('event.to_week')->
+            select('event.force_period')->
+            select('event.grace_period')->
             inner_join('event', array('event.id', '=', 'event_profile_delivery_item.event_id'))->
             where('event.folder_id', $folderId)->
             where('profile_id', $profileId)->
             where('is_visible', 1)->
+            order_by_asc('event.id')->
             order_by_asc('order_nr')->
             find_many();
     return $data;

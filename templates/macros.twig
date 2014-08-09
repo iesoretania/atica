@@ -22,6 +22,14 @@
     </div>
 </div>
 {% endmacro %}
+{% macro input_number(name, mdLength, description, placeholder, min, max, value, enabled = true, maxlength, textclass, other) %}
+<div class="form-group{{ textclass ? ' text-' ~ textclass }}">
+    <label for="{{ name }}" class="col-md-2 control-label">{{ description }}</label>
+    <div class="col-md-{{mdLength}}">
+        <input type="number" class="form-control" name="{{ name }}" id="{{ name }}" placeholder="{{ placeholder }}"{% if value is not null %} value="{{ value }}"{% endif %}{% if maxlength %} maxlength="{{ maxlength }}"{% endif %}{% if not enabled %} disabled="disabled"{% endif %}{% if min is not null %} min="{{min}}" {% endif %}{% if max is not null %} max="{{max}}" {% endif %}{{ other | raw }}>
+    </div>
+</div>
+{% endmacro %}
 {% macro input_radio(name, description, value1, description1, value2, description2, current, enabled = true, textclass) %}
 <div class="form-group{{ textclass ? ' text-' ~ textclass }}">
     <label class="col-md-2 control-label">{{ description }}</label>
