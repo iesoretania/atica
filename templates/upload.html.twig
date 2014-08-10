@@ -38,8 +38,18 @@
             <dd>
             {% for profile in upload_profiles %}{% if not loop.first %}, {% endif %}{% if user_profiles[profile.id] %}<u>{% endif %}{{ profile.display_name_neutral }}{% if profile.display_name is not null %} ({{ profile.display_name }}){% endif %}{% if user_profiles[profile.id] %}</u>{% endif %}{% endfor %}
             </dd>
+            {% if folder.is_restricted and restricted_profiles %}
+            <dt>Pueden visualizar:</dt>
+            <dd>
+            {% for profile in restricted_profiles %}{% if not loop.first %}, {% endif %}{% if user_profiles[profile.id] %}<u>{% endif %}{{ profile.display_name_neutral }}{% if profile.display_name is not null %} ({{ profile.display_name }}){% endif %}{% if user_profiles[profile.id] %}</u>{% endif %}{% endfor %}
+            </dd>
+            {% endif %}
         </dl>
-        {% if stats %}
+    </div>
+</div>
+{% if stats %}
+<div class="panel panel-default">
+    <div class="panel-body">
         <h3>Cuadro de entregas</h3>
         {% set sum_c = 0 %}{% set sum_total = 0 %}
         <table class="table table-condensed table-hover">
@@ -70,9 +80,9 @@
                 </tr>
             </tfoot>
         </table>
-        {% endif %}
     </div>
 </div>
+{% endif %}
 <div class="panel panel-default">
     <div class="panel-body">
         <h3>Envío</h3>
@@ -91,7 +101,7 @@
                 </div>
             <div class="form-group">
                 <button type="submit" class="btn btn-primary auto-enable">Entregar en la plataforma</button>
-                <a class="btn btn-info" href="{{ flash['last_url'] }}">Volver sin entregar</a>
+                <a class="btn btn-info" href="{{ last_url }}">Volver sin entregar</a>
             </div>
         </form>
     </div>

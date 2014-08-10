@@ -91,6 +91,7 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
         'data' => $data,
         'isMine' => $isMine,
         'deliveries' => $deliveries,
+        'backurl' => array('return' => 1, 'data1' => $pid, 'data2' => $aid, 'data3' => $id),
         'event' => $event));
 })->name('event')->via('GET', 'POST');
 

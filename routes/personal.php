@@ -707,12 +707,30 @@ function getProfilesByOrganization($orgId, $filter = true, $containers = false) 
 function getProfileById($id, $orgId) {
     $data = ORM::for_table('profile')->
             select('profile.*')->
+            select('profile_group.display_name_neutral')->
+            select('profile_group.display_name_male')->
+            select('profile_group.display_name_female')->
             inner_join('profile_group', array('profile_group.id', '=', 'profile.profile_group_id'))->
             where('profile_group.organization_id', $orgId)->
             where('profile.id', $id)->
             find_one();
 
     return $data;
+}
+
+function getProfileFullDisplayName($profile, $user) {
+    $names = array(
+        $profile['display_name_neutral'],
+        $profile['display_name_male'],
+        $profile['display_name_female']
+    );
+    
+    $name = $names[$user['gender']];
+    
+    if ($profile['display_name']) {
+        $name .= ' ' . $profile['display_name'];
+    }
+    return $name;
 }
 
 function getProfileGroupById($id, $orgId) {

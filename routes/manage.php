@@ -16,7 +16,8 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see [http://www.gnu.org/licenses/]. */
 
-$app->map('/modificar/:folderid/:id', function ($folderId, $id) use ($app, $user, $config, $organization, $preferences) {
+$app->map('/modificar/:folderid/:id(/:return(/:data1(/:data2(/:data3(/:data4)))))', function ($folderId, $id, $return = null, $data1 = null, $data2 = null, $data3 = null, $data4 = null)
+        use ($app, $user, $config, $organization, $preferences) {
     if (!$user) {
         $app->redirect($app->urlFor('login'));
     }
@@ -36,7 +37,7 @@ $app->map('/modificar/:folderid/:id', function ($folderId, $id) use ($app, $user
     $managerProfiles = parseArray(getPermissionProfiles($folderId, 0));
     $userProfiles = parseArray(getUserProfiles($user['id'], $organization['id'], true));
     $profile = getProfile($delivery['profile_id']);
-    
+
     if (isset($_SESSION['slim.flash']['last_url'])) {
         $app->flash('last_url', $_SESSION['slim.flash']['last_url']);
     }
@@ -48,7 +49,7 @@ $app->map('/modificar/:folderid/:id', function ($folderId, $id) use ($app, $user
     else {
         $deliveredItem = array();
     }
-    
+
     $items = getFolderProfileDeliveryItems($delivery['profile_id'], $folderId);
 
     $isManager = $user['is_admin'];
@@ -191,6 +192,23 @@ $app->map('/modificar/:folderid/:id', function ($folderId, $id) use ($app, $user
         array('display_name' => 'Modificar entrega')
     );
 
+    switch ($return) {
+        case 0:
+            $lastUrl = $app->urlFor('tree', array('id' => $data1));
+            break;
+
+        case 1:
+            $lastUrl = $app->urlFor('event', array('pid' => $data1, 'aid' => $data2, 'id' => $data3));
+            break;
+
+        case 2:
+            $lastUrl = $app->urlFor('upload', array('id' => $folderId, 'return' => $data1, 'data1' => $data2, 'data2' => $data3, 'data3' => $data4));
+            break;
+
+        default:
+            $lastUrl = $app->urlFor('frontpage');
+    }
+
     $app->render('manage_delivery.html.twig', array(
         'navigation' => $breadcrumb, 'search' => false,
         'select2' => true,
@@ -208,6 +226,7 @@ $app->map('/modificar/:folderid/:id', function ($folderId, $id) use ($app, $user
         'manager_profiles' => $managerProfiles,
         'user_profiles' => $userProfiles,
         'upload_as' => $uploadAs,
+        'last_url' => $lastUrl,
         'data' => $data));
 
 })->name('modify')->via('GET', 'POST');

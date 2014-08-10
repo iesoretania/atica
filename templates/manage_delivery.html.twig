@@ -72,12 +72,12 @@
             {% set now = (current-base+48) % 48 %}
             {% set from = (item.from_week-base+48) % 48 %}
             {% set to = (item.to_week-base+48) % 48 %}
-            {% if item and ((not item.force_period) or is_manager or ((now>=from) and (now<=to))) %}
+            {% if not item or (item and ((not item.force_period) or is_manager or ((now>=from) and (now<=to)))) %}
             <button type="submit" name="delete" class="btn btn-danger" onClick="javascript:return confirm('La operación de borrado no se puede deshacer. ¿Desea continuar?');">Eliminar la entrega</button>
             {% else %}
             <button type="button" class="btn btn-danger" disabled="1">No se puede eliminar, entregue una nueva revisión</button>
             {% endif %}
-            <a class="btn btn-info" href="{{ flash['last_url'] }}">Volver sin realizar cambios</a>
+            <a class="btn btn-info" href="{{ last_url }}">Volver sin realizar cambios</a>
         </div>
     </div>
     <div class="panel panel-default">

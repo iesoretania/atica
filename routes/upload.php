@@ -16,8 +16,10 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see [http://www.gnu.org/licenses/]. */
 
-$app->get('/enviar/:id', function ($id) use ($app, $user, $config, $organization) {
-    if (!$user) {
+$app->get('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $return=0, $data1=null, $data2=null, $data3=null) 
+    use ($app, $user, $config, $organization) {
+    
+    if ((!$user) || ($return < 0) || ($return > 1)) {
         $app->redirect($app->urlFor('login'));
     }
 
@@ -26,6 +28,7 @@ $app->get('/enviar/:id', function ($id) use ($app, $user, $config, $organization
     $parent = array();
 
     $folder = getFolder($organization['id'], $id);
+    $restrictedProfiles = parseArray(getPermissionProfiles($id, 2));
     $uploadProfiles = parseArray(getPermissionProfiles($id, 1));
     $managerProfiles = parseArray(getPermissionProfiles($id, 0));
     $userProfiles = parseArray(getUserProfiles($user['id'], $organization['id'], true));
@@ -67,17 +70,53 @@ $app->get('/enviar/:id', function ($id) use ($app, $user, $config, $organization
             }
         }
     }
-    $stats = getFolderProfileDeliveryStats($id);
-    $sidebar = getTree($organization['id'], $app, $folder['category_id'], $category, $parent);
-
-    $breadcrumb = array(
-        array('display_name' => 'Árbol', 'target' => $app->urlFor('tree')),
-        array('display_name' => $parent['display_name'], 'target' => $app->urlFor('tree')),
-        array('display_name' => $category['display_name'], 'target' => $app->urlFor('tree', array('id' => $category['id']))),
-        array('display_name' => 'Enviar documento')
-    );
-
-    $app->flashKeep();
+    
+    $category = getCategoryObjectById($organization['id'], $folder['category_id']);
+    
+    if (!$category) {
+        $app->redirect($app->urlFor('login'));
+    }
+    
+    switch ($return) {
+        case 0:
+            $breadcrumb = array(
+                array('display_name' => 'Árbol', 'target' => $app->urlFor('tree'))
+            );
+            $parents = getCategoryParentsById($category['id']);
+            foreach($parents as $parent) {
+                $breadcrumb[] = array('display_name' => $parent['display_name'], 'target' => $app->urlFor('tree'));
+            }
+            $breadcrumb[] = array('display_name' => $category['display_name'], 'target' => $app->urlFor('tree', array('id' => $category['id'])));
+            $breadcrumb[] = array('display_name' => 'Enviar documento');
+            $lastUrl = $app->urlFor('tree', array('id' => $data1));
+            break;
+        case 1:
+            $event = getEventObject($organization['id'], $data3);
+            $activityevent = getActivityEvent($data3, $data2, $user);
+            $profile = getProfileById($data1, $organization['id']);
+            if ((!$event) || (!$activityevent) || (!$profile) || ($event['folder_id'] != $id)) {
+                $app->redirect($app->urlFor('login'));
+            }
+            $lastUrl = $app->urlFor('event', array('pid' => $data1, 'aid' => $data2, 'id' => $data3));
+            
+            $breadcrumb = array(
+                array('display_name' => 'Actividades', 'target' => $app->urlFor('activities')),
+                array('display_name' => getProfileFullDisplayName($profile, $user), 'target' => $app->urlFor('activities', array('id' => $data1))),
+                array('display_name' => $activityevent['activity_display_name'], 'target' => $app->urlFor('activities', array('id' => $data1))),
+                array('display_name' => $event['display_name'], 'target' => $app->urlFor('event', array('pid' => $data1, 'aid' => $data2, 'id' => $data3))),
+                array('display_name' => 'Enviar documento')
+            );
+            break;
+    }
+    
+    if ($isManager) {
+        $stats = getFolderProfileDeliveryStats($id);
+    }
+    
+    
+    $items = parseVariablesArray(getFolderItemsByUser($user['id'], $id, $organization['id']), $organization, $user, 'profile_id', $userProfiles);
+    
+    $localStats = getArrayGroups($items, 'profile_id');
     
     $app->render('upload.html.twig', array(
         'navigation' => $breadcrumb, 'search' => false,
@@ -86,9 +125,13 @@ $app->get('/enviar/:id', function ($id) use ($app, $user, $config, $organization
         'folder' => $folder,
         'upload_profiles' => $uploadProfiles,
         'manager_profiles' => $managerProfiles,
+        'restricted_profiles' => $restrictedProfiles,
         'user_profiles' => $userProfiles,
         'upload_as' => $uploadAs,
         'stats' => $stats,
+        'local_stats' => $localStats,
+        'back_url' => array('return' => $return, 'data1' => $data1, 'data2' => $data2, 'data3' => $data3),
+        'last_url' => $lastUrl,
         'data' => $data));
 })->name('upload');
 
@@ -211,7 +254,7 @@ $app->post('/enviar/:id', function ($id) use ($app, $user, $preferences, $organi
     );
 
     $deliveries = $profileIsSet ?
-            getFolderProfileDeliveredItems($profileId, $id, $organization, $user, $profile) :
+            getFolderProfileDeliveredItems($profileId, $id, $organization['id'], $user, $profile) :
             array();
     $deliveries = parseVariablesArray($deliveries, $organization, $user, $profile);
     
@@ -475,7 +518,7 @@ function getFolderProfileDeliveryStatsByProfile($folderId, $profileId) {
     return $data;
 }
 
-function getFolderProfileDeliveredItems($profileId, $folderId, $organization, $user, $profile) {
+function getFolderProfileDeliveredItems($profileId, $folderId, $orgId, $user, $profile) {
     $data = ORM::for_table('event_profile_delivery_item')->
             inner_join('event', array('event.id', '=', 'event_id'))->
             select('event_profile_delivery_item.id')->
@@ -492,6 +535,54 @@ function getFolderProfileDeliveredItems($profileId, $folderId, $organization, $u
             find_array();
 
     return $data;
+}
+
+function getArrayGroups($data, $key) {
+    $lastgroup = null;
+    $return = array();
+    $partial = array();
+    foreach ($data as $item) {
+        if ($lastgroup != $item[$key]) {
+            if ($lastgroup !== null) {
+                $return[$lastgroup] = $partial;
+            }
+            $partial = array();
+            $lastgroup = $item[$key];
+        }
+        $partial[] = $item;
+    }
+    if ($lastgroup !== null) {
+        $return[$lastgroup] = $partial;
+    }
+    return $return;
+}
+
+function getFolderItemsByUser($userId, $folderId, $orgId) {
+    $data = ORM::for_table('event_profile_delivery_item')->
+            inner_join('event', array('event.id', '=', 'event_id'))->
+            select('event_profile_delivery_item.id')->
+            select('event_profile_delivery_item.display_name')->
+            select('event_profile_delivery_item.profile_id')->
+            select('delivery.creation_date')->
+            select('delivery.id', 'delivery_id')->
+            select('event.folder_id')->
+            select_expr('COUNT(delivery.item_id)', 'c')->
+            left_outer_join('delivery', array('delivery.item_id', '=', 'event_profile_delivery_item.id'))->
+            left_outer_join('person_profile', array('person_profile.profile_id', '=', 'event_profile_delivery_item.profile_id'))->
+            where('event.folder_id', $folderId)->
+            where('event.organization_id', $orgId)->
+            where('person_profile.person_id', $userId)->
+            where('event_profile_delivery_item.is_visible', 1)->
+            group_by('event_profile_delivery_item.id')->
+            order_by_asc('event_profile_delivery_item.profile_id')->
+            order_by_asc('event_profile_delivery_item.order_nr')->
+            find_array();
+
+    return $data;
+}
+
+function getEventItemsByUser($userId, $eventId) {
+    
 }
 
 function getProfile($profileId) {
@@ -694,9 +785,9 @@ function parseVariables($string, $organization, $user, $profile) {
         }, $string);
 }
 
-function parseVariablesArray($data, $organization, $user, $profile) {
+function parseVariablesArray($data, $organization, $user, $profile, $profiles = null) {
     foreach ($data as $k => $item) {
-        $data[$k]['display_name'] = parseVariables($data[$k]['display_name'], $organization, $user, $profile);
+        $data[$k]['display_name'] = parseVariables($data[$k]['display_name'], $organization, $user, $profiles ? $profiles[$data[$k][$profile]] : $profile);
     }
     return $data;
 }

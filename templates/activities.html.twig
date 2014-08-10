@@ -58,7 +58,7 @@
                 {% if isMine %}
                 <td>
                 {% if (event.is_automatic or event.is_manual) %}
-                {{ event.completed_date ? event.completed_date | date('Y-m-d') : 'Pendiente' }}
+                {{ event.completed_date ? 'Hecho' : 'Pendiente' }}
                 {% else %}
                 &mdash;&mdash;&mdash;
                 {% endif %}

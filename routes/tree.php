@@ -60,6 +60,7 @@ $app->get('/arbol(/:id)', function ($id = null) use ($app, $user, $organization)
         'persons' => $persons,
         'folderProfiles' => $folderProfiles,
         'profileGender' => $profileGender,
+        'backurl' => array('return' => 0, 'data1' => $id, 'data2' => 0, 'data3' => 0),
         'folders' => $folders));
 })->name('tree');
 
@@ -231,8 +232,6 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = null) use ($app, $use
         array('display_name' => $category['display_name'], 'target' => $app->urlFor('tree', array('id' => $catid))),
         array('display_name' => 'Gestionar carpeta')
     );
-    
-    $app->flashKeep();
     
     $app->render('manage_folder.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true, 'topbar' => $topbar,
@@ -594,6 +593,20 @@ function getCategoryObjectById($orgId, $catId) {
             where('organization_id', $orgId)->
             where('id', $catId)->
             find_one();
+}
+
+function getCategoryParentsById($catId) {
+    $data = array();
+    $category = ORM::for_table('category')->find_one($catId);
+    while ($category['category_level']>1) {
+        $category = ORM::for_table('category')->
+                where('category_level', $category['category_level']-1)->
+                where_lt('category_left', $category['category_left'])->
+                order_by_Desc('category_left')->
+                find_one();
+        array_unshift($data, $category);
+    }
+    return $data;
 }
 
 function getMaxFolderOrder($catId) {
