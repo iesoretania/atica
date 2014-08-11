@@ -33,35 +33,42 @@
             <div class="form-group">
                 <label class="col-md-2 control-label" for="creation">Realizada el </label>
                     <div class="col-md-10">
-                    {% if user['is_admin'] %}
-                    {{ m.select_date('creation', delivery['creation_date'] | date('YmdHi'), true) }}
-                    {% else %}
-                    <p class="form-control-static">{{ delivery['creation_date'] | date('Y-m-d') }}</p>
-                    {% endif %}
-                </div>
+                        {% if user['is_admin'] %}
+                        {{ m.select_date('creation', delivery['creation_date'] | date('YmdHi'), true) }}
+                        {% else %}
+                        <p class="form-control-static">{{ delivery['creation_date'] | date('Y-m-d') }}</p>
+                        {% endif %}
+                    </div>
             </div>
             {% if item %}
             <div class="form-group">
                 <label class="col-md-2 control-label" for="creation">Asociada a la actividad </label>
                     <div class="col-md-10">
-                    <p class="form-control-static">{{ item.event_display_name }}</p>
-                </div>
+                        <p class="form-control-static">{{ item.event_display_name }}</p>
+                    </div>
             </div>
             <div class="form-group">
                 <label class="col-md-2 control-label" for="creation">Se corresponde con </label>
                     <div class="col-md-10">
-                    <p class="form-control-static">{{ item.display_name }}</p>
-                </div>
+                        <p class="form-control-static">{{ item.display_name }}</p>
+                    </div>
             </div>
             {% endif %}
             {% if folder['is_divided'] %}
             <div class="form-group">
                 <label class="col-md-2 control-label" for="profile">Asociada al perfil</label>
+                {% if is_manager %}
                 <div class="col-md-10">
                     <select class="form-control select" name="profile">
                         {% for profile in upload_as %}<option value="{{ profile['id'] }}" {{ (delivery['profile_id'] == profile['id']) ? " selected" : "" }}>{{ [profile['display_name_neutral'], profile['display_name_male'], profile['display_name_female']][user['gender']] }}{% if profile['display_name'] %} ({{ profile['display_name'] }}){% endif %}</option>{% endfor %}
                     </select>
                 </div>
+                {% else %}
+                <div class="col-md-10">
+                    {% set profile = upload_as[delivery['profile_id']] %}
+                    <p class="form-control-static">{{ [profile['display_name_neutral'], profile['display_name_male'], profile['display_name_female']][user['gender']] }}{% if profile['display_name'] %} ({{ profile['display_name'] }}){% endif %}</p>
+                </div>
+                {% endif %}
             </div>
             {% endif %}
             {{ m.input_text('displayname', 10, 'Nombre a mostrar', 'Nombre con el que se mostrará la entrega en los listados', delivery['display_name']) }}
@@ -75,7 +82,7 @@
             {% if not item or (item and ((not item.force_period) or is_manager or ((now>=from) and (now<=to)))) %}
             <button type="submit" name="delete" class="btn btn-danger" onClick="javascript:return confirm('La operación de borrado no se puede deshacer. ¿Desea continuar?');">Eliminar la entrega</button>
             {% else %}
-            <button type="button" class="btn btn-danger" disabled="1">No se puede eliminar, entregue una nueva revisión</button>
+            <button type="button" class="btn btn-danger" disabled="1">Fuera de plazo, no se puede eliminar (entregue una nueva revisión)</button>
             {% endif %}
             <a class="btn btn-info" href="{{ last_url }}">Volver sin realizar cambios</a>
         </div>

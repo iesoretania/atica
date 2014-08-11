@@ -24,10 +24,13 @@ $app->get('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $retu
     }
 
     $data = array();
-    $category = array();
     $parent = array();
 
     $folder = getFolder($organization['id'], $id);
+    if (!$folder) {
+        $app->redirect($app->urlFor('login'));
+    }
+
     $restrictedProfiles = parseArray(getPermissionProfiles($id, 2));
     $uploadProfiles = parseArray(getPermissionProfiles($id, 1));
     $managerProfiles = parseArray(getPermissionProfiles($id, 0));
@@ -112,11 +115,15 @@ $app->get('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $retu
     if ($isManager) {
         $stats = getFolderProfileDeliveryStats($id);
     }
-    
+    else {
+        $stats = array();
+    }
     
     $items = parseVariablesArray(getFolderItemsByUser($user['id'], $id, $organization['id']), $organization, $user, 'profile_id', $userProfiles);
     
     $localStats = getArrayGroups($items, 'profile_id');
+    $now = getdate();
+    $currentWeek = ($now['mon']-1)*4 + floor(($now['mday']-1)/7);
     
     $app->render('upload.html.twig', array(
         'navigation' => $breadcrumb, 'search' => false,
@@ -127,62 +134,55 @@ $app->get('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $retu
         'manager_profiles' => $managerProfiles,
         'restricted_profiles' => $restrictedProfiles,
         'user_profiles' => $userProfiles,
+        'is_manager' => $isManager,
         'upload_as' => $uploadAs,
+        'base' => $config['calendar.base_week'],
+        'current' => $currentWeek,
         'stats' => $stats,
         'local_stats' => $localStats,
+        'url' => $app->request()->getPathInfo(),
         'back_url' => array('return' => $return, 'data1' => $data1, 'data2' => $data2, 'data3' => $data3),
         'last_url' => $lastUrl,
         'data' => $data));
 })->name('upload');
 
-$app->post('/enviar/:id', function ($id) use ($app, $user, $preferences, $organization, $config) {
+$app->post('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $return=0, $data1=null, $data2=null, $data3=null) 
+    use ($app, $user, $config, $organization, $preferences) {
     if (!$user) {
         $app->redirect($app->urlFor('login'));
     }
-    if ((! isset($_FILES['document']['name'][0])) || (strlen($_FILES['document']['name'][0]) == 0)) {
-        // no hay archivos enviados
-        $app->redirect($app->urlFor('upload', array('id' => $id)));
-    }
     
-    $items = array();
+    if (isset($_POST['localupload'])) {
+        $folder = getFolder($organization['id'], $id);
+        if (!$folder) {
+            $app->redirect($app->urlFor('login'));
+        }
+        $userProfiles = parseArray(getUserProfiles($user['id'], $organization['id'], true));
 
-    // TODO: Comprobar si la carpeta es válida
-    $folder = getFolder($organization['id'], $id);
-    
-    // TODO: Comprobar perfil
-    $profileIsSet = $folder['is_divided'];
-    $profileId = $profileIsSet ? $_POST['profile'] : null;
-    $profile = $profileIsSet ? getProfile($profileId) : array();
+        $items = parseVariablesArray(getFolderItemsByUser($user['id'], $id, $organization['id']), $organization, $user, 'profile_id', $userProfiles);
+        $failed = 0;
+        $success = 0;
+        
+        // comprobar ítem a ítem si se ha recibido un documento
+        foreach ($items as $item) {
+            $profile = getProfile($item['profile_id']);
+            $ref = 'localdocument_' . $item['id'];
+            if (($item['c'] == 0) && (isset($_FILES[$ref]['name'])) && (strlen($_FILES[$ref]['name']) > 0) && (is_uploaded_file($_FILES[$ref]['tmp_name']))) {
+                // recibido
+                $hash = sha1_file($_FILES[$ref]['tmp_name']);
+                $filesize = filesize($_FILES[$ref]['tmp_name']);
 
-    // buscar si hay una lista de entrega
-    $list = $profileIsSet ?
-            parseArray(getFolderProfileDeliveryItems($profileId, $id)) :
-            array();
-
-    $list = parseVariablesArray($list, $organization, $user, $profile);
-    
-    // si es falso, mostrar revisión de los documentos enviados
-    $finished = false;
-    
-    $loop = 0;
-    $failed = 0;
-    $success = 0;
-    while (isset($_FILES['document']['name'][$loop])) {
-        $ok = true;
-        $type = "";
-        if ( is_uploaded_file($_FILES['document']['tmp_name'][$loop]) ) {
-            $hash = sha1_file($_FILES['document']['tmp_name'][$loop]);
-            $filesize = filesize($_FILES['document']['tmp_name'][$loop]);
-
-            if (!$list) {
-                // Entregar directamente pues no hay lista de entrega
                 $documentDestination = createDocumentFolder($preferences['upload.folder'], $hash);
-                if (move_uploaded_file($_FILES['document']['tmp_name'][$loop], $preferences['upload.folder'] . $documentDestination))
-                    $filename = $_FILES['document']['name'][$loop];
-                    $info = pathinfo( $filename );
-                    $description = str_replace ('_', ' ', $info['filename']);
-                    
-                    if (false == createDelivery($id, $user['id'], $profileId, $_FILES['document']['name'][$loop], $description, null, null, $documentDestination, $hash, $filesize)) {
+                if (move_uploaded_file($_FILES[$ref]['tmp_name'], $preferences['upload.folder'] . $documentDestination)) {
+                    $ext = pathinfo($_FILES[$ref]['name'], PATHINFO_EXTENSION);
+                    if ($ext) {
+                        $ext = '.' . $ext;
+                    }
+                    $name = $item['document_name'] ? $item['document_name'] : $item['display_name'];
+                    $filename = parseVariables($name, $organization, $user, $profile) . $ext;
+                    $description = parseVariables($item['display_name'], $organization, $user, $profile);
+
+                    if (false == createDelivery($id, $user['id'], $item['profile_id'], $_FILES[$ref]['name'], $description, null, $item['id'], $documentDestination, $hash, $filesize)) {
                         $ok = false;
                         $type = 'danger';
                         $message = 'cannot register';
@@ -191,90 +191,174 @@ $app->post('/enviar/:id', function ($id) use ($app, $user, $preferences, $organi
                         $ok = true;
                         $type = 'ok';
                     }
-            }
-            else {
-                // Mover a una carpeta temporal
-                @mkdir($preferences['upload.folder'] . "temp/", 0770, true);
-                $tempDestination = $preferences['upload.folder'] . "temp/" . $hash;
-                move_uploaded_file($_FILES['document']['tmp_name'][$loop], $tempDestination);
-
-                $filename = $_FILES['document']['name'][$loop];
-                $info = pathinfo( $filename );
-                $description = $info['filename'];
-                $items[] = array(
-                    'name' => $filename,
-                    'description' => $description,
-                    'hash' => $hash,
-                    'filesize' => $filesize
-                );
+                }
+                else {
+                    $ok = false;
+                    $type = 'danger';
+                    $message = 'cannot move';
+                }
+                
+                if ($type == 'danger') {
+                    $app->flash('upload_status_' . $failed, $type);
+                    $app->flash('upload_name_' . $failed, $_FILES[$ref]['name']);
+                    $app->flash('upload_error_' . $failed, $message);
+                    $failed++;
+                }
+                else {
+                    $success++;
+                }
             }
         }
-        else {
-            $ok = false;
-            $type = 'danger';
-            $message = 'cannot move';
-        }
-        if ($type) {
-            if ($type == 'danger') {
-                $app->flash('upload_status_' . $failed, $type);
-                $app->flash('upload_name_' . $failed, $_FILES['document']['name'][$loop]);
-                $app->flash('upload_error_' . $failed, $message);
-                $failed++;
-            }
-            else {
-                $success++;
-            }
-            $finished = true;
-        }
-        $loop++;
-    }
-    
-    if ($finished) {
+        
         $app->flash('upload', $failed);
         if ($success>0) {
             $app->flash('upload_ok', $success);
         }
-        $url = isset($_SESSION['slim.flash']['last_url']) ?
-            $_SESSION['slim.flash']['last_url'] :
-            $app->urlFor('tree', array( 'id' => $folder['category_id']));
-        
-        $app->redirect($url);
+        $app->redirect($app->request()->getPathInfo());
     }
+    else {
+        if ((! isset($_FILES['document']['name'][0])) || (strlen($_FILES['document']['name'][0]) == 0)) {
+            // no hay archivos enviados
+            $app->redirect($app->request()->getPathInfo());
+        }
 
-    $category = array();
-    $parent = array();
+        $items = array();
 
-    getTree($organization['id'], $app, $folder['category_id'], $category, $parent);
+        // TODO: Comprobar si la carpeta es válida
+        $folder = getFolder($organization['id'], $id);
 
-    $breadcrumb = array(
-        array('display_name' => 'Árbol', 'target' => $app->urlFor('tree')),
-        array('display_name' => $parent['display_name'], 'target' => $app->urlFor('tree')),
-        array('display_name' => $category['display_name'], 'target' => $app->urlFor('tree', array('id' => $category['id']))),
-        array('display_name' => 'Revisar documento')
-    );
+        // TODO: Comprobar perfil
+        $profileIsSet = $folder['is_divided'];
+        $profileId = $profileIsSet ? $_POST['profile'] : null;
+        $profile = $profileIsSet ? getProfile($profileId) : array();
 
-    $deliveries = $profileIsSet ?
-            getFolderProfileDeliveredItems($profileId, $id, $organization['id'], $user, $profile) :
-            array();
-    $deliveries = parseVariablesArray($deliveries, $organization, $user, $profile);
-    
-    $now = getdate();
-    $currentWeek = ($now['mon']-1)*4 + floor(($now['mday']-1)/7);
+        // buscar si hay una lista de entrega
+        $list = $profileIsSet ?
+                parseArray(getFolderProfileDeliveryItems($profileId, $id)) :
+                array();
 
-    $app->flashKeep();
-    
-    $app->render('upload_review.html.twig', array(
-        'navigation' => $breadcrumb, 'search' => false,
-        'base' => $config['calendar.base_week'],
-        'current' => $currentWeek,
-        'select2' => true,
-        'category' => $category,
-        'folder' => $folder,
-        'items' => $list,
-        'profile' => $profile,
-        'deliveries' => $deliveries,
-        'data' => $items));
+        $list = parseVariablesArray($list, $organization, $user, $profile);
 
+        // si es falso, mostrar revisión de los documentos enviados
+        $finished = false;
+
+        $loop = 0;
+        $failed = 0;
+        $success = 0;
+        while (isset($_FILES['document']['name'][$loop])) {
+            $ok = true;
+            $type = "";
+            if ( is_uploaded_file($_FILES['document']['tmp_name'][$loop]) ) {
+                $hash = sha1_file($_FILES['document']['tmp_name'][$loop]);
+                $filesize = filesize($_FILES['document']['tmp_name'][$loop]);
+
+                if (!$list) {
+                    // Entregar directamente pues no hay lista de entrega
+                    $documentDestination = createDocumentFolder($preferences['upload.folder'], $hash);
+                    if (move_uploaded_file($_FILES['document']['tmp_name'][$loop], $preferences['upload.folder'] . $documentDestination)) {
+                        $filename = $_FILES['document']['name'][$loop];
+                        $info = pathinfo( $filename );
+                        $description = str_replace ('_', ' ', $info['filename']);
+
+                        if (false == createDelivery($id, $user['id'], $profileId, $_FILES['document']['name'][$loop], $description, null, null, $documentDestination, $hash, $filesize)) {
+                            $ok = false;
+                            $type = 'danger';
+                            $message = 'cannot register';
+                        }               
+                        else {
+                            $ok = true;
+                            $type = 'ok';
+                        }
+                    }
+                    else {
+                        $ok = false;
+                        $type = 'danger';
+                        $message = 'cannot register';
+                    }
+                }
+                else {
+                    // Mover a una carpeta temporal
+                    @mkdir($preferences['upload.folder'] . "temp/", 0770, true);
+                    $tempDestination = $preferences['upload.folder'] . "temp/" . $hash;
+                    move_uploaded_file($_FILES['document']['tmp_name'][$loop], $tempDestination);
+
+                    $filename = $_FILES['document']['name'][$loop];
+                    $info = pathinfo( $filename );
+                    $description = $info['filename'];
+                    $items[] = array(
+                        'name' => $filename,
+                        'description' => $description,
+                        'hash' => $hash,
+                        'filesize' => $filesize
+                    );
+                }
+            }
+            else {
+                $ok = false;
+                $type = 'danger';
+                $message = 'cannot move';
+            }
+            if ($type) {
+                if ($type == 'danger') {
+                    $app->flash('upload_status_' . $failed, $type);
+                    $app->flash('upload_name_' . $failed, $_FILES['document']['name'][$loop]);
+                    $app->flash('upload_error_' . $failed, $message);
+                    $failed++;
+                }
+                else {
+                    $success++;
+                }
+                $finished = true;
+            }
+            $loop++;
+        }
+
+        if ($finished) {
+            $app->flash('upload', $failed);
+            if ($success>0) {
+                $app->flash('upload_ok', $success);
+            }
+            $url = isset($_SESSION['slim.flash']['last_url']) ?
+                $_SESSION['slim.flash']['last_url'] :
+                $app->urlFor('tree', array( 'id' => $folder['category_id']));
+
+            $app->redirect($url);
+        }
+
+        $category = array();
+        $parent = array();
+
+        getTree($organization['id'], $app, $folder['category_id'], $category, $parent);
+
+        $breadcrumb = array(
+            array('display_name' => 'Árbol', 'target' => $app->urlFor('tree')),
+            array('display_name' => $parent['display_name'], 'target' => $app->urlFor('tree')),
+            array('display_name' => $category['display_name'], 'target' => $app->urlFor('tree', array('id' => $category['id']))),
+            array('display_name' => 'Revisar documento')
+        );
+
+        $deliveries = $profileIsSet ?
+                getFolderProfileDeliveredItems($profileId, $id, $organization['id'], $user, $profile) :
+                array();
+        $deliveries = parseVariablesArray($deliveries, $organization, $user, $profile);
+
+        $now = getdate();
+        $currentWeek = ($now['mon']-1)*4 + floor(($now['mday']-1)/7);
+
+        $app->flashKeep();
+
+        $app->render('upload_review.html.twig', array(
+            'navigation' => $breadcrumb, 'search' => false,
+            'base' => $config['calendar.base_week'],
+            'current' => $currentWeek,
+            'select2' => true,
+            'category' => $category,
+            'folder' => $folder,
+            'items' => $list,
+            'profile' => $profile,
+            'deliveries' => $deliveries,
+            'data' => $items));
+    }
 });
 
 $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $organization) {
@@ -561,8 +645,15 @@ function getFolderItemsByUser($userId, $folderId, $orgId) {
     $data = ORM::for_table('event_profile_delivery_item')->
             inner_join('event', array('event.id', '=', 'event_id'))->
             select('event_profile_delivery_item.id')->
+            select('event_profile_delivery_item.event_id')->
             select('event_profile_delivery_item.display_name')->
+            select('event_profile_delivery_item.document_name')->
             select('event_profile_delivery_item.profile_id')->
+            select('event.display_name', 'event_display_name')->
+            select('event.from_week')->
+            select('event.to_week')->
+            select('event.grace_period')->
+            select('event.force_period')->
             select('delivery.creation_date')->
             select('delivery.id', 'delivery_id')->
             select('event.folder_id')->

@@ -64,36 +64,27 @@ $app->map('/modificar/:folderid/:id(/:return(/:data1(/:data2(/:data3(/:data4))))
     // - Es administrador o gestor de la carpeta ($isManager)
     // - La revisión activa es suya
     if ((!$isManager) && ($revisions[$delivery['current_revision_id']]['uploader_person_id'] != $user['id'])) {
-        $app-redirect($app->urlFor('login'));
+        $app->redirect($app->urlFor('login'));
     }
 
     $uploadAs = array();
-    if (!$isManager) {
-        $realUserProfiles = parseArray(getUserProfiles($user['id'], $organization['id'], false));
-        foreach ($realUserProfiles as $item) {
-            if (isset($uploadProfiles[$item['id']]) || isset($uploadProfiles[$item['profile_group_id']])) {
-                $uploadAs[$item['id']] = $item;
-            }
-        }
-    }
-    else {
-        foreach ($uploadProfiles as $item) {
-            if (null == $item['display_name']) {
-                $data = parseArray(getSubprofiles($item['id']));
-                if (count($data)>1) {
-                    foreach($data as $subItem) {
-                        if (null != $subItem['display_name']) {
-                            $uploadAs[$subItem['id']] = $subItem;
-                        }
+    
+    foreach ($uploadProfiles as $item) {
+        if (null == $item['display_name']) {
+            $data = parseArray(getSubprofiles($item['id']));
+            if (count($data)>1) {
+                foreach($data as $subItem) {
+                    if (null != $subItem['display_name']) {
+                        $uploadAs[$subItem['id']] = $subItem;
                     }
-                }
-                else {
-                    $uploadAs[$item['id']] = $item;
                 }
             }
             else {
                 $uploadAs[$item['id']] = $item;
             }
+        }
+        else {
+            $uploadAs[$item['id']] = $item;
         }
     }
 
@@ -128,6 +119,9 @@ $app->map('/modificar/:folderid/:id(/:return(/:data1(/:data2(/:data3(/:data4))))
         }
         foreach($revisions as $revision) {
             $ok = $ok && $revision->delete();
+        }
+        if ($delivery['profile_id']) {
+            checkItemUpdateStatus($folderId, $delivery['profile_id']);
         }
         if ($ok) {
             $delivery->delete();
