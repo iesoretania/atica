@@ -502,9 +502,91 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
         $app->flash('upload_ok', $success);
     }
     $app->redirect($app->urlFor('tree', array( 'id' => $folder['category_id'])));
-    //$app->redirect($app->urlFor('upload', array('id' => $id)));
     
 })->name('confirm');
+
+$app->get('/estadisticas/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $return=0, $data1=null, $data2=null, $data3=null) 
+        use ($app, $user, $organization, $config) {
+    if (!$user) {
+        $app->redirect($app->urlFor('login'));
+    }
+    
+    $folder = getFolderObjectById($organization['id'], $id);
+    
+    $restrictedProfiles = parseArray(getPermissionProfiles($id, 2));
+    $uploadProfiles = parseArray(getPermissionProfiles($id, 1));
+    $managerProfiles = parseArray(getPermissionProfiles($id, 0));
+    $userProfiles = parseArray(getUserProfiles($user['id'], $organization['id'], true));
+    $allProfiles = parseArray(getProfilesByOrganization($organization['id']));
+    
+    $isManager = $user['is_admin'];
+    foreach ($managerProfiles as $upload) {
+        if (isset($userProfiles[$upload['id']])) {
+            $isManager = true;
+            break;
+        }
+    }
+    
+    switch ($return) {
+        case 0:
+            $breadcrumb = array(
+                array('display_name' => 'Árbol', 'target' => $app->urlFor('tree'))
+            );
+            $category = getCategoryObjectById($organization['id'], $folder['category_id']);
+            $parents = getCategoryParentsById($category['id']);
+            foreach($parents as $parent) {
+                $breadcrumb[] = array('display_name' => $parent['display_name'], 'target' => $app->urlFor('tree'));
+            }
+            $breadcrumb[] = array('display_name' => $category['display_name'], 'target' => $app->urlFor('tree', array('id' => $category['id'])));
+            $breadcrumb[] = array('display_name' => 'Enviar documento');
+            $lastUrl = $app->urlFor('tree', array('id' => $data1));
+            break;
+        case 1:
+            $event = getEventObject($organization['id'], $data3);
+            $activityevent = getActivityEvent($data3, $data2, $user);
+            $profile = getProfileById($data1, $organization['id']);
+            if ((!$event) || (!$activityevent) || (!$profile) || ($event['folder_id'] != $id)) {
+                $app->redirect($app->urlFor('login'));
+            }
+            $lastUrl = $app->urlFor('event', array('pid' => $data1, 'aid' => $data2, 'id' => $data3));
+            
+            $breadcrumb = array(
+                array('display_name' => 'Actividades', 'target' => $app->urlFor('activities')),
+                array('display_name' => getProfileFullDisplayName($profile, $user), 'target' => $app->urlFor('activities', array('id' => $data1))),
+                array('display_name' => $activityevent['activity_display_name'], 'target' => $app->urlFor('activities', array('id' => $data1))),
+                array('display_name' => $event['display_name'], 'target' => $app->urlFor('event', array('pid' => $data1, 'aid' => $data2, 'id' => $data3))),
+                array('display_name' => 'Enviar documento')
+            );
+            break;
+    }
+    
+    $stats = getFolderProfileDeliveryStats($id);
+    
+    $data = getFolderItems($id, $organization['id'])->find_array();
+    $items = parseVariablesArray($data, $organization, $user, 'profile_id', $allProfiles);
+    
+    $localStats = getArrayGroups($items, 'profile_id');
+    $now = getdate();
+    $currentWeek = ($now['mon']-1)*4 + floor(($now['mday']-1)/7);
+    
+    $app->render('folder_stats.html.twig', array(
+        'navigation' => $breadcrumb,
+        'search' => false,
+        'url' => $app->request()->getPathInfo(),
+        'back_url' => array('return' => $return, 'data1' => $data1, 'data2' => $data2, 'data3' => $data3),
+        'last_url' => $lastUrl,
+        'stats' => $stats,
+        'local_stats' => $localStats,
+        'base' => $config['calendar.base_week'],
+        'current' => $currentWeek,
+        'restricted_profiles' => $restrictedProfiles,
+        'upload_profiles' => $uploadProfiles,
+        'manager_profiles' => $managerProfiles,
+        'user_profiles' => $userProfiles,
+        'all_profiles' => $allProfiles,
+        'folder' => $folder));
+    
+})->name('folderstats');
 
 function getDelivery($deliveryId) {
     return ORM::for_table('delivery')->
@@ -641,7 +723,7 @@ function getArrayGroups($data, $key) {
     return $return;
 }
 
-function getFolderItemsByUser($userId, $folderId, $orgId) {
+function getFolderItems($folderId, $orgId) {
     $data = ORM::for_table('event_profile_delivery_item')->
             inner_join('event', array('event.id', '=', 'event_id'))->
             select('event_profile_delivery_item.id')->
@@ -659,14 +741,20 @@ function getFolderItemsByUser($userId, $folderId, $orgId) {
             select('event.folder_id')->
             select_expr('COUNT(delivery.item_id)', 'c')->
             left_outer_join('delivery', array('delivery.item_id', '=', 'event_profile_delivery_item.id'))->
-            left_outer_join('person_profile', array('person_profile.profile_id', '=', 'event_profile_delivery_item.profile_id'))->
             where('event.folder_id', $folderId)->
             where('event.organization_id', $orgId)->
-            where('person_profile.person_id', $userId)->
             where('event_profile_delivery_item.is_visible', 1)->
             group_by('event_profile_delivery_item.id')->
             order_by_asc('event_profile_delivery_item.profile_id')->
-            order_by_asc('event_profile_delivery_item.order_nr')->
+            order_by_asc('event_profile_delivery_item.order_nr');
+
+    return $data;
+}
+
+function getFolderItemsByUser($userId, $folderId, $orgId) {
+    $data = getFolderItems($folderId, $orgId)->
+            left_outer_join('person_profile', array('person_profile.profile_id', '=', 'event_profile_delivery_item.profile_id'))->
+            where('person_profile.person_id', $userId)->
             find_array();
 
     return $data;

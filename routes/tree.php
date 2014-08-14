@@ -284,7 +284,7 @@ $app->map('/elemento/:id/:profileid/(:actid)', function ($id, $profileid, $actid
     if (!$user && $user['is_admin']) {
         $app->redirect($app->urlFor('login'));
     }
-
+    
     $event = getEventObject($organization['id'], $id);
     $uploadProfiles = parseArray(getPermissionProfiles($event['folder_id'], 1));
     
