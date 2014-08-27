@@ -20,7 +20,7 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
     if (!$user) {
         $app->redirect($app->urlFor('login'));
     }
-    
+
     // obtener evento
     // TODO: Comprobar que el evento es válido
     $event = getActivityEvent($id, $aid, $user)->as_array();
@@ -28,28 +28,28 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
     if (!$event) {
         $app->redirect($app->urlFor('frontpage'));
     }
-    
+
     // marcar evento como no completado
     if ($event['is_manual'] && ($event['completed_date'] != null) && isset($_POST['unmark'])) {
         deleteCompletedEvent($id, $user['id']);
         $app->redirect($app->urlFor('activities', array('id' => $pid)));
     }
-    
+
     // marcar evento como completado
     if ($event['is_manual'] && ($event['completed_date'] == null) && isset($_POST['mark'])) {
         addCompletedEvent($id, $user['id']);
         $app->redirect($app->urlFor('activities', array('id' => $pid)));
     }
-    
+
     // obtener carpeta
     $folder = getFolder($organization['id'], $event['folder_id']);
 
     // obtener entregas asociadas
     $deliveries = getDeliveriesFromEvent($id);
-    
+
     // obtener perfiles
     $profiles = parseArray(getUserProfiles($user['id'], $organization['id'], false));
-    
+
     $isMine = isset($profiles[$pid]);
 
     $breadcrumb = array(
@@ -58,7 +58,7 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
         array('display_name' => $event['activity_display_name'], 'target' => $app->urlFor('activities', array('id' => $pid))),
         array('display_name' => $event['display_name'])
     );
-    
+
     if ($folder && isset($folder['id'])) {
         $profileGender = array();
         $data = getParsedFolderById($organization['id'], $folder['id'], $profileGender);
@@ -71,10 +71,10 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
         $data = array();
         $folderProfiles = array();
         $folders = array();
-        $persons = array();        
+        $persons = array();
     }
     $app->flash('last_url', $app->request()->getPathInfo());
-    
+
     // generar página
     $app->render('event.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true,
@@ -83,7 +83,7 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
         'aid' => $aid,
         'user' => $user,
         'profiles' => $profiles,
-        'profileGender' => $profileGender,        
+        'profileGender' => $profileGender,
         'folder' => $folder,
         'folders' => $folders,
         'folderProfiles' => $folderProfiles,
@@ -99,7 +99,7 @@ $app->map('/actividad/:id', function ($id) use ($app, $user, $organization) {
     if (!$user || !$user['is_admin']) {
         $app->redirect($app->urlFor('login'));
     }
-    
+
     // obtener evento
     // TODO: Comprobar que el evento es válido
     if ($id != 0) {
@@ -112,14 +112,14 @@ $app->map('/actividad/:id', function ($id) use ($app, $user, $organization) {
             'is_automatic' => 0
         );
     }
-    
+
     if (!$event) {
         $app->redirect($app->urlFor('frontpage'));
     }
-    
+
     if (isset($_POST['saveevent'])) {
         ORM::get_db()->beginTransaction();
-        
+
         if ($id == 0) {
             $local = ORM::for_table('event')->create();
         }
@@ -140,7 +140,7 @@ $app->map('/actividad/:id', function ($id) use ($app, $user, $organization) {
         }
         $local->set('from_week', $_POST['fromweek']+4*$_POST['frommonth']);
         $local->set('to_week', $_POST['toweek']+4*$_POST['tomonth']);
-        
+
         if ($local->save()) {
             $id = $local['id'];
             $ok = setEventProfiles($id, $_POST['profiles']);
@@ -163,36 +163,36 @@ $app->map('/actividad/:id', function ($id) use ($app, $user, $organization) {
             $app->flash('save_error', 'error');
             ORM::get_db()->rollBack();
         }
-        
+
         $app->redirect($app->request()->getPathInfo());
     }
-    
+
     // obtener carpeta
     $folders = getParsedFolderTree($organization['id']);
-    
+
     // obtener todas las categorías de eventos
     $categories = getActivities($organization['id']);
-    
+
     // obtener las activas en este evento
     $selectedCategories = ($id == 0) ? array() : getEventActivitiesId($id);
-    
+
     // obtener todos los perfiles
     $allProfiles = getProfilesByOrganization($organization['id'], true, true);
-    
+
     // obtener los perfiles asociados a este evento
     $profiles = ($id == 0) ? array() : getEventProfilesId($id);
-    
+
     // obtener todas las entregas de la organización (!!!)
     $allDeliveries = getParsedDeliveriesByOrganization($organization['id']);
-    
+
     // obtener las entregas asociadas
     $deliveries = ($id == 0) ? array() : parseArray(getDeliveriesFromEvent($id));
-    
+
     $breadcrumb = array(
         array('display_name' => 'Actividades', 'target' => $app->urlFor('activities')),
         array('display_name' => ($id == 0) ? 'Nueva actividad' : $event['display_name'])
     );
-    
+
     // generar página
     $app->render('manage_event.html.twig', array(
         'navigation' => $breadcrumb,
@@ -232,7 +232,7 @@ function getEventObject($orgId, $eventId) {
 }
 
 function getDeliveriesFromEvent($eventId) {
-    
+
     $data = ORM::for_table('delivery')->
             select('delivery.*')->
             select('event_delivery.description', 'event_delivery_description')->
@@ -245,7 +245,7 @@ function getDeliveriesFromEvent($eventId) {
             order_by_asc('delivery.display_name')->
             where('event_delivery.event_id', $eventId)->
             find_array();
-    
+
     return (!$data) ? array() : $data;
 }
 
@@ -288,7 +288,7 @@ function addCompletedEvent($eventId, $personId) {
     $completedEvent->set('event_id', $eventId);
     $completedEvent->set('person_id', $personId);
     $completedEvent->set('completed_date', date('c'));
-    
+
     return $completedEvent->save();
 }
 
@@ -304,7 +304,7 @@ function getActivities($orgId) {
             where('organization_id', $orgId)->
             order_by_asc('display_name')->
             find_array();
-    
+
     if (!$data) {
         return array();
     }
@@ -328,7 +328,7 @@ function getAllFoldersByOrganization($orgId, $filter = true) {
             order_by_asc('category.category_left')->
             order_by_asc('category.id')->
             order_by_asc('order_nr');
-    
+
     if ($filter) {
         $folders = $folders->where('is_visible', 1);
     }
@@ -342,7 +342,7 @@ function getParsedFolderTree($orgId) {
     $currentCategory = null;
     $currentCategoryDisplayName = null;
     $first = true;
-    
+
     foreach($data as $folder) {
         if ($first) {
             $currentCategory = $folder['category_id'];
@@ -374,7 +374,7 @@ function getEventProfilesId($eventId) {
             select('event_profile.profile_id', 'id')->
             where('event_profile.event_id', $eventId)->
             find_array();
-    
+
     return !$data ? false : parseArray($data);
 }
 
@@ -391,13 +391,13 @@ function getParsedDeliveriesByOrganization($orgId) {
             order_by_asc('folder.order_nr')->
             order_by_asc('folder_delivery.order_nr')->
             find_array();
-    
+
     $return = array();
     $currentData = array();
     $currentCategory = null;
     $currentCategoryDisplayName = null;
     $first = true;
-    
+
     foreach($data as $delivery) {
         $category = $delivery['category_display_name'] . ': ' . $delivery['folder_display_name'];
         if ($first) {
@@ -427,7 +427,7 @@ function setEventProfiles($eventId, $profiles) {
     $query = ORM::for_table('event_profile')->
             where('event_id', $eventId)->
             delete_many();
-    
+
     $ok = true;
     foreach ($profiles as $profile) {
         $insert = ORM::for_table('event_profile')->create();
@@ -435,7 +435,7 @@ function setEventProfiles($eventId, $profiles) {
         $insert->set('profile_id', $profile);
         $ok = $ok && $insert->save();
     }
-    
+
     return $ok;
 }
 
@@ -443,7 +443,7 @@ function setEventActivities($eventId, $activities) {
     $query = ORM::for_table('activity_event')->
             where('event_id', $eventId)->
             delete_many();
-    
+
     $ok = true;
     foreach ($activities as $activity) {
         $insert = ORM::for_table('activity_event')->create();
@@ -451,7 +451,7 @@ function setEventActivities($eventId, $activities) {
         $insert->set('activity_id', $activity);
         $ok = $ok && $insert->save();
     }
-    
+
     return $ok;
 }
 
@@ -459,7 +459,7 @@ function setEventDeliveries($eventId, $deliveries) {
     $query = ORM::for_table('event_delivery')->
             where('event_id', $eventId)->
             delete_many();
-    
+
     $ok = true;
     foreach ($deliveries as $delivery) {
         $insert = ORM::for_table('event_delivery')->create();
@@ -467,7 +467,7 @@ function setEventDeliveries($eventId, $deliveries) {
         $insert->set('delivery_id', $delivery);
         $ok = $ok && $insert->save();
     }
-    
+
     return $ok;
 }
 
@@ -481,6 +481,6 @@ function getItemFromId($id) {
             select('event.grace_period')->
             inner_join('event', array('event.id', '=', 'event_profile_delivery_item.event_id'))->
             find_one($id);
-    
+
     return $data;
 }

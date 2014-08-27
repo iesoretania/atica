@@ -23,17 +23,17 @@ $app->get('/actividades(/:id)', function ($id = null) use ($app, $user, $config,
 
     // indica si el perfil pertence al usuario
     $isMine = true;
-    
+
     // obtener perfiles
     $profiles = parseArray(getUserProfiles($user['id'], $organization['id'], false));
 
     // barra superior de perfiles
     $profile_bar = array();
-    
+
     if (count($profiles, COUNT_NORMAL)>1) {
        $profile_bar[] = array('caption' => 'Ver todas', 'active' => ($id == null), 'target' => $app->urlFor('activities'));
     }
-    
+
     $current = null;
     $detail = '';
     $profile_ids = array();
@@ -110,7 +110,7 @@ $app->get('/actividades(/:id)', function ($id = null) use ($app, $user, $config,
         // si no, dejarlo como estaba
         if (isset($profiles[$id])) {
             $profile_ids = array ( $id );
-            $profile_group_ids = array ($profiles[$id]['profile_group_id'] );    
+            $profile_group_ids = array ($profiles[$id]['profile_group_id'] );
         }
         else {
             $profile_ids = array();
@@ -118,10 +118,10 @@ $app->get('/actividades(/:id)', function ($id = null) use ($app, $user, $config,
             $isMine = false;
         }
     }
-    
+
     // obtener actividades
     $events = getEventsForProfiles($profile_ids, $profile_group_ids, $user, $config['calendar.base_week']);
-    
+
     // formatear los eventos en grupos de perfiles de arrays
     $parsedEvents = parseEvents($events,
             'profile_id', array('profile_display_name', 'profile_group_display_name', 'profile_id'),
@@ -142,14 +142,14 @@ $app->get('/actividades(/:id)', function ($id = null) use ($app, $user, $config,
 })->name('activities');
 
 $app->map('/grupoactividad/:id', function ($id) use ($app, $user, $config, $organization) {
-    
+
     if (!$user || !$user['is_admin']) {
         $app->redirect($app->urlFor('login'));
     }
-    
+
     if (0 != $id) {
         $activity = getActivityObject($organization['id'], $id);
-    
+
         if (!$activity) {
             $app->redirect($app->urlFor('frontpage'));
         }
@@ -158,10 +158,10 @@ $app->map('/grupoactividad/:id', function ($id) use ($app, $user, $config, $orga
         $activity = array();
     }
 
-    
+
     if (isset($_POST['saveactivity'])) {
         ORM::get_db()->beginTransaction();
-        
+
         if ($id == 0) {
             $local = ORM::for_table('activity')->create();
         }
@@ -171,8 +171,8 @@ $app->map('/grupoactividad/:id', function ($id) use ($app, $user, $config, $orga
         $local->set('organization_id', $organization['id']);
         $local->set('display_name', $_POST['displayname']);
         $local->set('description', strlen($_POST['description'])>0 ? $_POST['description'] : null);
-        
-        if ($local->save()) {      
+
+        if ($local->save()) {
             $app->flash('save_ok', 'ok');
                 ORM::get_db()->commit();
         }
@@ -182,19 +182,19 @@ $app->map('/grupoactividad/:id', function ($id) use ($app, $user, $config, $orga
         }
         $app->redirect($app->request()->getPathInfo());
     }
-    
+
     $breadcrumb = array(
         array('display_name' => 'Actividades', 'target' => $app->urlFor('activities')),
         array('display_name' => ($id == 0) ? 'Nueva agrupación de actividades' : $activity['display_name'])
     );
-    
+
     // generar página
     $app->render('manage_activity.html.twig', array(
         'navigation' => $breadcrumb,
         'url' => $app->request()->getPathInfo(),
         'new' => ($id == 0),
         'activity' => ($id == 0) ? array() : $activity));
-    
+
 })->name('manageactivity')->via('GET', 'POST');
 
 function getUserProfiles($user_id, $org_id, $extended) {
@@ -287,7 +287,7 @@ function getEventsForProfiles($profile_ids, $profile_group_ids, $user, $base = 3
         $data = $data->where_raw($condition,
                 array_merge($profile_ids, $profile_group_ids));
     }
-    
+
     return $data->find_array();
 }
 

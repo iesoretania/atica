@@ -724,9 +724,9 @@ function getProfileFullDisplayName($profile, $user) {
         $profile['display_name_male'],
         $profile['display_name_female']
     );
-    
+
     $name = $names[$user['gender']];
-    
+
     if ($profile['display_name']) {
         $name .= ' ' . $profile['display_name'];
     }

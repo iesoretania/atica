@@ -156,14 +156,14 @@ function doRegisterAction($app, $user, $organization, $module, $command, $action
         $time = null, $activityId = null, $eventId = null, $groupingId = null,
         $folderId = null, $profileId = null, $deliveryId = null,
         $revisionId = null, $documentId = null, $deliveryItemId = null) {
-    
+
     if (null == $time) {
         $time = date('c');
     }
-    
+
     $personId = is_null($user) ? null : $user['id'];
     $orgId = is_null($organization) ? null : $organization['id'];
-    
+
     $log = ORM::for_table('log')->create();
     $log->set(array(
         'time' => $time,
@@ -186,6 +186,6 @@ function doRegisterAction($app, $user, $organization, $module, $command, $action
         'document_id' => $documentId,
         'delivery_item_id' => $deliveryItemId
     ));
-    
+
     return $log->save();
 }

@@ -23,16 +23,16 @@ $app->get('/(portada)', function () use ($app, $user) {
     $breadcrumb = array(
         array('display_name' => 'Portada', 'target' => '#')
     );
-    
+
     $parentGrouping = array();
     $matchedGrouping = array();
 
     $sidebar = getGroupings($_SESSION['organization_id'], $app, null, $matchedGrouping, $parentGrouping);
-    
+
     $app->render('frontpage.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar,
         'user' => $user));
-    
+
 })->name('frontpage');
 
 $app->get('/portada/:id', function ($id) use ($app, $user) {
@@ -41,22 +41,22 @@ $app->get('/portada/:id', function ($id) use ($app, $user) {
     }
     $matchedGrouping = null;
     $parentGrouping = null;
-    
+
     $sidebar = getGroupings($_SESSION['organization_id'], $app, $id, $matchedGrouping, $parentGrouping);
-    
+
     if ($matchedGrouping == null) {
         $app->redirect($app->urlFor('frontpage'));
     }
-    
+
     $breadcrumb = array(
             array('display_name' => 'Portada', 'target' => $app->urlFor('frontpage')),
             array('display_name' => $parentGrouping['display_name'], 'target' => $app->urlFor('grouping', array('id' => $id))),
             array('display_name' => $matchedGrouping['display_name'])
     );
-    
+
     $folders = getGroupingFolders($id);
     $data = getParsedDeliveriesFromGroupingFolders($folders);
-    
+
     $app->render('grouping.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar,
         'data' => $data,
@@ -130,7 +130,7 @@ function getGroupingFolders($groupingId) {
 
 
 function getParsedDeliveriesFromGroupingFolders($folders) {
-    
+
     $return = array();
     foreach($folders as $folder) {
         $deliveries = ORM::for_table('delivery')->
@@ -143,7 +143,7 @@ function getParsedDeliveriesFromGroupingFolders($folders) {
                 where('folder_delivery.folder_id', $folder['id'])->
                 order_by_asc('delivery.profile_id')->
                 order_by_asc('order_nr')->find_array();
-        
+
         $return[] = array(
             'id' => $folder['id'],
             'data' => $deliveries

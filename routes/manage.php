@@ -68,7 +68,7 @@ $app->map('/modificar/:folderid/:id(/:return(/:data1(/:data2(/:data3(/:data4))))
     }
 
     $uploadAs = array();
-    
+
     foreach ($uploadProfiles as $item) {
         if (null == $item['display_name']) {
             $data = parseArray(getSubprofiles($item['id']));

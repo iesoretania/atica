@@ -16,9 +16,9 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see [http://www.gnu.org/licenses/]. */
 
-$app->get('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $return=0, $data1=null, $data2=null, $data3=null) 
+$app->get('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $return=0, $data1=null, $data2=null, $data3=null)
     use ($app, $user, $config, $organization) {
-    
+
     if ((!$user) || ($return < 0) || ($return > 1)) {
         $app->redirect($app->urlFor('login'));
     }
@@ -73,13 +73,13 @@ $app->get('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $retu
             }
         }
     }
-    
+
     $category = getCategoryObjectById($organization['id'], $folder['category_id']);
-    
+
     if (!$category) {
         $app->redirect($app->urlFor('login'));
     }
-    
+
     switch ($return) {
         case 0:
             $breadcrumb = array(
@@ -101,7 +101,7 @@ $app->get('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $retu
                 $app->redirect($app->urlFor('login'));
             }
             $lastUrl = $app->urlFor('event', array('pid' => $data1, 'aid' => $data2, 'id' => $data3));
-            
+
             $breadcrumb = array(
                 array('display_name' => 'Actividades', 'target' => $app->urlFor('activities')),
                 array('display_name' => getProfileFullDisplayName($profile, $user), 'target' => $app->urlFor('activities', array('id' => $data1))),
@@ -111,20 +111,20 @@ $app->get('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $retu
             );
             break;
     }
-    
+
     if ($isManager) {
         $stats = getFolderProfileDeliveryStats($id);
     }
     else {
         $stats = array();
     }
-    
+
     $items = parseVariablesArray(getFolderItemsByUser($user['id'], $id, $organization['id']), $organization, $user, 'profile_id', $userProfiles);
-    
+
     $localStats = getArrayGroups($items, 'profile_id');
     $now = getdate();
     $currentWeek = ($now['mon']-1)*4 + floor(($now['mday']-1)/7);
-    
+
     $app->render('upload.html.twig', array(
         'navigation' => $breadcrumb, 'search' => false,
         'select2' => true,
@@ -146,12 +146,12 @@ $app->get('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $retu
         'data' => $data));
 })->name('upload');
 
-$app->post('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $return=0, $data1=null, $data2=null, $data3=null) 
+$app->post('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $return=0, $data1=null, $data2=null, $data3=null)
     use ($app, $user, $config, $organization, $preferences) {
     if (!$user) {
         $app->redirect($app->urlFor('login'));
     }
-    
+
     if (isset($_POST['localupload'])) {
         $folder = getFolder($organization['id'], $id);
         if (!$folder) {
@@ -162,7 +162,7 @@ $app->post('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $ret
         $items = parseVariablesArray(getFolderItemsByUser($user['id'], $id, $organization['id']), $organization, $user, 'profile_id', $userProfiles);
         $failed = 0;
         $success = 0;
-        
+
         // comprobar ítem a ítem si se ha recibido un documento
         foreach ($items as $item) {
             $profile = getProfile($item['profile_id']);
@@ -186,7 +186,7 @@ $app->post('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $ret
                         $ok = false;
                         $type = 'danger';
                         $message = 'cannot register';
-                    }               
+                    }
                     else {
                         $ok = true;
                         $type = 'ok';
@@ -197,7 +197,7 @@ $app->post('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $ret
                     $type = 'danger';
                     $message = 'cannot move';
                 }
-                
+
                 if ($type == 'danger') {
                     $app->flash('upload_status_' . $failed, $type);
                     $app->flash('upload_name_' . $failed, $_FILES[$ref]['name']);
@@ -209,7 +209,7 @@ $app->post('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $ret
                 }
             }
         }
-        
+
         $app->flash('upload', $failed);
         if ($success>0) {
             $app->flash('upload_ok', $success);
@@ -264,7 +264,7 @@ $app->post('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $ret
                             $ok = false;
                             $type = 'danger';
                             $message = 'cannot register';
-                        }               
+                        }
                         else {
                             $ok = true;
                             $type = 'ok';
@@ -365,10 +365,10 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
     if (!$user) {
         $app->redirect($app->urlFor('login'));
     }
-    
+
     // TODO: Comprobar si la carpeta es válida
     $folder = getFolder($organization['id'], $id);
-    
+
     if (isset($_POST['discard'])) {
         // descartar envío: borrar archivos temporales
         $loop = 1;
@@ -379,7 +379,7 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
         }
         $app->redirect($app->urlFor('tree', array('id' => $folder['category_id'])));
     }
-    
+
     // TODO: Comprobar perfil
     $profileIsSet = $folder['is_divided'];
     $profileId = $profileIsSet ? $_POST['profile'] : null;
@@ -392,26 +392,26 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
     $loop = 1;
     $success = 0;
     $failed = 0;
-    
+
     if (! isset($_POST['hash' . $loop])) {
         // no hay archivos enviados
         $app->redirect($app->urlFor('upload', array('id' => $id)));
     }
     // TODO: comprobar que $hash es realmente un hash
     // TODO: comprobar que 'profile' es correcto
-    
+
     while (isset($_POST['hash' . $loop])) {
         $ok = true;
         $hash = $_POST['hash' . $loop];
         $filename = $_POST['filename'. $loop];
         $description = isset($_POST['description'. $loop]) ? $_POST['description'. $loop] : $_POST['filename'. $loop];
-        
+
         $tempDestination = $preferences['upload.folder'] . "temp/" . $hash;
-        
+
         $itemId = null;
-        
+
         if (file_exists($tempDestination)) {
-            
+
             // si es un ítem, hacer comprobaciones adicionales
             if (count($list) > 0) {
                 // ¿se ha elegido ignorar el documento?
@@ -460,7 +460,7 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
                     $message = 'ignored';
                 }
             }
-            
+
             if ($ok) {
                 $filesize = filesize($tempDestination);
                 $documentDestination = createDocumentFolder($preferences['upload.folder'], $hash);
@@ -502,23 +502,23 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
         $app->flash('upload_ok', $success);
     }
     $app->redirect($app->urlFor('tree', array( 'id' => $folder['category_id'])));
-    
+
 })->name('confirm');
 
-$app->get('/estadisticas/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $return=0, $data1=null, $data2=null, $data3=null) 
+$app->get('/estadisticas/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $return=0, $data1=null, $data2=null, $data3=null)
         use ($app, $user, $organization, $config) {
     if (!$user) {
         $app->redirect($app->urlFor('login'));
     }
-    
+
     $folder = getFolderObjectById($organization['id'], $id);
-    
+
     $restrictedProfiles = parseArray(getPermissionProfiles($id, 2));
     $uploadProfiles = parseArray(getPermissionProfiles($id, 1));
     $managerProfiles = parseArray(getPermissionProfiles($id, 0));
     $userProfiles = parseArray(getUserProfiles($user['id'], $organization['id'], true));
     $allProfiles = parseArray(getProfilesByOrganization($organization['id']));
-    
+
     $isManager = $user['is_admin'];
     foreach ($managerProfiles as $upload) {
         if (isset($userProfiles[$upload['id']])) {
@@ -526,7 +526,7 @@ $app->get('/estadisticas/:id(/:return/:data1(/:data2(/:data3)))', function ($id,
             break;
         }
     }
-    
+
     switch ($return) {
         case 0:
             $breadcrumb = array(
@@ -549,7 +549,7 @@ $app->get('/estadisticas/:id(/:return/:data1(/:data2(/:data3)))', function ($id,
                 $app->redirect($app->urlFor('login'));
             }
             $lastUrl = $app->urlFor('event', array('pid' => $data1, 'aid' => $data2, 'id' => $data3));
-            
+
             $breadcrumb = array(
                 array('display_name' => 'Actividades', 'target' => $app->urlFor('activities')),
                 array('display_name' => getProfileFullDisplayName($profile, $user), 'target' => $app->urlFor('activities', array('id' => $data1))),
@@ -559,16 +559,16 @@ $app->get('/estadisticas/:id(/:return/:data1(/:data2(/:data3)))', function ($id,
             );
             break;
     }
-    
+
     $stats = getFolderProfileDeliveryStats($id);
-    
+
     $data = getFolderItems($id, $organization['id'])->find_array();
     $items = parseVariablesArray($data, $organization, $user, 'profile_id', $allProfiles);
-    
+
     $localStats = getArrayGroups($items, 'profile_id');
     $now = getdate();
     $currentWeek = ($now['mon']-1)*4 + floor(($now['mday']-1)/7);
-    
+
     $app->render('folder_stats.html.twig', array(
         'navigation' => $breadcrumb,
         'search' => false,
@@ -585,7 +585,7 @@ $app->get('/estadisticas/:id(/:return/:data1(/:data2(/:data3)))', function ($id,
         'user_profiles' => $userProfiles,
         'all_profiles' => $allProfiles,
         'folder' => $folder));
-    
+
 })->name('folderstats');
 
 function getDelivery($deliveryId) {
@@ -667,7 +667,7 @@ function getFolderProfileDeliveryStatsBase($folderId) {
             group_by('event_profile_delivery_item.profile_id')->
             order_by_asc('event_profile_delivery_item.id')->
             order_by_asc('event_profile_delivery_item.order_nr');
-    
+
     return $data;
 }
 
@@ -761,7 +761,7 @@ function getFolderItemsByUser($userId, $folderId, $orgId) {
 }
 
 function getEventItemsByUser($userId, $eventId) {
-    
+
 }
 
 function getProfile($profileId) {
@@ -821,14 +821,14 @@ function getPersonsWithEventByFolderAndProfile($folderId, $profileId) {
 
 function checkItemUpdateStatus($folderId, $profileId) {
     $data = getFolderProfileDeliveryStatsByProfile($folderId, $profileId);
-    
+
     // para cada perfil que tiene ítems, comprobamos si están todos los
     // elementos
     foreach ($data as $item) {
-        
+
         // obtener usuarios asociados a esta carpeta y perfil
         $persons = getPersonsWithEventByFolderAndProfile($folderId, $profileId);
-        
+
         if ($item['total'] == $item['c']) {
             // están todos los elementos: marcar como completados los eventos
             // de todos los usuarios
@@ -842,19 +842,19 @@ function checkItemUpdateStatus($folderId, $profileId) {
             // de todos los usuarios
             foreach($persons as $person) {
                 removeCompletedEvent($person['event_id'], $person['id']);
-            }            
+            }
         }
     }
 }
 
 function createDelivery($folderId, $userId, $profileId, $fileName, $deliveryName, $description, $itemId, $dataPath, $dataHash, $filesize, $revisionNr = 0) {
-    
+
     $order = ORM::for_table('folder_delivery')->
             where('folder_id', $folderId)->
             max('order_nr');
-        
+
     ORM::get_db()->beginTransaction();
-    
+
     $delivery = ORM::for_table('delivery')->create();
     $delivery->set('profile_id', $profileId);
     $delivery->set('item_id', $itemId);
@@ -862,7 +862,7 @@ function createDelivery($folderId, $userId, $profileId, $fileName, $deliveryName
     $delivery->set('description', $description);
     $delivery->set('creation_date', date('c'));
     $delivery->save();
-    
+
     $folderDelivery = ORM::for_table('folder_delivery')->create();
     $folderDelivery->set('folder_id', $folderId);
     $folderDelivery->set('delivery_id', $delivery['id']);
@@ -870,36 +870,36 @@ function createDelivery($folderId, $userId, $profileId, $fileName, $deliveryName
     $folderDelivery->save();
 
     $revision = createRevision($delivery['id'], $userId, $fileName, $dataPath, $dataHash, $filesize, $revisionNr);
-    
+
     $delivery->set('current_revision_id', $revision['id']);
     $delivery->save();
-    
+
     checkItemUpdateStatus($folderId, $profileId);
-    
+
     return ORM::get_db()->commit();
 }
 
 function createRevision($deliveryId, $userId, $fileName, $dataPath, $dataHash, $filesize, $revisionNr) {
-    
+
     $revision = ORM::for_table('revision')->create();
     $revision->set('delivery_id', $deliveryId);
     $revision->set('uploader_person_id', $userId);
     $revision->set('upload_date', date('c'));
     $revision->set('revision_nr', $revisionNr);
     $revision->save();
-    
+
     $document = createDocument($revision['id'], $fileName, $dataHash, $dataPath, $filesize);
-    
+
     $revision->set('original_document_id', $document['id']);
     $revision->save();
-    
+
     return $revision;
 }
 
 function createDocument($revisionId, $fileName, $dataHash, $dataPath, $filesize) {
-    
+
     $documentData = getDocumentDataByHash($dataHash);
-    
+
     if (false === $documentData) {
         $documentData = ORM::for_table('document_data')->create();
         $documentData->set('download_path', $dataPath);
@@ -907,9 +907,9 @@ function createDocument($revisionId, $fileName, $dataHash, $dataPath, $filesize)
         $documentData->set('download_filesize', $filesize);
         $documentData->save();
     }
-    
+
     $ext = pathinfo($fileName, PATHINFO_EXTENSION);
-            
+
     $extension = getExtension($ext);
     if (false === $extension) {
         $extension = ORM::for_table('file_extension')->create();
@@ -919,7 +919,7 @@ function createDocument($revisionId, $fileName, $dataHash, $dataPath, $filesize)
         $extension->set('icon', 'icon-none.png');
         $extension->save();
     }
-    
+
     $document = ORM::for_table('document')->create();
     $document->set('document_data_id', $documentData['id']);
     $document->set('download_filename', $fileName);
@@ -944,14 +944,14 @@ function parseVariables($string, $organization, $user, $profile) {
                     case 'profile.name':
                         return $profile['display_name'];
                 }
-                
+
                 // probar con las variables de la tabla 'variables'
                 // específico para esta organización
                 $data = ORM::for_table('variable')->
                         where('name', $token)->
                         where('organization_id', $organization['id'])->
                         find_one();
-                
+
                 // probar con las variables de la tabla 'variables'
                 // en genérico si no hay nada específico
                 if (!$data) {

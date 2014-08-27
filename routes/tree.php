@@ -52,7 +52,7 @@ $app->get('/arbol(/:id)', function ($id = null) use ($app, $user, $organization)
         );
     }
     $app->flash('last_url', $app->request()->getPathInfo());
-    
+
     $app->render('tree.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true, 'topbar' => $topbar,
         'category' => $category,
@@ -126,7 +126,7 @@ $app->get('/descargar/:kind/:cid/:id/(:p1/)(:p2/)', function ($kind, $cid, $id, 
             $delivery['download_filename'],
             null, null, null, $eventId, $groupId, null, null, $id,
             $delivery['current_delivery_id'], null, null);
-    
+
     readfile($file);
 })->name('download');
 
@@ -143,10 +143,10 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = null) use ($app, $use
     $uploadProfiles = parseArray(getPermissionProfiles($id, 1));
     $managerProfiles = parseArray(getPermissionProfiles($id, 0));
     $restrictedProfiles = parseArray(getPermissionProfiles($id, 2));
-    
+
     if ($user['is_admin'] && isset($_POST['savefolder'])) {
         ORM::get_db()->beginTransaction();
-        
+
         if ($id == 0) {
             $order = getMaxFolderOrder($_POST['category']) + 1000;
             $local = ORM::for_table('folder')->create();
@@ -163,7 +163,7 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = null) use ($app, $use
         $local->set('is_restricted', $_POST['restrictedaccess']);
         $local->set('show_revision_nr', $_POST['revisionnr']);
         $local->set('auto_clean', $_POST['autoclean']);
-        
+
         if ($local->save()) {
             $id = $local['id'];
             $ok = true;
@@ -201,29 +201,29 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = null) use ($app, $use
         $url = isset($_SESSION['slim.flash']['last_url']) ?
                 $_SESSION['slim.flash']['last_url'] :
                 $app->request()->getPathInfo();
-        
+
         $app->redirect($url);
     }
-    
+
     $folder = getFolder($organization['id'], $id);
-    
+
     if (!$folder) {
         // valores por defecto de las carpetas nuevas
         $folder = array();
         $folder['is_visible'] = 1;
         $folder['category_id'] = $catid;
     }
-    
+
     if (null == $catid) {
         $catid = $folder['category_id'];
     }
-    
+
     $query = getCategoryObjectById($organization['id'], $catid);
     if (!$query) {
         // error, no existe la categoría en la organización, posible
         // intento de ataque
         $app->redirect($app->urlFor('frontpage'));
-    }    
+    }
     $topbar = getTree($organization['id'], $app, $catid, $category, $parent);
 
     $breadcrumb = array(
@@ -232,7 +232,7 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = null) use ($app, $use
         array('display_name' => $category['display_name'], 'target' => $app->urlFor('tree', array('id' => $catid))),
         array('display_name' => 'Gestionar carpeta')
     );
-    
+
     $app->render('manage_folder.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true, 'topbar' => $topbar,
         'select2' => true,
@@ -251,9 +251,9 @@ $app->get('/opcarpeta/:id/:oper(/:data)', function ($id, $oper, $data = null) us
     if (!$user['is_admin']) {
         $app->redirect($app->urlFor('login'));
     }
-    
+
     $folder = getFolderObjectById($organization['id'], $id);
-    
+
     switch ($oper) {
         case 'swap':
             ORM::get_db()->beginTransaction();
@@ -274,9 +274,9 @@ $app->get('/opcarpeta/:id/:oper(/:data)', function ($id, $oper, $data = null) us
             $folder->save();
             $folder2->save();
             ORM::get_db()->commit();
-            break;        
+            break;
     }
-    
+
     $app->redirect($app->urlFor('tree', array('id' => $folder['category_id'])));
 })->name('folderoperation');
 
@@ -284,14 +284,14 @@ $app->map('/elemento/:id/:profileid/(:actid)', function ($id, $profileid, $actid
     if (!$user && $user['is_admin']) {
         $app->redirect($app->urlFor('login'));
     }
-    
+
     $event = getEventObject($organization['id'], $id);
     $uploadProfiles = parseArray(getPermissionProfiles($event['folder_id'], 1));
-    
+
     if (isset($_POST['changeprofile'])) {
         $app->redirect($app->urlFor('manageitem', array('id' => $id, 'profileid' => $_POST['profile'], 'actid' => $actid )));
     }
-    
+
     if (isset($_POST['new'])) {
         $lines = explode("\n", $_POST['newelements']);
         $ok = true;
@@ -310,7 +310,7 @@ $app->map('/elemento/:id/:profileid/(:actid)', function ($id, $profileid, $actid
         }
         $app->redirect($app->request()->getPathInfo());
     }
-    
+
     if (isset($_POST['delete'])) {
         ORM::get_db()->beginTransaction();
         if (deleteEventItems($id, $_POST['profile'], $_POST['item'])) {
@@ -323,7 +323,7 @@ $app->map('/elemento/:id/:profileid/(:actid)', function ($id, $profileid, $actid
         }
         $app->redirect($app->request()->getPathInfo());
     }
-    
+
     if (isset($_POST['order'])) {
         ORM::get_db()->beginTransaction();
         if (orderEventItems($id, $_POST['profile'])) {
@@ -336,9 +336,9 @@ $app->map('/elemento/:id/:profileid/(:actid)', function ($id, $profileid, $actid
         }
         $app->redirect($app->request()->getPathInfo());
     }
-    
+
     $uploadAs = array();
-    
+
     foreach ($uploadProfiles as $item) {
         if (null == $item['display_name']) {
             $data = parseArray(getSubprofiles($item['id']));
@@ -367,9 +367,9 @@ $app->map('/elemento/:id/:profileid/(:actid)', function ($id, $profileid, $actid
         }
     }
     $folder = getFolder($organization['id'], $event['folder_id']);
-    
+
     $items = parseArray(getEventProfileDeliveryItems($profileid, $id));
-    
+
     // barra lateral
     $topbar = array(
         array(
@@ -377,15 +377,15 @@ $app->map('/elemento/:id/:profileid/(:actid)', function ($id, $profileid, $actid
             array('caption' => 'Gestionar actividad', 'active' => true, 'target' => $app->request()->getPathInfo())
         )
     );
-    
+
     $breadcrumb = array(
         array('display_name' => 'Actividades', 'target' => $app->urlFor('activities')),
         array('display_name' => $event['display_name'], 'target' => $app->urlFor('event', array('id' => $id, 'actid' => $actid))),
         array('display_name' => 'Gestionar entregas')
     );
-    
+
     $app->flashKeep();
-    
+
     $app->render('manage_item.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true, 'topbar' => $topbar,
         'select2' => true,
@@ -540,12 +540,12 @@ function getCategories($orgId) {
             where('organization_id', $orgId)->
             order_by_asc('category_left')->
             find_array();
-    
+
     $return = array();
-    
+
     $current = null;
     $currentData = array();
-    
+
     foreach($data as $element) {
         if ($element['category_level'] == 1) {
             if ($current != null) {
@@ -575,7 +575,7 @@ function setFolderProfiles($folderId, $permission, $profiles) {
             where('folder_id', $folderId)->
             where('permission', $permission)->
             delete_many();
-    
+
     $ok = true;
     foreach ($profiles as $profile) {
         $insert = ORM::for_table('folder_permission')->create();
@@ -584,7 +584,7 @@ function setFolderProfiles($folderId, $permission, $profiles) {
         $insert->set('profile_id', $profile);
         $ok = $ok && $insert->save();
     }
-    
+
     return $ok;
 }
 
@@ -621,16 +621,16 @@ function getFoldersByOrganization($orgId, $filter = true) {
             inner_join('category', array('category.id', '=', 'folder.category_id'))->
             where('category.organization_id', $orgId)->
             order_by_asc('order_nr');
-    
+
     if ($filter) {
         $folders = $folders->where('is_visible', 1);
     }
-    
+
     return $folders;
 }
 
 function getDeliveriesFromFolders($folders, &$profileGender) {
-    
+
     $return = array();
     foreach($folders as $folder) {
         $deliveries = ORM::for_table('delivery')->
@@ -646,7 +646,7 @@ function getDeliveriesFromFolders($folders, &$profileGender) {
                 where('folder_delivery.folder_id', $folder['id'])->
                 order_by_asc('delivery.profile_id')->
                 order_by_asc('order_nr')->find_array();
-        
+
         $return[] = array(
             'id' => $folder['id'],
             'data' => $deliveries
@@ -666,11 +666,11 @@ function getDeliveriesFromFolders($folders, &$profileGender) {
 }
 
 function getParsedDeliveriesByCategory($orgId, $catId, &$profileGender, $filter = true) {
-    
+
     $folders = getFoldersByOrganization($orgId, $filter)->
                 where('category_id', $catId)->
                 find_array();
-    
+
     return getDeliveriesFromFolders($folders, $profileGender);
 }
 
@@ -685,9 +685,9 @@ function createEventItem($id, $profileId, $displayName, $documentName) {
     $order = ORM::for_table('event_profile_delivery_item')->
             where('profile_id', $profileId)->
             where('event_id', $id)->max('order_nr');
-    
+
     $order = ($order) ? ($order + 1000) : 0;
-    
+
     $item = ORM::for_table('event_profile_delivery_item')->create()->
             set('profile_id', $profileId)->
             set('event_id', $id)->
@@ -710,13 +710,13 @@ function deleteEventItems($id, $profileId, $items) {
 function orderEventItems($id, $profileId) {
     $ok = true;
     $order = 0;
-    
+
     $items = ORM::for_table('event_profile_delivery_item')->
             where('profile_id', $profileId)->
             where('event_id', $id)->
             order_by_asc('display_name')->
             find_many();
-    
+
     foreach($items as $item) {
         $ok = $ok && $item->set('order_nr', $order)->save();
         $order += 1000;
