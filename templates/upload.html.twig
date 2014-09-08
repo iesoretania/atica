@@ -53,16 +53,31 @@
     <div class="panel panel-default">
         <div class="panel-body">
             <h3>Mis entregas</h3>
+        </div>
+        {% set now = (current-base+48) % 48 %}
+        {% for event_id, local_stats_item in local_stats %}
             {% set sum_c = 0 %}
             {% set sum_total = 0 %}
-            {% set last_event = 0 %}
-            {% set now = (current-base+48) % 48 %}
+            {% set it = (local_stats_item | first)[0] %}
+            {% set from = (it.from_week-base+48) % 48 %}
+            {% set to = (it.to_week+it.grace_period-base+48) % 48 %}
+            {% set late = ((now>=from) and (now>to)) %}
+            {% set ready = ((now>=from) and (now<=to)) %}
+            <div class="panel-body">
+                <h4>
+                    <strong>Actividad: </strong>{{ it['event_display_name'] }}{% if user['is_admin'] %} <a class="delivery-tools hidden-print" title="Modificar actividad" href="{{ urlFor('manageevent', { 'id': event_id }) }}"><span class="icon-pencil"></span></a>{% endif %}
+                <h4>
+                <p>
+                    <strong>Plazo: </strong>{{ it.period_description ? it.period_description : parsePeriod(it.from_week, it.to_week, period_labels) }}
+                    {% if it.force_period %} <span class="icon-{{ ready ? "un" }}lock"></span>{% endif %}
+                </p>
+            </div>
             <table class="table table-hover">
                 <tbody>
-                    {% for profile_id, local_stats_item in local_stats %}
+                    {% for profile_id, local_stats_item in local_stats_item %}
                         {% set profile = user_profiles[profile_id] %}
                         <tr>
-                            <td colspan="2" class="profile">
+                            <td colspan="2" class="profile profile-detail">
                                 {{ profile['display_name_neutral'] }} {{ profile['display_name'] }}
                             </td>
                         </tr>
@@ -71,24 +86,12 @@
                         {% set to = (item.to_week-base+48) % 48 %}
                         {% set late = ((now>=from) and (now>to)) %}
                         {% set ready = ((now>=from) and (now<=to)) %}
-                        {% if last_event != item.event_id %}
-                        <tr>
-                            <td class="col-md-8">
-                                <strong>Actividad: </strong>{{ item['event_display_name'] }}
-                            </td>
-                            <td class="col-md-4">
-                                <strong>Plazo: </strong>{{ item.period_description ? item.period_description : parsePeriod(item.from_week, item.to_week, period_labels) }}
-                                {% if item.force_period %} <span class="icon-{{ ready ? "un" }}lock"></span>{% endif %}
-                            </td>
-                            {% set last_event = item.event_id %}
-                        </tr>
-                        {% endif %}
                         <tr class="{% if item.c %}success{% elseif ready %}warning{% elseif late %}danger{% endif %}">
-                            <td>
+                            <td class="col-md-8">
                                 <span class="icon-{{ item.c ? 'ok' : 'remove'}}"></span>
                                 {{ item['display_name'] }}{% if not item.c and late %} (fuera de plazo){% endif %}
                             </td>
-                            <td>
+                            <td class="col-md-4">
                                 {% if item['c'] %}
                                     <a href="{{ urlFor('download', { 'id': item.delivery_id, 'cid': folder.category_id, 'kind': 1 }) }}">Descargar entrega</a> - 
                                     <a href="{{ urlFor('modify', {'folderid': item.folder_id, 'id': item.delivery_id, 'return': 2, 'data1': back_url['return'], 'data2': back_url['data1'], 'data3': back_url['data2'], 'data4': back_url['data3'] }) }}">Modificar entrega</a>
@@ -101,7 +104,7 @@
                         </tr>
                         {% set sum_c = sum_c + item['c'] %}{% set sum_total = sum_total + 1 %}
                         {% endfor %}
-                    {% endfor %}
+                        {% endfor %}
                 </tbody>
                 <tfoot>
                     <tr>
@@ -109,7 +112,7 @@
                     </tr>
                 </tfoot>
             </table>
-        </div>
+        {% endfor %}
         <div class="panel-footer">
             {% if show_upload %}
                 <button type="submit" name="localupload" class="btn btn-success">Enviar documentos</button>

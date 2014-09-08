@@ -121,7 +121,7 @@ $app->get('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $retu
 
     $items = parseVariablesArray(getFolderItemsByUser($user['id'], $id, $organization['id']), $organization, $user, 'profile_id', $userProfiles);
 
-    $localStats = getArrayGroups($items, 'profile_id');
+    $localStats = getArrayGroups($items, 'event_id', 'profile_id');
     $now = getdate();
     $currentWeek = ($now['mon']-1)*4 + floor(($now['mday']-1)/7);
 
