@@ -538,7 +538,7 @@ $app->get('/estadisticas/:id(/:return/:data1(/:data2(/:data3)))', function ($id,
                 $breadcrumb[] = array('display_name' => $parent['display_name'], 'target' => $app->urlFor('tree'));
             }
             $breadcrumb[] = array('display_name' => $category['display_name'], 'target' => $app->urlFor('tree', array('id' => $category['id'])));
-            $breadcrumb[] = array('display_name' => 'Enviar documento');
+            $breadcrumb[] = array('display_name' => 'Estadísticas');
             $lastUrl = $app->urlFor('tree', array('id' => $data1));
             break;
         case 1:
@@ -555,7 +555,7 @@ $app->get('/estadisticas/:id(/:return/:data1(/:data2(/:data3)))', function ($id,
                 array('display_name' => getProfileFullDisplayName($profile, $user), 'target' => $app->urlFor('activities', array('id' => $data1))),
                 array('display_name' => $activityevent['activity_display_name'], 'target' => $app->urlFor('activities', array('id' => $data1))),
                 array('display_name' => $event['display_name'], 'target' => $app->urlFor('event', array('pid' => $data1, 'aid' => $data2, 'id' => $data3))),
-                array('display_name' => 'Enviar documento')
+                array('display_name' => 'Estadísticas')
             );
             break;
     }
@@ -565,7 +565,7 @@ $app->get('/estadisticas/:id(/:return/:data1(/:data2(/:data3)))', function ($id,
     $data = getFolderItems($id, $organization['id'])->find_array();
     $items = parseVariablesArray($data, $organization, $user, 'profile_id', $allProfiles);
 
-    $localStats = getArrayGroups($items, 'profile_id');
+    $localStats = getArrayGroups($items,'event_id', 'profile_id');
     $now = getdate();
     $currentWeek = ($now['mon']-1)*4 + floor(($now['mday']-1)/7);
 
@@ -703,7 +703,7 @@ function getFolderProfileDeliveredItems($profileId, $folderId, $orgId, $user, $p
     return $data;
 }
 
-function getArrayGroups($data, $key) {
+function getArrayGroups($data, $key, $key2 = null) {
     $lastgroup = null;
     $return = array();
     $partial = array();
@@ -719,6 +719,13 @@ function getArrayGroups($data, $key) {
     }
     if ($lastgroup !== null) {
         $return[$lastgroup] = $partial;
+    }
+    if ($key2 !== null) {
+        $return2 = array();
+        foreach ($return as $key => $item) {
+            $return2[$key] = getArrayGroups($item, $key2);
+        }
+        return $return2;
     }
     return $return;
 }

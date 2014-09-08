@@ -80,15 +80,12 @@ $app->get('/descargar/:kind/:cid/:id/(:p1/)(:p2/)', function ($kind, $cid, $id, 
                 $app->redirect($app->urlFor('login'));
             }
             $catId = $cid;
-            $errorUrl = $app->urlFor('tree', array('id' => $cid));
             break;
         case 2:
             $groupId = $cid;
-            $errorUrl = $app->urlFor('grouping', array('id' => $cid));
             break;
         case 3:
             $eventId = $cid;
-            $errorUrl = $app->urlFor('event', array('id' => $cid, 'pid' => $p1, 'aid' => $p2));
             break;
         default:
             $app-redirect($app->urlFor('frontpage'));
@@ -100,7 +97,7 @@ $app->get('/descargar/:kind/:cid/:id/(:p1/)(:p2/)', function ($kind, $cid, $id, 
                null, null, null, $eventId, $groupId, null, null, $id,
                $delivery['current_delivery_id'], null, null);
        $app->flash('home_error', 'no_delivery');
-       $app->redirect($errorUrl);
+       $app->redirect($app->request->getReferrer());
     }
     $file = $preferences['upload.folder'] . $delivery['download_path'];
 
@@ -109,7 +106,7 @@ $app->get('/descargar/:kind/:cid/:id/(:p1/)(:p2/)', function ($kind, $cid, $id, 
                null, null, null, $eventId, $groupId, null, null, $id,
                $delivery['current_delivery_id'], null, null);
        $app->flash('home_error', 'no_document');
-       $app->redirect($errorUrl);
+       $app->redirect($app->request->getReferrer());
     }
 
     $res = $app->response();

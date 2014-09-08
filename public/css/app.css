@@ -194,6 +194,10 @@ footer {
     font-size: 90%;
 }
 
+.profile-detail {
+    text-align: left;
+}
+
 .delivery-tools {
     color: #888;
 }

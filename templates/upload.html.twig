@@ -76,7 +76,7 @@
                             <td class="col-md-8">
                                 <strong>Actividad: </strong>{{ item['event_display_name'] }}
                             </td>
-                            <td class="col-md-4 {% if item.c %}success{% elseif ready %}warning{% elseif late %}danger{% endif %}">
+                            <td class="col-md-4">
                                 <strong>Plazo: </strong>{{ item.period_description ? item.period_description : parsePeriod(item.from_week, item.to_week, period_labels) }}
                                 {% if item.force_period %} <span class="icon-{{ ready ? "un" }}lock"></span>{% endif %}
                             </td>
@@ -86,12 +86,12 @@
                         <tr class="{% if item.c %}success{% elseif ready %}warning{% elseif late %}danger{% endif %}">
                             <td>
                                 <span class="icon-{{ item.c ? 'ok' : 'remove'}}"></span>
-                                {{ item['display_name'] }}
+                                {{ item['display_name'] }}{% if not item.c and late %} (fuera de plazo){% endif %}
                             </td>
                             <td>
                                 {% if item['c'] %}
                                     <a href="{{ urlFor('download', { 'id': item.delivery_id, 'cid': folder.category_id, 'kind': 1 }) }}">Descargar entrega</a> - 
-                                    <a class="btn btn-warning col-md-6" href="{{ urlFor('modify', {'folderid': item.folder_id, 'id': item.delivery_id, 'return': 2, 'data1': back_url['return'], 'data2': back_url['data1'], 'data3': back_url['data2'], 'data4': back_url['data3'] }) }}">Modificar entrega</a>
+                                    <a href="{{ urlFor('modify', {'folderid': item.folder_id, 'id': item.delivery_id, 'return': 2, 'data1': back_url['return'], 'data2': back_url['data1'], 'data3': back_url['data2'], 'data4': back_url['data3'] }) }}">Modificar entrega</a>
                                 {% elseif not is_manager and item.force_period and late %}
                                     <button class="btn btn-danger btn-block" disabled="1">No se puede entregar. Fuera de plazo</button>
                                 {% else %}

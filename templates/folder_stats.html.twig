@@ -45,8 +45,12 @@
             </dd>
             {% endif %}
         </dl>
-        {% if not (local_stats or stats) %}<a class="btn btn-info" href="{{ last_url }}">Volver</a>{% endif %}
     </div>
+    {% if not (local_stats or stats) %}
+    <div class="panel-footer">
+        <a class="btn btn-info" href="{{ last_url }}">Volver</a>
+    </div>
+    {% endif %}
 </div>
 {% if stats %}
 <div class="panel panel-default">
@@ -56,7 +60,7 @@
         <table class="table table-condensed table-hover">
             <thead>
                 <tr>
-                    <th>Perfil</th><th>Entregas realizadas</th>
+                    <th class="col-md-10">Perfil</th><th class="col-md-2">Entregas realizadas</th>
                 </tr>
             </thead>
 
@@ -81,75 +85,76 @@
                 </tr>
             </tfoot>
         </table>
-        {% if not local_stats %}<a class="btn btn-info" href="{{ last_url }}">Volver</a>{% endif %}
+    </div>
+    <div class="panel-footer">
+        <a class="btn btn-info" href="{{ last_url }}">Volver</a>
     </div>
 </div>
 {% endif %}
 {% if local_stats %}
-<form class="form" enctype="multipart/form-data" role="form" method="post" action="{{ url }}">
-    <div class="panel panel-default">
-        <div class="panel-body">
-            <h3>Mis entregas</h3>
-            {% set sum_c = 0 %}
-            {% set sum_total = 0 %}
-            {% set last_event = 0 %}
-            {% set now = (current-base+48) % 48 %}
-            <table class="table table-hover">
-                <tbody>
-                    {% for profile_id, local_stats_item in local_stats %}
-                        {% set profile = all_profiles[profile_id] %}
-                        <tr>
-                            <td colspan="2" class="profile">
-                                {{ profile['display_name_neutral'] }} {{ profile['display_name'] }}
-                            </td>
-                        </tr>
-                        {% for item in local_stats_item %}
-                        {% set from = (item.from_week-base+48) % 48 %}
-                        {% set to = (item.to_week-base+48) % 48 %}
-                        {% set late = ((now>=from) and (now>to)) %}
-                        {% set ready = ((now>=from) and (now<=to)) %}
-                        {% if last_event != item.event_id %}
-                        <tr>
-                            <td class="col-md-8">
-                                <strong>Actividad: </strong>{{ item['event_display_name'] }}
-                            </td>
-                            <td class="col-md-4">
-                                <strong>Plazo: </strong>{{ item.period_description ? item.period_description : parsePeriod(item.from_week, item.to_week, period_labels) }}
-                                {% if item.force_period %} <span class="icon-{{ ready ? "un" }}lock"></span>{% endif %}
-                            </td>
-                            {% set last_event = item.event_id %}
-                        </tr>
-                        {% endif %}
-                        <tr class="{% if item.c %}success{% elseif ready %}warning{% elseif late %}danger{% endif %}">
-                            <td>
-                                <span class="icon-{{ item.c ? 'ok' : 'remove'}}"></span>
-                                {{ item['display_name'] }}
-                            </td>
-                            <td>
-                                {% if item['c'] %}
-                                    <a href="{{ urlFor('download', { 'id': item.delivery_id, 'cid': folder.category_id, 'kind': 1 }) }}">Descargar entrega</a> - 
-                                    <a href="{{ urlFor('modify', {'folderid': item.folder_id, 'id': item.delivery_id, 'return': 2, 'data1': back_url['return'], 'data2': back_url['data1'], 'data3': back_url['data2'], 'data4': back_url['data3'] }) }}">Modificar entrega</a>
-                                {% elseif not is_manager and item.force_period and late %}
-                                    <button class="btn btn-danger btn-block" disabled="1">No se puede entregar. Fuera de plazo</button>
-                                {% else %}
-                                    <input type="file" multiple class="form-control" name="localdocument_{{ item.id }}">
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% set sum_c = sum_c + item['c'] %}{% set sum_total = sum_total + 1 %}
-                        {% endfor %}
-                    {% endfor %}
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <th></th><th>{{ sum_c }}/{{ sum_total }} ({{ (100*sum_c/sum_total) | number_format }}%)</th>
-                    </tr>
-                </tfoot>
-            </table>
-            <a class="btn btn-info" href="{{ last_url }}">Volver</a>
-        </div>
+{% set now = (current-base+48) % 48 %}
+{% for event_id, local_stats_item in local_stats %}
+    {% set sum_c = 0 %}
+    {% set sum_total = 0 %}
+    {% set it = (local_stats_item | first)[0] %}
+    {% set from = (it.from_week-base+48) % 48 %}
+    {% set to = (it.to_week+it.grace_period-base+48) % 48 %}
+    {% set late = ((now>=from) and (now>to)) %}
+    {% set ready = ((now>=from) and (now<=to)) %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+
+        <h4>
+            <strong>Actividad: </strong>{{ it['event_display_name'] }}{% if user['is_admin'] %} <a class="delivery-tools hidden-print" title="Modificar actividad" href="{{ urlFor('manageevent', { 'id': event_id }) }}"><span class="icon-pencil"></span></a>{% endif %}
+        <h4>
+        <p>
+            <strong>Plazo: </strong>{{ it.period_description ? it.period_description : parsePeriod(it.from_week, it.to_week, period_labels) }}
+            {% if it.force_period %} <span class="icon-{{ ready ? "un" }}lock"></span>{% endif %}
+        </p>
+
     </div>
-</form>
+    <div class="panel-body">
+        <table class="table table-hover">
+            <tbody>
+                {% for profile_id, items in local_stats_item %}
+                    {% set profile = all_profiles[profile_id] %}
+                    <tr>
+                        <td colspan="2" class="profile profile-detail">
+                            {{ profile['display_name_neutral'] }} {{ profile['display_name'] }}
+                        </td>
+                    </tr>
+                    {% for item in items %}
+                    <tr class="{% if item.c %}success{% elseif ready %}warning{% elseif late %}danger{% endif %}">
+                        <td class="col-md-10">
+                            <span class="icon-{{ item.c ? 'ok' : 'remove'}}"></span>
+                            {{ item['display_name'] }}
+                        </td>
+                        <td class="col-md-2">
+                            {% if item['c'] %}
+                                <a href="{{ urlFor('download', { 'id': item.delivery_id, 'cid': folder.category_id, 'kind': 1 }) }}">Descargar entrega</a>
+                            {% elseif not is_manager and item.force_period and late %}
+                                <button class="btn btn-danger btn-block" disabled="1">No se puede entregar. Fuera de plazo</button>
+                            {% else %}
+                                No entregado
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% set sum_c = sum_c + item['c'] %}{% set sum_total = sum_total + 1 %}
+                    {% endfor %}
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th></th><th>{{ sum_c }}/{{ sum_total }} ({{ (100*sum_c/sum_total) | number_format }}%)</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <div class="panel-footer">
+        <a class="btn btn-info" href="{{ last_url }}">Volver</a>
+    </div>
+</div>
+{% endfor %}
 {% endif %}
 {% endblock %}
 {% endblock %}
