@@ -896,9 +896,11 @@ function deleteProfileGroupsById($profileGroupsIds, $orgId) {
 }
 
 function enablePersons($orgId, $persons, $status) {
+    // Cuidado: ataque SQL injection. Usar clave primaria compuesta
+    // para solucionarlo
     $organization = ORM::get_db()->quote($orgId);
     $active = $status ? 1 : 0;
-    $list = ORM::get_db()->quote(implode(',', $persons));
+    $list = implode(',', $persons);
     return ORM::get_db()->exec('UPDATE person_organization SET is_active=' . $active .
             ' WHERE organization_id=' . $organization . ' AND '.
             'person_id IN (' . $list . ');');
