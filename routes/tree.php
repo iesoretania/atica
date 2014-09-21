@@ -88,7 +88,7 @@ $app->get('/descargar/:kind/:cid/:id/(:p1/)(:p2/)', function ($kind, $cid, $id, 
             $eventId = $cid;
             break;
         default:
-            $app-redirect($app->urlFor('frontpage'));
+            $app->redirect($app->urlFor('frontpage'));
     }
 
     $delivery = getDelivery($id, $user['id']);
