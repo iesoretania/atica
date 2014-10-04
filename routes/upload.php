@@ -656,12 +656,14 @@ function getFolderProfileDeliveryStatsBase($folderId) {
             select('event_profile_delivery_item.profile_id')->
             select('profile.display_name')->
             select('profile_group.display_name_neutral')->
-            select_expr('COUNT(event_profile_delivery_item.profile_id)', 'total')->
-            select_expr('COUNT(delivery.item_id)', 'c')->
+            select('folder_delivery.snapshot_id')->
+            select_expr('COUNT(DISTINCT event_profile_delivery_item.id)', 'total')->
+            select_expr('SUM(folder_delivery.delivery_id IS NOT NULL AND (folder_delivery.snapshot_id IS NULL))', 'c')->
             inner_join('profile', array('profile.id', '=', 'event_profile_delivery_item.profile_id'))->
             inner_join('profile_group', array('profile_group.id', '=', 'profile.profile_group_id'))->
             inner_join('event', array('event.id', '=', 'event_profile_delivery_item.event_id'))->
             left_outer_join('delivery', array('delivery.item_id', '=', 'event_profile_delivery_item.id'))->
+            left_outer_join('folder_delivery', 'folder_delivery.delivery_id=delivery.id AND folder_delivery.folder_id=event.folder_id')->
             where('event.folder_id', $folderId)->
             where('event_profile_delivery_item.is_visible', 1)->
             group_by('event_profile_delivery_item.profile_id')->
@@ -691,8 +693,9 @@ function getFolderProfileDeliveredItems($profileId, $folderId, $orgId, $user, $p
             select('event_profile_delivery_item.display_name')->
             select('event_profile_delivery_item.profile_id')->
             select('delivery.creation_date')->
-            select_expr('COUNT(delivery.item_id)', 'c')->
+            select_expr('SUM(folder_delivery.delivery_id IS NOT NULL AND (folder_delivery.snapshot_id IS NULL))', 'c')->
             left_outer_join('delivery', array('delivery.item_id', '=', 'event_profile_delivery_item.id'))->
+            left_outer_join('folder_delivery', 'folder_delivery.delivery_id=delivery.id AND folder_delivery.folder_id=event.folder_id')->
             where('event.folder_id', $folderId)->
             where('event_profile_delivery_item.profile_id', $profileId)->
             where('event_profile_delivery_item.is_visible', 1)->
@@ -746,8 +749,9 @@ function getFolderItems($folderId, $orgId) {
             select('delivery.creation_date')->
             select('delivery.id', 'delivery_id')->
             select('event.folder_id')->
-            select_expr('COUNT(delivery.item_id)', 'c')->
+            select_expr('SUM(folder_delivery.delivery_id IS NOT NULL AND (folder_delivery.snapshot_id IS NULL))', 'c')->
             left_outer_join('delivery', array('delivery.item_id', '=', 'event_profile_delivery_item.id'))->
+            left_outer_join('folder_delivery', 'folder_delivery.delivery_id=delivery.id AND folder_delivery.folder_id=event.folder_id')->
             where('event.folder_id', $folderId)->
             where('event.organization_id', $orgId)->
             where('event_profile_delivery_item.is_visible', 1)->
@@ -790,6 +794,7 @@ function getDeliveryItemCount($profileId, $folderId, $itemId) {
             where('folder_delivery.folder_id', $folderId)->
             where('delivery.profile_id', $profileId)->
             where('delivery.item_id', $itemId)->
+            where_null('folder_delivery.snapshot_id')->
             count();
 }
 

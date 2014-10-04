@@ -387,6 +387,7 @@ function getParsedDeliveriesByOrganization($orgId) {
             inner_join('folder', array('folder.id', '=', 'folder_delivery.folder_id'))->
             inner_join('category', array('category.id', '=', 'folder.category_id'))->
             where('category.organization_id', $orgId)->
+            where_null('folder_delivery.snapshot_id')->
             order_by_asc('category.category_left')->
             order_by_asc('folder.order_nr')->
             order_by_asc('folder_delivery.order_nr')->
@@ -395,7 +396,6 @@ function getParsedDeliveriesByOrganization($orgId) {
     $return = array();
     $currentData = array();
     $currentCategory = null;
-    $currentCategoryDisplayName = null;
     $first = true;
 
     foreach($data as $delivery) {

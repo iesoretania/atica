@@ -460,6 +460,7 @@ function getFolderPersons() {
             inner_join('delivery', array('delivery.current_revision_id', '=', 'revision.id'))->
             inner_join('folder_delivery', array('folder_delivery.delivery_id','=','delivery.id'))->
             inner_join('folder', array('folder.id','=','folder_delivery.folder_id'))->
+            where_null('folder_delivery.snapshot_id')->
             where('folder.is_visible', 1);
 }
 
@@ -505,6 +506,7 @@ function getProfiles() {
             inner_join('delivery', array('delivery.profile_id', '=', 'profile.id'))->
             inner_join('folder_delivery', array('folder_delivery.delivery_id','=','delivery.id'))->
             inner_join('folder', array('folder.id','=','folder_delivery.folder_id'))->
+            where_null('folder_delivery.snapshot_id')->
             order_by_asc('profile_group_id')->
             order_by_asc('profile.id');
 }
@@ -641,6 +643,7 @@ function getDeliveriesFromFolders($folders, &$profileGender) {
                 inner_join('revision', array('delivery.current_revision_id', '=', 'revision.id'))->
                 inner_join('person', array('person.id', '=', 'revision.uploader_person_id'))->
                 where('folder_delivery.folder_id', $folder['id'])->
+                where_null('folder_delivery.snapshot_id')->
                 order_by_asc('delivery.profile_id')->
                 order_by_asc('order_nr')->find_array();
 

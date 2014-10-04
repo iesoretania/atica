@@ -141,6 +141,7 @@ function getParsedDeliveriesFromGroupingFolders($folders) {
                 inner_join('revision', array('delivery.current_revision_id', '=', 'revision.id'))->
                 inner_join('person', array('person.id', '=', 'revision.uploader_person_id'))->
                 where('folder_delivery.folder_id', $folder['id'])->
+                where_null('folder_delivery.snapshot_id')->
                 order_by_asc('delivery.profile_id')->
                 order_by_asc('order_nr')->find_array();
 
