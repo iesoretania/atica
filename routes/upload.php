@@ -733,7 +733,7 @@ function getArrayGroups($data, $key, $key2 = null) {
     return $return;
 }
 
-function getFolderItems($folderId, $orgId) {
+function getFolderItemsBase($folderId, $orgId) {
     $data = ORM::for_table('event_profile_delivery_item')->
             inner_join('event', array('event.id', '=', 'event_id'))->
             select('event_profile_delivery_item.id')->
@@ -755,10 +755,51 @@ function getFolderItems($folderId, $orgId) {
             where('event.folder_id', $folderId)->
             where('event.organization_id', $orgId)->
             where('event_profile_delivery_item.is_visible', 1)->
-            group_by('event_profile_delivery_item.id')->
+            group_by('event_profile_delivery_item.id');
+
+    return $data;
+}
+
+function getFolderItems($folderId, $orgId) {
+    $data = getFolderItemsBase($folderId, $orgId)->
             order_by_asc('event_profile_delivery_item.profile_id')->
             order_by_asc('event_profile_delivery_item.order_nr');
 
+    return $data;
+}
+
+function getFolderItemsInSnapshot($folderId, $orgId, $snapshotId = null) {
+        $data = ORM::for_table('event_profile_delivery_item')->
+            inner_join('event', array('event.id', '=', 'event_id'))->
+            select('event_profile_delivery_item.id')->
+            select('event_profile_delivery_item.event_id')->
+            select('event_profile_delivery_item.display_name')->
+            select('event_profile_delivery_item.document_name')->
+            select('event_profile_delivery_item.profile_id')->
+            select('event.display_name', 'event_display_name')->
+            select('event.from_week')->
+            select('event.to_week')->
+            select('event.grace_period')->
+            select('event.force_period')->
+            select('delivery.creation_date')->
+            select('delivery.id', 'delivery_id')->
+            select('event.folder_id')->
+            select_expr('SUM(folder_delivery.delivery_id IS NOT NULL AND (folder_delivery.snapshot_id IS NULL))', 'c')->
+            left_outer_join('delivery', array('delivery.item_id', '=', 'event_profile_delivery_item.id'))->
+            left_outer_join('folder_delivery', 'folder_delivery.delivery_id=delivery.id AND folder_delivery.folder_id=event.folder_id')->
+            where('event.folder_id', $folderId)->
+            where('event.organization_id', $orgId)->
+            where('event_profile_delivery_item.is_visible', 1)->
+            group_by('event_profile_delivery_item.id');
+
+    if ($snapshotId) {
+        $data = $data->where('folder_delivery.snapshot_id', $snapshotId);
+    }
+    else {
+        $data = $data->where_not_null('folder_delivery.snapshot_id')->
+                order_by_asc('folder_delivery.snapshot_id');
+    }
+    
     return $data;
 }
 

@@ -3,8 +3,14 @@
 {% set buttons = user['is_admin'] or info['upload_permission'] or info['manage_permission'] %}
 <div class="panel panel-default">
     <div class="panel-heading">
-        <h2>{{ info['display_name'] }}
-            {% if user['is_admin'] or info['manage_permission'] %}&nbsp;<small class="pull-right hidden-print"><a class="folder-tools" href="{{ urlFor('folderstats', { 'id': info.id, 'return': backurl['return'], 'data1': backurl['data1'], 'data2': backurl['data2'], 'data3': backurl['data3']  })  }}"><span class="icon-list"></span></a>{% if user['is_admin'] %} <a class="folder-tools" href="{{ urlFor('managefolder', { 'id': info.id })  }}"><span class="icon-cog"></span></a> {% if not loop.first %}<a class="folder-tools" title="Subir carpeta" href="{{ urlFor('folderoperation', { 'id': info['id'], 'data': lastinfo['id'], 'oper': 'swap' }) }}"><span class="icon-arrow-up"></span></a>{% endif %} {% if not loop.last %}<a class="folder-tools" title="Bajar carpeta" href="{{  urlFor('folderoperation', { 'id': info['id'], 'oper': 'swapnext' }) }}"><span class="icon-arrow-down"></span></a>{% endif %}{% endif %}</small>{% endif %}
+        <h2>{% if snapshot %}{{ snapshot['display_name'] }}:<br/>{% endif %}{{ info['display_name'] }}
+            {% if not snapshot %}
+                &nbsp;<small class="pull-right hidden-print">
+                {% if info['has_snapshot'] %}<a class="folder-tools" href="{{ urlFor('foldersnapshots', { 'id': info.id, 'return': backurl['return'], 'data1': backurl['data1'], 'data2': backurl['data2'], 'data3': backurl['data3']  })  }}"><span class="icon-time"></span></a>{% endif %}
+                {% if info['is_divided'] %}<a class="folder-tools" href="{{ urlFor('folderstats', { 'id': info.id, 'return': backurl['return'], 'data1': backurl['data1'], 'data2': backurl['data2'], 'data3': backurl['data3']  })  }}"><span class="icon-list"></span></a>{% endif %}
+                {% if user['is_admin'] or info['manage_permission'] %}{% if user['is_admin'] %} <a class="folder-tools" href="{{ urlFor('managefolder', { 'id': info.id })  }}"><span class="icon-cog"></span></a> {% if not loop.first %}<a class="folder-tools" title="Subir carpeta" href="{{ urlFor('folderoperation', { 'id': info['id'], 'data': lastinfo['id'], 'oper': 'swap' }) }}"><span class="icon-arrow-up"></span></a>{% endif %} {% if not loop.last %}<a class="folder-tools" title="Bajar carpeta" href="{{  urlFor('folderoperation', { 'id': info['id'], 'oper': 'swapnext' }) }}"><span class="icon-arrow-down"></span></a>{% endif %}{% endif %}{% endif %}
+                </small>
+            {% endif %}
         </h2>
         {% if buttons and top_buttons %}
         {% include 'folder_buttons.html.twig' %}

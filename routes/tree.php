@@ -396,6 +396,112 @@ $app->map('/elemento/:id/:profileid/(:actid)', function ($id, $profileid, $actid
         'folder' => $folder));
 })->name('manageitem')->via('GET', 'POST');
 
+$app->get('/historial/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $return=0, $data1=null, $data2=null, $data3=null)
+        use ($app, $user, $organization, $config) {
+    if (!$user) {
+        $app->redirect($app->urlFor('login'));
+    }
+
+    $folder = getFolderObjectById($organization['id'], $id);
+    if (!$folder) {
+        $app->redirect($app->urlFor('login'));
+    }
+
+    $restrictedProfiles = parseArray(getPermissionProfiles($id, 2));
+    $uploadProfiles = parseArray(getPermissionProfiles($id, 1));
+    $managerProfiles = parseArray(getPermissionProfiles($id, 0));
+    $userProfiles = parseArray(getUserProfiles($user['id'], $organization['id'], true));
+    $allProfiles = parseArray(getProfilesByOrganization($organization['id']));
+
+    $isManager = $user['is_admin'];
+    foreach ($managerProfiles as $upload) {
+        if (isset($userProfiles[$upload['id']])) {
+            $isManager = true;
+            break;
+        }
+    }
+
+    if ($folder['is_restricted']) {
+        foreach ($restrictedProfiles as $restrict) {
+            if (isset($userProfiles[$restrict['id']])) {
+                $isAllowed = true;
+                break;
+            }
+        }
+    }
+    else {
+        $isAllowed = true;
+    }
+
+    if (!$isAllowed) {
+        $app->redirect($app->urlFor('login'));
+    }
+
+    switch ($return) {
+        case 0:
+            $breadcrumb = array(
+                array('display_name' => 'Árbol', 'target' => $app->urlFor('tree'))
+            );
+            $category = getCategoryObjectById($organization['id'], $folder['category_id']);
+            $parents = getCategoryParentsById($category['id']);
+            foreach($parents as $parent) {
+                $breadcrumb[] = array('display_name' => $parent['display_name'], 'target' => $app->urlFor('tree'));
+            }
+            $breadcrumb[] = array('display_name' => $category['display_name'], 'target' => $app->urlFor('tree', array('id' => $category['id'])));
+            $breadcrumb[] = array('display_name' => 'Estadísticas');
+            $lastUrl = $app->urlFor('tree', array('id' => $data1));
+            break;
+        case 1:
+            $event = getEventObject($organization['id'], $data3);
+            $activityevent = getActivityEvent($data3, $data2, $user);
+            $profile = getProfileById($data1, $organization['id']);
+            if ((!$event) || (!$activityevent) || (!$profile) || ($event['folder_id'] != $id)) {
+                $app->redirect($app->urlFor('login'));
+            }
+            $lastUrl = $app->urlFor('event', array('pid' => $data1, 'aid' => $data2, 'id' => $data3));
+
+            $breadcrumb = array(
+                array('display_name' => 'Actividades', 'target' => $app->urlFor('activities')),
+                array('display_name' => getProfileFullDisplayName($profile, $user), 'target' => $app->urlFor('activities', array('id' => $data1))),
+                array('display_name' => $activityevent['activity_display_name'], 'target' => $app->urlFor('activities', array('id' => $data1))),
+                array('display_name' => $event['display_name'], 'target' => $app->urlFor('event', array('pid' => $data1, 'aid' => $data2, 'id' => $data3))),
+                array('display_name' => 'Estadísticas')
+            );
+            break;
+    }
+
+    $snapshots = parseArray(getSnapshotsFromFolder($folder['id']), 'snapshot_id');
+
+    $profileGender = array();
+
+    foreach($snapshots as $key => $snapshot) {
+        $snapshots[$key]['data'] = getDeliveriesFromFolders(array($folder), $profileGender, $key);
+    }
+
+    $folderProfiles = getProfilesByFolderId($folder['id']);
+    $folders = getFoldersById($folder['id']);
+    $persons = getFolderPersonsByFolderId($folder['id']);
+
+    $app->render('folder_snapshots.html.twig', array(
+        'navigation' => $breadcrumb,
+        'search' => false,
+        'url' => $app->request()->getPathInfo(),
+        'back_url' => array('return' => $return, 'data1' => $data1, 'data2' => $data2, 'data3' => $data3),
+        'last_url' => $lastUrl,
+        'snapshots' => $snapshots,
+        'folderProfiles' => $folderProfiles,
+        'folders' => $folders,
+        'persons' => $persons,
+        'profileGender' => $profileGender,
+        'restricted_profiles' => $restrictedProfiles,
+        'upload_profiles' => $uploadProfiles,
+        'manager_profiles' => $managerProfiles,
+        'user_profiles' => $userProfiles,
+        'all_profiles' => $allProfiles,
+        'folder' => $folder));
+
+})->name('foldersnapshots');
+
 function getTree($orgId, $app, $id, &$matchedCategory, &$parentCategory) {
     $return = array();
     $currentData = array();
@@ -460,7 +566,6 @@ function getFolderPersons() {
             inner_join('delivery', array('delivery.current_revision_id', '=', 'revision.id'))->
             inner_join('folder_delivery', array('folder_delivery.delivery_id','=','delivery.id'))->
             inner_join('folder', array('folder.id','=','folder_delivery.folder_id'))->
-            where_null('folder_delivery.snapshot_id')->
             where('folder.is_visible', 1);
 }
 
@@ -506,7 +611,6 @@ function getProfiles() {
             inner_join('delivery', array('delivery.profile_id', '=', 'profile.id'))->
             inner_join('folder_delivery', array('folder_delivery.delivery_id','=','delivery.id'))->
             inner_join('folder', array('folder.id','=','folder_delivery.folder_id'))->
-            where_null('folder_delivery.snapshot_id')->
             order_by_asc('profile_group_id')->
             order_by_asc('profile.id');
 }
@@ -628,7 +732,21 @@ function getFoldersByOrganization($orgId, $filter = true) {
     return $folders;
 }
 
-function getDeliveriesFromFolders($folders, &$profileGender) {
+function getSnapshotsFromFolder($folderId) {
+    return ORM::for_table('folder_delivery')->
+            distinct()->
+            select('snapshot_id')->
+            select('snapshot.display_name')->
+            select('snapshot.order_nr')->
+            inner_join('snapshot', array('snapshot.id', '=', 'folder_delivery.snapshot_id'))->
+            where_not_null('snapshot_id')->
+            where('folder_id', $folderId)->
+            where('snapshot.visible', 1)->
+            order_by_desc('snapshot.order_nr')->
+            find_many();
+}
+
+function getDeliveriesFromFolders($folders, &$profileGender, $snapshot = null) {
 
     $return = array();
     foreach($folders as $folder) {
@@ -643,9 +761,21 @@ function getDeliveriesFromFolders($folders, &$profileGender) {
                 inner_join('revision', array('delivery.current_revision_id', '=', 'revision.id'))->
                 inner_join('person', array('person.id', '=', 'revision.uploader_person_id'))->
                 where('folder_delivery.folder_id', $folder['id'])->
-                where_null('folder_delivery.snapshot_id')->
+                order_by_asc('folder_delivery.snapshot_id')->
                 order_by_asc('delivery.profile_id')->
-                order_by_asc('order_nr')->find_array();
+                order_by_asc('order_nr');
+
+        if (is_null($snapshot)) {
+            $deliveries = $deliveries->where_null('folder_delivery.snapshot_id');
+        }
+        elseif ($snapshot == 0) {
+            $deliveries = $deliveries->where_not_null('folder_delivery.snapshot_id');
+        }
+        else {
+            $deliveries = $deliveries->where('folder_delivery.snapshot_id', $snapshot);
+        }
+
+        $deliveries = $deliveries->find_array();
 
         $return[] = array(
             'id' => $folder['id'],
