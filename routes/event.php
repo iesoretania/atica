@@ -51,6 +51,9 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
     $profiles = parseArray(getUserProfiles($user['id'], $organization['id'], false));
 
     $isMine = isset($profiles[$pid]);
+    foreach ($profiles as $p) {
+        $isMine = $isMine || ($p['profile_group_id'] == $pid);
+    }
 
     $breadcrumb = array(
         array('display_name' => 'Actividades', 'target' => $app->urlFor('activities')),
