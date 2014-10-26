@@ -182,7 +182,7 @@ $app->post('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $ret
                     $filename = parseVariables($name, $organization, $user, $profile) . $ext;
                     $description = parseVariables($item['display_name'], $organization, $user, $profile);
 
-                    if (false == createDelivery($id, $user['id'], $item['profile_id'], $_FILES[$ref]['name'], $description, null, $item['id'], $documentDestination, $hash, $filesize)) {
+                    if (false == createDelivery($id, $user['id'], $item['profile_id'], $filename, $description, null, $item['id'], $documentDestination, $hash, $filesize)) {
                         $ok = false;
                         $type = 'danger';
                         $message = 'cannot register';
