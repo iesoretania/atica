@@ -421,7 +421,8 @@ $app->get('/historial/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $r
         }
     }
 
-    if ($folder['is_restricted']) {
+    $isAllowed = false;
+    if (!$isManager && $folder['is_restricted']) {
         foreach ($restrictedProfiles as $restrict) {
             if (isset($userProfiles[$restrict['id']])) {
                 $isAllowed = true;
