@@ -832,9 +832,12 @@ function getDeliveriesFromFolders($folders, $userProfiles, &$profileGender, $use
                         $profileGender[$delivery['profile_id']] = 0;
                     }
                 }
+                else {
+                    $profileGender[$delivery['profile_id']] = $delivery['gender'];
+                }
             }
         }
-    }   
+    }
     return $return;
 }
 
