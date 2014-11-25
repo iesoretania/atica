@@ -39,6 +39,16 @@
     </div>
 </div>
 {% endmacro %}
+{% macro input_radio_array(name, description, items, current, enabled = true, textclass) %}
+<div class="form-group{{ textclass ? ' text-' ~ textclass }}">
+    <label class="col-md-2 control-label">{{ description }}</label>
+    <div class="col-md-10">
+        {% for value,description in items %}
+        <label class="radio-inline"><input type="radio" name="{{ name }}" value="{{ value }}" {% if (value == current) %} checked="checked"{% endif %}{{ enabled ? '' : ' disabled' }}> {{ description }}</label>
+        {% endfor %}
+    </div>
+</div>
+{% endmacro %}
 {% macro input_textarea(name, rows, description, placeholder, value, enabled = true, textclass) %}
 <div class="form-group{{ textclass ? ' text-' ~ textclass }}">
     <label for="{{ name }}" class="col-md-2 control-label">{{ description }}</label>

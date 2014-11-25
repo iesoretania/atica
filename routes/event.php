@@ -49,7 +49,13 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
 
     // obtener perfiles
     $profiles = parseArray(getUserProfiles($user['id'], $organization['id'], false));
-
+    $userProfiles = getUserProfiles($user['id'], $organization['id'], true);
+    $userProfilesList = array();
+    foreach($userProfiles as $prof) {
+        $userProfilesList[$prof['id']] = $prof['id'];
+        $userProfilesList[$prof['profile_group_id']] = $prof['profile_group_id'];
+    }
+   
     $isMine = isset($profiles[$pid]);
     foreach ($profiles as $p) {
         $isMine = $isMine || ($p['profile_group_id'] == $pid);
@@ -64,7 +70,7 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
 
     if ($folder && isset($folder['id'])) {
         $profileGender = array();
-        $data = getParsedFolderById($organization['id'], $folder['id'], $profiles, $profileGender);
+        $data = getParsedFolderById($organization['id'], $folder['id'], $userProfilesList, $profileGender, $user['id']);
         $folderProfiles = getProfilesByFolderId($folder['id']);
         $folders = getFoldersById($folder['id']);
         $persons = getFolderPersonsByFolderId($folder['id']);
@@ -252,13 +258,13 @@ function getDeliveriesFromEvent($eventId) {
     return (!$data) ? array() : $data;
 }
 
-function getParsedFolderById($orgId, $folderId, $profiles, &$profileGender, $filter = true) {
+function getParsedFolderById($orgId, $folderId, $profiles, &$profileGender, $userId, $filter = true) {
 
     $folders = getFoldersByOrganization($orgId, $filter)->
                 where('id', $folderId)->
                 find_array();
 
-    return getDeliveriesFromFolders($folders, $profileGender, $profiles);
+    return getDeliveriesFromFolders($folders, $profiles, $profileGender, $userId);
 }
 
 function getFoldersById($folderId) {

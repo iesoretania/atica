@@ -35,12 +35,12 @@ $app->get('/arbol(/:id)', function ($id = null) use ($app, $user, $organization)
     $userProfiles = getUserProfiles($user['id'], $organization['id'], true);
     $userProfilesList = array();
     foreach($userProfiles as $prof) {
-        $userProfilesList[] = $prof['id'];
-        $userProfilesList[] = $prof['profile_group_id'];
+        $userProfilesList[$prof['id']] = $prof['id'];
+        $userProfilesList[$prof['profile_group_id']] = $prof['profile_group_id'];
     }
     
     if (null !== $id) {
-        $data = getParsedDeliveriesByCategory($organization['id'], $id, $profileGender, $user['is_admin'] ? null : $userProfilesList);
+        $data = getParsedDeliveriesByCategory($organization['id'], $id, $user['is_admin'] ? null : $userProfilesList, $profileGender, $user['id']);
         // TODO: Optimizar leyendo todos los permisos de golpe para todas las
         // carpetas y colocándolos en un array
         $allFolders = getFoldersByCategory($id);
@@ -163,8 +163,10 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = null) use ($app, $use
         $local->set('category_id', $_POST['category']);
         $local->set('display_name', $_POST['displayname']);
         $local->set('description', strlen($_POST['description'])>0 ? $_POST['description'] : null);
-        $local->set('is_visible', $_POST['visible']);
+        $local->set('is_visible', 1);
         $local->set('is_divided', $_POST['divided']);
+        $local->set('is_private_personal', ($_POST['private']==1));
+        $local->set('is_private_profile', ($_POST['private']==2));
         $local->set('is_restricted', $_POST['restrictedaccess']);
         $local->set('show_revision_nr', $_POST['revisionnr']);
         $local->set('auto_clean', $_POST['autoclean']);
@@ -217,6 +219,12 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = null) use ($app, $use
         $folder = array();
         $folder['is_visible'] = 1;
         $folder['category_id'] = $catid;
+        $folder['is_private_profile'] = 0;
+        $folder['is_private_personal'] = 0;
+        $folder['is_divided'] = 1;
+        $folder['show_revision_nr'] = 0;
+        $folder['auto_clean'] = 0;
+        $folder['is_restricted'] = 0;
     }
 
     if (null == $catid) {
@@ -237,6 +245,8 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = null) use ($app, $use
         array('display_name' => $category['display_name'], 'target' => $app->urlFor('tree', array('id' => $catid))),
         array('display_name' => 'Gestionar carpeta')
     );
+    
+    $private = $folder['is_private_profile'] ? 2 : ($folder['is_private_personal'] ? 1 : 0);
 
     $app->render('manage_folder.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true, 'topbar' => $topbar,
@@ -245,6 +255,7 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = null) use ($app, $use
         'url' => $app->request()->getPathInfo(),
         'data' => $data,
         'new' => ($id == 0),
+        'private' => $private,
         'allProfiles' => $allProfiles,
         'uploaders' => $uploadProfiles,
         'managers' => $managerProfiles,
@@ -420,6 +431,11 @@ $app->get('/historial/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $r
     $managerProfiles = parseArray(getPermissionProfiles($id, 0));
     $userProfiles = parseArray(getUserProfiles($user['id'], $organization['id'], true));
     $allProfiles = parseArray(getProfilesByOrganization($organization['id']));
+    $userProfilesList = array();
+    foreach($userProfiles as $prof) {
+        $userProfilesList[$prof['id']] = $prof['id'];
+        $userProfilesList[$prof['profile_group_id']] = $prof['profile_group_id'];
+    }
 
     $isManager = $user['is_admin'];
     foreach ($managerProfiles as $upload) {
@@ -484,7 +500,7 @@ $app->get('/historial/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $r
     $profileGender = array();
 
     foreach($snapshots as $key => $snapshot) {
-        $snapshots[$key]['data'] = getDeliveriesFromFolders(array($folder), $profileGender, null, $key);
+        $snapshots[$key]['data'] = getDeliveriesFromFolders(array($folder), $isManager ? null : $userProfilesList, $profileGender, $user['id'], $key);
     }
 
     $folderProfiles = getProfilesByFolderId($folder['id']);
@@ -755,7 +771,7 @@ function getSnapshotsFromFolder($folderId) {
             find_many();
 }
 
-function getDeliveriesFromFolders($folders, &$profileGender, $userProfiles, $snapshot = null) {
+function getDeliveriesFromFolders($folders, $userProfiles, &$profileGender, $userId, $snapshot = null) {
 
     $return = array();
     foreach($folders as $folder) {
@@ -786,6 +802,14 @@ function getDeliveriesFromFolders($folders, &$profileGender, $userProfiles, $sna
                     order_by_asc('delivery.profile_id')->
                     order_by_asc('order_nr');
 
+            if (!is_null($userProfiles)) {
+                if ($folder['is_private_personal']) {
+                    $deliveries = $deliveries->where('revision.uploader_person_id', $userId);
+                } elseif ($folder['is_private_profile']) {
+                    $deliveries = $deliveries->
+                            where_in('delivery.profile_id', $userProfiles);
+                }
+            }
             if (is_null($snapshot)) {
                 $deliveries = $deliveries->where_null('folder_delivery.snapshot_id');
             }
@@ -814,13 +838,13 @@ function getDeliveriesFromFolders($folders, &$profileGender, $userProfiles, $sna
     return $return;
 }
 
-function getParsedDeliveriesByCategory($orgId, $catId, &$profileGender, $userProfiles, $filter = true) {
+function getParsedDeliveriesByCategory($orgId, $catId, $userProfiles, &$profileGender, $userId, $filter = true) {
 
     $folders = getFoldersByOrganization($orgId, $filter)->
                 where('category_id', $catId)->
                 find_array();
 
-    return getDeliveriesFromFolders($folders, $profileGender, $userProfiles);
+    return getDeliveriesFromFolders($folders, $userProfiles, $profileGender, $userId);
 }
 
 function getNextFolderObject($folder) {

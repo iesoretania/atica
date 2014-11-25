@@ -40,16 +40,16 @@
                     </select>
                 </div>
             </div>
-            {{ m.input_text('displayname', 10, 'Nombre de la carpeta', 'Nombre de la carpeta que se mostrará', folder['display_name']) }}
+            {{ m.input_text('displayname', 10, 'Nombre de la carpeta', 'Nombre de la carpeta que se mostrará', folder['display_name'], true, null, null, 'required') }}
             {{ m.input_textarea('description', 8, 'Más información', 'Descripción del contenido de la carpeta e instrucciones de uso', folder['description']) }}
-            {{ m.input_radio('visible', 'Visibilidad', '0', 'Carpeta oculta', '1', 'Carpeta visible', folder['is_visible']) }}
-            {{ m.input_radio('divided', 'Almacenar perfil en la entrega', '0', 'No', '1', 'Sí, las entregas se organizarán por perfiles', folder['is_divided']) }}
+            {{ m.input_radio('divided', 'Almacenar perfil en la entrega', '0', 'No', '1', 'Sí, las entregas se identificarán con el perfil de subida', folder['is_divided']) }}
             {{ m.input_radio('revisionnr', 'Mostrar nº de revisión', '0', 'No mostrarlo', '1', 'Sí, se mostrará en los listados el nº de revisión actual', folder['show_revision_nr']) }}
             {{ m.input_radio('autoclean', 'Al comenzar un nuevo curso', '0', 'Mantener el contenido', '1', 'Guardar un histórico y vaciar las entregas', folder['auto_clean']) }}
             {{ m.input_profiles('managers', 'Responsables', managers, allProfiles, 0) }}
             {{ m.input_profiles('uploaders', 'Pueden entregar', uploaders, allProfiles, 0) }}
             {{ m.input_radio('restrictedaccess', 'Acceso restringido', '0', 'No, todos pueden ver el contenido', '1', 'Sí, sólo algunos perfiles pueden ver el contenido', folder['is_restricted']) }}
             {{ m.input_profiles('restricted', 'Tienen acceso si está restringido', restricted, allProfiles, 0) }}
+            {{ m.input_radio_array('private', 'Los usuarios autorizados pueden ver', {'0': 'Todas las entregas', '1': 'Sólo sus entregas', '2': 'Sólo las entregas de sus perfiles'}, private) }}
             <button type="submit" name="savefolder" class="btn btn-success">{{ folder.new ? 'Crear carpeta' : 'Guardar cambios' }}</button>
             <a href="{{ flash['last_url'] }}" class="btn btn-info">Volver sin guardar los cambios</a>
         </form>
