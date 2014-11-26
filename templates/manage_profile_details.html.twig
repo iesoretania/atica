@@ -23,7 +23,7 @@
             <h1>Elemento del perfil "{{ profileGroup.display_name_neutral }}"</h1>
         </div>
         <div class="panel-body">
-            {{ m.input_text('displayname', '10', 'Nombre del elemento', 'Nombre con el que aparecerá en la plataforma', profile.display_name) }}
+            {{ m.input_text('displayname', '10', 'Nombre del elemento', 'Nombre con el que aparecerá en la plataforma', profile.display_name, true, null, null, 'required') }}
             {{ m.input_text('initials', '2', 'Iniciales', 'Hasta 5 letras', profile['initials'], true, 5) }}
             {{ m.input_radio('isactive', 'Está activo', '0', 'No aparecerá en los listados', '1', 'Aparecerá en la lista de perfiles disponibles', profile.is_active, true) }}
             {{ m.input_textarea('description', 5, 'Descripción', 'Detalles sobre el elemento', profile['description'], true) }}            

@@ -35,10 +35,10 @@ function switchChecks(e) {
             <h1>{{ new ? "Nuevo perfil" : "Detalles del perfil" }}</h1>
         </div>
         <div class="panel-body">
-            {{ m.input_text('displaynameneutral', '10', 'Nombre del perfil genérico', 'Nombre con el que aparecerá en la plataforma de forma genérica', profileGroup.display_name_neutral) }}
-            {{ m.input_text('displaynamemale', '10', 'Perfil masculino', 'Nombre con el que aparecerá en la plataforma para los hombres', profileGroup.display_name_male) }}
-            {{ m.input_text('displaynamefemale', '10', 'Perfil femenino', 'Nombre con el que aparecerá en la plataforma para las mujeres', profileGroup.display_name_female) }}
-            {{ m.input_text('abbreviation', '2', 'Abreviatura', 'Hasta 5 letras', profileGroup.abbreviation, true, 5) }}
+            {{ m.input_text('displaynameneutral', '10', 'Nombre del perfil genérico', 'Nombre con el que aparecerá en la plataforma de forma genérica', profileGroup.display_name_neutral, true, null, null, 'required') }}
+            {{ m.input_text('displaynamemale', '10', 'Perfil masculino', 'Nombre con el que aparecerá en la plataforma para los hombres', profileGroup.display_name_male, true, null, null, 'required') }}
+            {{ m.input_text('displaynamefemale', '10', 'Perfil femenino', 'Nombre con el que aparecerá en la plataforma para las mujeres', profileGroup.display_name_female, true, null, null, 'required') }}
+            {{ m.input_text('abbreviation', '2', 'Abreviatura', 'Hasta 5 letras', profileGroup.abbreviation, true, 5, null, 'required') }}
             {{ m.input_radio('iscontainer', 'Tiene subperfiles', '0', 'Es un perfil único', '1', 'Existen varios elementos dentro de este perfil', isContainer, (personCount==0)) }}
             {{ m.input_radio('ismanager', 'Es gestor del centro', '0', 'No', '1', 'Sí, puede administrar este centro', profileGroup.is_manager, true, 'danger') }}
             {{ m.input_textarea('description', 5, 'Descripción', 'Detalles sobre el perfil', profileGroup.description, true) }}

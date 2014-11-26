@@ -426,7 +426,7 @@ $app->map('/perfiles/:id(/:filter)', function ($id, $filter = 0) use ($app, $use
 
         // si no es contenedor, actualizar la lista de usuarios asociados
         if (!$isContainer) {
-            $ok = $ok && setProfilePersons($id, $_POST['persons']);
+            $ok = $ok && setProfilePersons($id, isset($_POST['persons']) ? $_POST['persons'] : array());
         }
 
         if ($ok) {
@@ -526,7 +526,7 @@ $app->map('/detalleperfil/:id(/:gid)', function ($id, $gid = null) use ($app, $u
 
         $ok = $profile->save();
 
-        $ok = $ok && setProfilePersons($profile['id'], $_POST['persons']);
+        $ok = $ok && setProfilePersons($profile['id'], isset($_POST['persons']) ? $_POST['persons'] : array());
 
         if ($ok) {
             $app->flash('save_ok', 'ok');
