@@ -44,7 +44,7 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
             }
         }
         else {
-            $userData = array( 'new' => true, 'is_active' => 1, 'gender' => 0 );
+            $userData = array( 'new' => true, 'is_active' => 1, 'gender' => 0, 'email_enabled' => 0 );
         }
     }
 

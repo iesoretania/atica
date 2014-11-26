@@ -34,13 +34,13 @@
 {% endif %}
         <form class="form-horizontal" role="form" method="post" action="{{ url }}">
             {% if user.is_admin %}
-            {{ m.input_text('username', '10', 'Nombre de usuario', 'Nombre de usuario para entrar en la plataforma', userData.user_name, edit) }}
+            {{ m.input_text('username', '10', 'Nombre de usuario', 'Nombre de usuario para entrar en la plataforma', userData.user_name, edit, null, null, 'required') }}
             {% endif %}
             {{ m.input_radio('active', 'Estado', '0', 'Usuario no activo', '1', 'Usuario activo', userData['is_active'], (user.is_admin and not local)) }}
-            {{ m.input_text('displayname', '10', 'Nombre visible', 'Nombre con el que aparecerá en la plataforma', userData.display_name, edit) }}
-            {{ m.input_text('firstname', '10', 'Nombre', 'Nombre completo sin abreviaturas', userData.first_name, edit) }}
-            {{ m.input_text('lastname', '10', 'Apellidos', 'Apellidos completos', userData.last_name, edit) }}
-            {{ m.input_text('initials', '5', 'Iniciales', 'Iniciales en mayúsculas sin espacios ni puntos', userData.initials, edit, 5) }}
+            {{ m.input_text('displayname', '10', 'Nombre visible', 'Nombre con el que aparecerá en la plataforma', userData.display_name, edit, null, null, 'required') }}
+            {{ m.input_text('firstname', '10', 'Nombre', 'Nombre completo sin abreviaturas', userData.first_name, edit, null, null, 'required') }}
+            {{ m.input_text('lastname', '10', 'Apellidos', 'Apellidos completos', userData.last_name, edit, null, null, 'required') }}
+            {{ m.input_text('initials', '5', 'Iniciales', 'Iniciales en mayúsculas sin espacios ni puntos', userData.initials, edit, 5, null, 'required') }}
             {{ m.input_radio('gender', 'Sexo', '1', 'Hombre', '2', 'Mujer', userData['gender'], edit) }}
             {% if edit %}
             {{ m.input_text('email', '6', 'Correo electrónico', 'Correo electrónico donde recibir las notificaciones', userData.email, edit) }}
