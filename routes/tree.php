@@ -313,8 +313,11 @@ $app->map('/elemento/:id/:profileid/(:actid)', function ($id, $profileid, $actid
         $ok = true;
         ORM::get_db()->beginTransaction();
         foreach($lines as $line) {
-            $item = explode("*", trim($line));
-            $ok = $ok && createEventItem($id, $_POST['profile'], $item[0], isset($item[1]) ? $item[1] : null);
+            $line = str_replace($line, '\r', '');
+            if ($line) {
+                $item = explode("*", trim($line));
+                $ok = $ok && createEventItem($id, $_POST['profile'], $item[0], isset($item[1]) ? $item[1] : null);
+            }
         }
         if ($ok) {
             $app->flash('save_ok', 'ok');
