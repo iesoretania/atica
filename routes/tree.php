@@ -805,7 +805,14 @@ function getDeliveriesFromFolders($folders, $userProfiles, &$profileGender, $use
                     order_by_asc('delivery.profile_id')->
                     order_by_asc('order_nr');
 
-            if (!is_null($userProfiles)) {
+            $isManager = false;
+
+            if (!is_null($userProfiles) && ($folder['is_private_personal'] || $folder['is_private_profile'])) {
+                $managerProfiles = array_keys(parseArray(getPermissionProfiles($folder['id'], 0)));
+                $isManager = count(array_intersect($managerProfiles, array_keys($userProfiles)));
+            }
+
+            if (!is_null($userProfiles) && !$isManager) {
                 if ($folder['is_private_personal']) {
                     $deliveries = $deliveries->where('revision.uploader_person_id', $userId);
                 } elseif ($folder['is_private_profile']) {
