@@ -71,6 +71,17 @@
                 {% endif %}
             </div>
             {% endif %}
+            {% if is_manager %}
+            <div class="form-group">
+                <label class="col-md-2 control-label" for="item">Elemento de entrega asociado</label>
+                <div class="col-md-10">
+                    <select class="form-control select" name="item">
+                        <option value="0" {{ (delivery['item_id'] is null) ? " selected" : "" }}>Ninguno</option>
+                        {% for elem in items %}<option value="{{ elem['id'] }}" {{ (delivery['item_id'] == elem['id']) ? " selected" : "" }}>{{ elem['display_name'] }}</option>{% endfor %}
+                    </select>
+                </div>
+            </div>
+            {% endif %}
             {{ m.input_text('displayname', 10, 'Nombre a mostrar', 'Nombre con el que se mostrará la entrega en los listados', delivery['display_name']) }}
             {{ m.input_textarea('description', 3, 'Descripción detallada', 'Notas adicionales sobre la entrega', delivery['description']) }}
         </div>

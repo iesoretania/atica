@@ -96,6 +96,9 @@ $app->map('/modificar/:folderid/:id(/:return(/:data1(/:data2(/:data3(/:data4))))
         if (isset($_POST['creation_year'])) {
             $delivery->set('creation_date', $_POST['creation_year'] . '-'. $_POST['creation_month'] . '-' . $_POST['creation_day'] . ' ' .$_POST['creation_hour'] . ':' . $_POST['creation_minute'] . ':00');
         }
+        if (isset($_POST['item'])) {
+            $delivery->set('item_id', ($_POST['item'] == 0) ? null : $_POST['item']);
+        }
         $delivery->save();
         $app->flash('save_ok', 'ok');
         $app->redirect($app->request()->getPathInfo());
