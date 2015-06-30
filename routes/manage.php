@@ -93,11 +93,16 @@ $app->map('/modificar/:folderid/:id(/:return(/:data1(/:data2(/:data3(/:data4))))
     if (isset($_POST['save'])) {
         $delivery->set('display_name', $_POST['displayname']);
         $delivery->set('description', strlen($_POST['description']) > 0 ? $_POST['description'] : null);
-        if (isset($_POST['creation_year'])) {
-            $delivery->set('creation_date', $_POST['creation_year'] . '-'. $_POST['creation_month'] . '-' . $_POST['creation_day'] . ' ' .$_POST['creation_hour'] . ':' . $_POST['creation_minute'] . ':00');
+        if ($isManager) {
+            if (isset($_POST['creation_year'])) {
+                $delivery->set('creation_date', $_POST['creation_year'] . '-'. $_POST['creation_month'] . '-' . $_POST['creation_day'] . ' ' .$_POST['creation_hour'] . ':' . $_POST['creation_minute'] . ':00');
+            }
         }
-        if (isset($_POST['item'])) {
+        if (isset($_POST['item']) && isset($items[$_POST['item']])) {
             $delivery->set('item_id', ($_POST['item'] == 0) ? null : $_POST['item']);
+        }
+        if (isset($_POST['profile']) && isset($uploadAs[$_POST['profile']])) {
+            $delivery->set('profile_id', ($_POST['profile'] == 0) ? null : $_POST['profile']);
         }
         $delivery->save();
         $app->flash('save_ok', 'ok');
