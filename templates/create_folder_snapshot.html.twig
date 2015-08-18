@@ -1,0 +1,123 @@
+{#  ATICA - Web application for supporting Quality Management Systems
+    Copyright (C) 2009-2015: Luis-Ramón López López
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
+
+{% extends "tree.html.twig" %}
+{% block scripts %}
+<script>
+function switchChecks(e) {
+    if (!$(e).prop('checked')) {
+        $('.check').removeAttr('checked');
+    }
+    else {
+        $('.check').prop('checked', 'checked');
+    }
+    console.log($(e).prop('checked'));
+    console.dir($(e));
+}
+</script>
+{% endblock %}
+{% block maincontent %}
+{% import "macros.twig" as m %}
+<div class="panel panel-info">
+    <div class="panel-heading">
+    <h1>Archivado de carpeta</h1>
+    </div>
+</div>
+<form class="form-horizontal" role="form" method="post" action="{{ url }}">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <strong>Instrucciones: </strong> Seleccione las entregas que serán archivadas y luego
+            elija el nombre con el que se identificarán en el histórico
+        </div>
+        <table class="table table-striped table-condensed table-hover">
+            <thead>
+                <tr>
+                    <th class="col-md-12"><input type="checkbox" class="showjs-inline" onChange="switchChecks(this);" checked="checked">
+                        Documento</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td><input type="checkbox" class="check" name="item[]" value="{{ item['id'] }}" checked="checked">
+                        {{ item['display_name'] }}
+                    </td>
+                </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="1">
+                            <h3>No hay entregas pendientes de archivo</h3>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if not items %}
+            <div class="panel-footer">
+                <a class="btn btn-info" href="{{ urlFor('tree') }}">Volver sin realizar cambios</a>
+            </div>
+        {% endif %}
+    </div>
+    {% if items %}
+        {% if snapshots %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1>Archivar en curso ya existente</h1>
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="snapshot">Seleccione curso académico</label>
+                        <div class="col-md-10">
+                            <select class="form-control select" name="snapshot">
+                                {% for snapshot in snapshots %}
+                                    <option value="{{ snapshot['id'] }}" {{ loop.first ? " selected" : "" }}>
+                                        {{ snapshot['display_name'] }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer hidden-print">
+                    <p><strong>Advertencia: </strong>La operación no se puede deshacer. Se borrarán las marcas de actividades
+                        completadas relacionadas con esta carpeta de todos los usuarios. Los documentos archivados
+                        seguirán estando disponibles al pulsar sobre el botón del reloj.</p>
+                    <button type="submit" name="archive_old" class="btn btn-success">Archivar las entregas
+                        seleccionadas en el curso indicado</button>
+                    &nbsp;<a class="btn btn-info" href="{{ urlFor('tree') }}">Volver sin realizar cambios</a>
+                </div>
+            </div>
+        {% endif %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h1>Archivar en un nuevo curso</h1>
+            </div>
+            <div class="panel-body">
+                {{ m.input_text('displayname', 10, 'Nombre del archivo', 'Nombre con el que se archivarán los documentos',
+                '') }}
+            </div>
+            <div class="panel-footer hidden-print">
+                <p><strong>Advertencia: </strong>La operación no se puede deshacer. Se borrarán las marcas de actividades
+                    completadas relacionadas con esta carpeta de todos los usuarios. Los documentos archivados
+                    seguirán estando disponibles al pulsar sobre el botón del reloj.</p>
+                <button type="submit" name="archive" class="btn btn-success">Archivar las carpetas
+                    seleccionadas en un nuevo curso</button>
+                &nbsp;<a class="btn btn-info" href="{{ urlFor('tree') }}">Volver sin realizar cambios</a>
+            </div>
+        </div>
+    {% endif %}
+</form>
+{% endblock %}

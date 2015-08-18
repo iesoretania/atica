@@ -28,8 +28,9 @@
         {% set top_buttons = true %}
         {% set no_manager = true %}
         {% set no_upload = true %}
+        {% set no_buttons = true %}
         {% if data %}
-        {% include 'folder.html.twig' %}
+            {% include 'folder.html.twig' %}
         {% endif %}
         <div class="panel-footer">
             <a class="btn btn-info" href="{{ last_url }}">Volver</a>

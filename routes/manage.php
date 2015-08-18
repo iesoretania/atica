@@ -346,7 +346,7 @@ $app->map('/revision/:folderid/:id', function ($folderId, $id) use ($app, $user,
 
 })->name('revision')->via('GET', 'POST');
 
-$app->map('/archivo/crear', function () use ($app, $user, $config, $organization, $preferences) {
+$app->map('/archivo/masivo', function () use ($app, $user, $config, $organization, $preferences) {
 
     if ((!$user) || (!$user['is_admin'])) {
         $app->redirect($app->urlFor('login'));
@@ -417,6 +417,97 @@ $app->map('/archivo/crear', function () use ($app, $user, $config, $organization
     ));
 
 })->name('addsnapshot')->via('GET', 'POST');
+
+$app->map('/archivo/carpeta/:id(/:return(/:data1(/:data2(/:data3(/:data4)))))', function ($id, $return = null, $data1 = null, $data2 = null, $data3 = null, $data4 = null) use ($app, $user, $config, $organization, $preferences) {
+
+    if ((!$user) || (!$user['is_admin'])) {
+        $app->redirect($app->urlFor('login'));
+    }
+
+    switch ($return) {
+        case 0:
+            $lastUrl = $app->urlFor('tree', array('id' => $data1));
+            break;
+
+        case 1:
+            $lastUrl = $app->urlFor('event', array('pid' => $data1, 'aid' => $data2, 'id' => $data3));
+            break;
+
+        case 2:
+            $lastUrl = $app->urlFor('upload', array('id' => $id, 'return' => $data1, 'data1' => $data2, 'data2' => $data3, 'data3' => $data4));
+            break;
+
+        default:
+            $lastUrl = $app->urlFor('frontpage');
+    }
+
+    if ((isset($_POST['archive']) && isset($_POST['displayname']) && strlen($_POST['displayname'])) ||
+        (isset($_POST['archive_old']) && isset($_POST['snapshot']))) {
+
+        // realizar los cambios en una transacción
+        ORM::get_db()->beginTransaction();
+
+        if (isset($_POST['archive'])) {
+            // crear snapshot
+            $snapshot = ORM::for_table('snapshot')->create();
+            $snapshot->set('organization_id', $organization['id']);
+            $snapshot->set('display_name', $_POST['displayname']);
+            $snapshot->set('order_nr', getLastSnapshotOrder($organization['id']) + 1000);
+            $ok = $snapshot->save();
+        }
+        else {
+            // recuperar snapshot
+            $snapshot = ORM::for_table('snapshot')->
+            where('organization_id',  $organization['id'])->
+            where('id', $_POST['snapshot'])->
+            find_one();
+
+            if (!$snapshot) {
+                $app->redirect($app->urlFor('login'));
+            }
+
+            $ok = true;
+        }
+
+        // archivar carpetas
+        $ok = $ok && archiveDeliveriesFromFolder($organization['id'], $snapshot['id'], $id, $_POST['item']);
+
+        // borrar eventos completados
+        $ok = $ok && deleteCompletedEventsForFolder($organization['id'], $id);
+
+        if ($ok) {
+            $app->flash('save_ok', 'ok');
+            ORM::get_db()->commit();
+
+            $app->redirect($lastUrl);
+        }
+        else {
+            $app->flash('save_error', 'ok');
+            ORM::get_db()->rollback();
+        }
+    }
+
+    $items = getDeliveriesFromFolderNotInSnapshot($organization['id'], $id);
+    $snapshots = getSnapshots($organization['id']);
+
+    // generar barra de navegación
+    $breadcrumb = array(
+        array('display_name' => 'Archivos'),
+        array('display_name' => 'Archivado de una carpeta')
+    );
+
+
+    // lanzar plantilla
+    $app->render('create_folder_snapshot.html.twig', array(
+        'select2' => true,
+        'navigation' => $breadcrumb,
+        'snapshots' => $snapshots,
+        'items' => $items,
+        'last_url' => $lastUrl,
+        'url' => $app->request()->getPathInfo()
+    ));
+
+})->name('addfoldersnapshot')->via('GET', 'POST');
 
 function getDeliveryUploadersById($deliveryId) {
     return parseArray(ORM::for_table('person')->
@@ -570,6 +661,59 @@ function archiveFolders($orgId, $snapId, $folders) {
     return $ok;
 }
 
+function archiveDeliveriesFromFolder($orgId, $snapId, $folderId, $deliveries) {
+
+    $ok = ORM::for_table('folder')->
+        select('folder.*')->
+        inner_join('category', array('category.id', '=', 'category_id'))->
+        where('folder.id', $folderId)->
+        where('category.organization_id', $orgId)->
+        find_result_set()->
+        set('has_snapshot', 1)->
+        save();
+
+    $ok = $ok && ORM::for_table('delivery')->
+        inner_join('folder_delivery', array('delivery.id', '=', 'delivery_id'))->
+        where('folder_delivery.folder_id', $folderId)->
+        where_null('snapshot_id')->
+        where_in('delivery.id', $deliveries)->
+        find_result_set()->
+        set('item_id', null)->
+        save();
+
+    $ok = $ok && ORM::for_table('folder_delivery')->
+        use_id_column(array('folder_id', 'delivery_id'))->
+        where('folder_id', $folderId)->
+        where_in('delivery_id', $deliveries)->
+        where_null('snapshot_id')->
+        find_result_set()->
+        set('snapshot_id', $snapId)->
+        save();
+
+    return $ok;
+}
+
+function deleteCompletedEventsForFolder($orgId, $folderId) {
+    $events = ORM::for_table('event')->
+        select('event.id')->
+        where('event.organization_id', $orgId)->
+        where('event.folder_id', $folderId)->
+        find_array();
+
+    $events = array_column($events, 'id');
+
+    if (count($events) > 0) {
+        $ok = ORM::for_table('completed_event')->
+        where_in('event_id', $events)->
+        delete_many();
+    }
+    else {
+        $ok = true;
+    }
+
+    return $ok;
+}
+
 function deleteAllCompletedEvents($orgId) {
     $events = ORM::for_table('event')->
         select('event.id')->
@@ -578,13 +722,30 @@ function deleteAllCompletedEvents($orgId) {
 
     $events = array_column($events, 'id');
 
-    $ok = ORM::for_table('completed_event')->
+    if (count($events) > 0) {
+        $ok = ORM::for_table('completed_event')->
         where_in('event_id', $events)->
         delete_many();
+    }
+    else {
+        $ok = true;
+    }
 
     return $ok;
 }
 
 function getSnapshots($orgId) {
     return ORM::for_table('snapshot')->where('organization_id', $orgId)->order_by_desc('order_nr')->find_array();
+}
+
+function getDeliveriesFromFolderNotInSnapshot($orgId, $folderId) {
+    return ORM::for_table('delivery')->
+        select('delivery.*')->
+        inner_join('folder_delivery', array('delivery.id', '=', 'delivery_id'))->
+        inner_join('folder', array('folder.id', '=', 'folder_delivery.folder_id'))->
+        inner_join('category', array('folder.category_id', '=', 'category.id'))->
+        where('category.organization_id', $orgId)->
+        where('folder_delivery.folder_id', $folderId)->
+        where_null('snapshot_id')->
+        find_array();
 }

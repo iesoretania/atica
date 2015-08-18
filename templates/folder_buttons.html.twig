@@ -1,5 +1,9 @@
 {% if buttons %}
 <form class="form-inline" role="form">
     {% if user['is_admin'] or (not no_upload and (info['upload_permission'] or info['manage_permission'])) %} <a class="btn btn-info" href="{{ urlFor('upload', { 'id': folder.id, 'return': backurl['return'], 'data1': backurl['data1'], 'data2': backurl['data2'], 'data3': backurl['data3'] }) }}">Subir nuevo documento</a>{% endif %}
+    {% if user['is_admin'] and folder.data %} <a class="btn btn-warning" href="{{ urlFor('addfoldersnapshot', { 'id':
+        folder.id,
+        'return': backurl['return'], 'data1': backurl['data1'], 'data2': backurl['data2'], 'data3': backurl['data3'] }) }}">Archivar contenido</a>{%
+    endif %}
 </form>
 {% endif %}
