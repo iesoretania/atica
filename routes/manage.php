@@ -346,6 +346,60 @@ $app->map('/revision/:folderid/:id', function ($folderId, $id) use ($app, $user,
 
 })->name('revision')->via('GET', 'POST');
 
+$app->map('/archivo/crear', function () use ($app, $user, $config, $organization, $preferences) {
+
+    if ((!$user) || (!$user['is_admin'])) {
+        $app->redirect($app->urlFor('login'));
+    }
+
+    if (isset($_POST['archive'])) {
+
+        // realizar los cambios en una transacción
+        ORM::get_db()->beginTransaction();
+
+        // crear snapshot
+        $snapshot = ORM::for_table('snapshot')->create();
+        $snapshot->set('organization_id', $organization['id']);
+        $snapshot->set('display_name', $_POST['displayname']);
+        $snapshot->set('order_nr', getLastSnapshotOrder($organization['id']) + 1000);
+        $ok = $snapshot->save();
+
+        // archivar carpetas
+        $ok = $ok && archiveFolders($organization['id'], $snapshot['id'], $_POST['item']);
+
+        // borrar eventos completados
+        $ok = $ok && deleteAllCompletedEvents($organization['id']);
+
+        if ($ok) {
+            $app->flash('save_ok', 'delete');
+            ORM::get_db()->commit();
+
+            $app->redirect($app->urlFor('tree'));
+        }
+        else {
+            $app->flash('save_error', 'delete');
+            ORM::get_db()->rollback();
+        }
+    }
+
+    $items = getAutoCleaningFolders($organization['id']);
+
+    // generar barra de navegación
+    $breadcrumb = array(
+        array('display_name' => 'Archivos'),
+        array('display_name' => 'Archivado masivo de carpetas')
+    );
+
+        // lanzar plantilla
+    $app->render('create_snapshot.html.twig', array(
+        'select2' => true,
+        'navigation' => $breadcrumb,
+        'items' => $items,
+        'url' => $app->request()->getPathInfo()
+    ));
+
+})->name('addsnapshot')->via('GET', 'POST');
+
 function getDeliveryUploadersById($deliveryId) {
     return parseArray(ORM::for_table('person')->
         select('person.*')->
@@ -443,4 +497,63 @@ function getRevisionNrArrayByDelivery($delId, $limit, $currentNr) {
         $nrs[] = $nr['revision_nr'];
     }
     return array_diff($data, $nrs);
+}
+
+function getLastSnapshotOrder($orgId) {
+    return ORM::for_table('snapshot')->
+        where('organization_id', $orgId)->
+        max('order_nr');
+}
+
+function getAutoCleaningFolders($orgId) {
+    $data = ORM::for_table('folder_delivery')->
+        select('folder.*')->
+        select('category.display_name', 'category_display_name')->
+        select_expr('COUNT(*)', 'total')->
+        inner_join('folder', array('folder_delivery.folder_id', '=', 'folder.id'))->
+        inner_join('category', array('folder.category_id', '=', 'category.id'))->
+        where('category.organization_id', $orgId)->
+        where('folder.auto_clean', 1)->
+        where_null('folder_delivery.snapshot_id')->
+        group_by('folder_delivery.folder_id')->
+        order_by_asc('folder.category_id')->
+        find_array();
+
+    return $data;
+}
+
+function archiveFolders($orgId, $snapId, $folders) {
+
+    $ok = ORM::for_table('folder')->
+        inner_join('category', array('category.id', '=', 'category_id'))->
+        where_in('folder.id', $folders)->
+        where('category.organization_id', $orgId)->
+        find_result_set()->
+        set('has_snapshot', 1)->
+        save();
+
+    $ok = $ok && ORM::for_table('folder_delivery')->
+        use_id_column(array('folder_id', 'delivery_id'))->
+        where_in('folder_id', $folders)->
+        where_null('snapshot_id')->
+        find_result_set()->
+        set('snapshot_id', $snapId)->
+        save();
+
+    return $ok;
+}
+
+function deleteAllCompletedEvents($orgId) {
+    $events = ORM::for_table('event')->
+        select('event.id')->
+        where('event.organization_id', $orgId)->
+        find_array();
+
+    $events = array_column($events, 'id');
+
+    $ok = ORM::for_table('completed_event')->
+        where_in('event_id', $events)->
+        delete_many();
+
+    return $ok;
 }
