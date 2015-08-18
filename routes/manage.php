@@ -352,17 +352,33 @@ $app->map('/archivo/crear', function () use ($app, $user, $config, $organization
         $app->redirect($app->urlFor('login'));
     }
 
-    if (isset($_POST['archive'])) {
+    if ((isset($_POST['archive']) && isset($_POST['displayname']) && strlen($_POST['displayname'])) ||
+        (isset($_POST['archive_old']) && isset($_POST['snapshot']))) {
 
         // realizar los cambios en una transacción
         ORM::get_db()->beginTransaction();
 
-        // crear snapshot
-        $snapshot = ORM::for_table('snapshot')->create();
-        $snapshot->set('organization_id', $organization['id']);
-        $snapshot->set('display_name', $_POST['displayname']);
-        $snapshot->set('order_nr', getLastSnapshotOrder($organization['id']) + 1000);
-        $ok = $snapshot->save();
+        if (isset($_POST['archive'])) {
+            // crear snapshot
+            $snapshot = ORM::for_table('snapshot')->create();
+            $snapshot->set('organization_id', $organization['id']);
+            $snapshot->set('display_name', $_POST['displayname']);
+            $snapshot->set('order_nr', getLastSnapshotOrder($organization['id']) + 1000);
+            $ok = $snapshot->save();
+        }
+        else {
+            // recuperar snapshot
+            $snapshot = ORM::for_table('snapshot')->
+                where('organization_id',  $organization['id'])->
+                where('id', $_POST['snapshot'])->
+                find_one();
+
+            if (!$snapshot) {
+                $app->redirect($app->urlFor('login'));
+            }
+
+            $ok = true;
+        }
 
         // archivar carpetas
         $ok = $ok && archiveFolders($organization['id'], $snapshot['id'], $_POST['item']);
@@ -383,6 +399,7 @@ $app->map('/archivo/crear', function () use ($app, $user, $config, $organization
     }
 
     $items = getAutoCleaningFolders($organization['id']);
+    $snapshots = getSnapshots($organization['id']);
 
     // generar barra de navegación
     $breadcrumb = array(
@@ -394,6 +411,7 @@ $app->map('/archivo/crear', function () use ($app, $user, $config, $organization
     $app->render('create_snapshot.html.twig', array(
         'select2' => true,
         'navigation' => $breadcrumb,
+        'snapshots' => $snapshots,
         'items' => $items,
         'url' => $app->request()->getPathInfo()
     ));
@@ -565,4 +583,8 @@ function deleteAllCompletedEvents($orgId) {
         delete_many();
 
     return $ok;
+}
+
+function getSnapshots($orgId) {
+    return ORM::for_table('snapshot')->where('organization_id', $orgId)->order_by_desc('order_nr')->find_array();
 }

@@ -77,19 +77,59 @@ function switchChecks(e) {
                 {% endfor %}
             </tbody>
         </table>
+        {% if not items %}
+            <div class="panel-footer">
+                <a class="btn btn-info" href="{{ urlFor('tree') }}">Volver sin realizar cambios</a>
+            </div>
+        {% endif %}
     </div>
-    <div class="panel panel-default">
-        <div class="panel-body">
-            {{ m.input_text('displayname', 10, 'Nombre del archivo', 'Nombre con el que se archivarán los documentos',
-            '', true, null, '', 'required') }}
+    {% if items %}
+        {% if snapshots %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1>Archivar en curso ya existente</h1>
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="snapshot">Seleccione curso académico</label>
+                        <div class="col-md-10">
+                            <select class="form-control select" name="snapshot">
+                                {% for snapshot in snapshots %}
+                                    <option value="{{ snapshot['id'] }}" {{ loop.first ? " selected" : "" }}>
+                                        {{ snapshot['display_name'] }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer hidden-print">
+                    <p><strong>Advertencia: </strong>La operación no se puede deshacer. Se borrarán las marcas de actividades
+                        completadas de todos los usuarios. Los documentos archivados seguirán estando disponibles al pulsar
+                        sobre el botón del reloj de cada una de las carpetas afectadas.</p>
+                    <button type="submit" name="archive_old" class="btn btn-success">Archivar las carpetas
+                        seleccionadas en el curso indicado</button>
+                    &nbsp;<a class="btn btn-info" href="{{ urlFor('tree') }}">Volver sin realizar cambios</a>
+                </div>
+            </div>
+        {% endif %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h1>Archivar en un nuevo curso</h1>
+            </div>
+            <div class="panel-body">
+                {{ m.input_text('displayname', 10, 'Nombre del archivo', 'Nombre con el que se archivarán los documentos',
+                '') }}
+            </div>
+            <div class="panel-footer hidden-print">
+                <p><strong>Advertencia: </strong>La operación no se puede deshacer. Se borrarán las marcas de actividades
+                    completadas de todos los usuarios. Los documentos archivados seguirán estando disponibles al pulsar
+                    sobre el botón del reloj de cada una de las carpetas afectadas.</p>
+                <button type="submit" name="archive" class="btn btn-success">Archivar las carpetas
+                    seleccionadas en un nuevo curso</button>
+                &nbsp;<a class="btn btn-info" href="{{ urlFor('tree') }}">Volver sin realizar cambios</a>
+            </div>
         </div>
-        <div class="panel-footer hidden-print">
-            <p><strong>Advertencia: </strong>La operación no se puede deshacer. Se borrarán las marcas de actividades
-                completadas de todos los usuarios. Los documentos archivados seguirán estando disponibles al pulsar
-                sobre el botón del reloj de cada una de las carpetas afectadas.</p>
-            <button type="submit" name="archive" class="btn btn-success">Archivar las carpetas
-                seleccionadas</button>
-        </div>
-    </div>
+    {% endif %}
 </form>
 {% endblock %}
