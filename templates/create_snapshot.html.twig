@@ -39,12 +39,8 @@ function switchChecks(e) {
 <form class="form-horizontal" role="form" method="post" action="{{ url }}">
     <div class="panel panel-default">
         <div class="panel-heading">
-            <strong>Instrucciones: </strong> Elija el nombre con el que se identificarán los documentos archivados
-            y seleccione las carpetas que serán archivadas de forma automática
-        </div>
-        <div class="panel-body">
-            {{ m.input_text('displayname', 10, 'Nombre del archivo', 'Nombre con el que se archivarán los documentos',
-            '', true, null, '', 'required') }}
+            <strong>Instrucciones: </strong> Seleccione las carpetas que serán archivadas de forma automática y luego
+            elija el nombre con el que se identificarán en el histórico
         </div>
         <table class="table table-striped table-condensed table-hover">
             <thead>
@@ -71,10 +67,22 @@ function switchChecks(e) {
                     <td>
                         {{ item['total'] }}
                     </td>
+                </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4">
+                            <h3>No hay carpetas pendientes de archivo</h3>
+                        </td>
+                    </tr>
                 {% endfor %}
             </tbody>
         </table>
-
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            {{ m.input_text('displayname', 10, 'Nombre del archivo', 'Nombre con el que se archivarán los documentos',
+            '', true, null, '', 'required') }}
+        </div>
         <div class="panel-footer hidden-print">
             <p><strong>Advertencia: </strong>La operación no se puede deshacer. Se borrarán las marcas de actividades
                 completadas de todos los usuarios. Los documentos archivados seguirán estando disponibles al pulsar
