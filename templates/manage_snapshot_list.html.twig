@@ -47,8 +47,8 @@ function switchChecks(e) {
                 {% for snapshot in snapshots %}
                 <tr>
                     <td><input type="checkbox" class="check" name="snapshot[]" value="{{ snapshot['id'] }}">
-                        <a href="">
-                        {{ snapshot['display_name'] }}</a>&nbsp;&nbsp;<a class="delivery-tools hidden-print" title="Modificar archivo" href=""><span class="icon-pencil"></span></a>
+                        <a href="{{ urlFor('managesnapshot', {'id': snapshot['id']}) }}">
+                        {{ snapshot['display_name'] }}</a>&nbsp;&nbsp;<a class="delivery-tools hidden-print" title="Modificar archivo" href="{{ urlFor('managesnapshot', {'id': snapshot['id']}) }}"><span class="icon-pencil"></span></a>
                         {% if not loop.first %}<button type="submit" name="up" class="btn btn-link delivery-tools hidden-print" value="{{ snapshot['id'] }}"><span class="icon-arrow-up"></span></button>{% endif %}
                         {% if not loop.last %}<button type="submit" name="down" class="btn btn-link delivery-tools hidden-print" value="{{ snapshot['id'] }}"><span class="icon-arrow-down"></span></button>{% endif %}
                     </td>
@@ -64,7 +64,7 @@ function switchChecks(e) {
             <button type="submit" name="delete" class="btn btn-danger" onClick="javascript:return confirm('La ' +
              'operación de borrado no se puede deshacer. Todos los documentos archivados se perderán para siempre. ' +
               '¿Desea continuar?');
-             ">Eliminar archivos</button>
+             ">Eliminar archivos y documentos asociados</button>
         </div>
     </form>
 </div>

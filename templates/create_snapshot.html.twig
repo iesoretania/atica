@@ -107,7 +107,7 @@ function switchChecks(e) {
                     <p><strong>Advertencia: </strong>La operación no se puede deshacer. Se borrarán las marcas de actividades
                         completadas de todos los usuarios. Los documentos archivados seguirán estando disponibles al pulsar
                         sobre el botón del reloj de cada una de las carpetas afectadas.</p>
-                    <button type="submit" name="archive_old" class="btn btn-success" onClick="javascript:return confirm('La operación no se puede deshacer. ¿Desea continuar?');">Archivar las carpetas
+                    <button type="submit" name="archive_old" class="btn btn-success" onClick="javascript:return confirm('Se añadirán los documentos al archivo seleccionado. La operación no se puede deshacer. ¿Desea continuar?');">Archivar las carpetas
                         seleccionadas en el curso indicado</button>
                     &nbsp;<a class="btn btn-info" href="{{ urlFor('tree') }}">Volver sin realizar cambios</a>
                 </div>
@@ -119,13 +119,13 @@ function switchChecks(e) {
             </div>
             <div class="panel-body">
                 {{ m.input_text('displayname', 10, 'Nombre del archivo', 'Nombre con el que se archivarán los documentos',
-                '') }}
+                '', true, null, null, 'onInput="javascript:$(\'#archive\').prop(\'disabled\',(this.value.length==0));"') }}
             </div>
             <div class="panel-footer hidden-print">
                 <p><strong>Advertencia: </strong>La operación no se puede deshacer. Se borrarán las marcas de actividades
                     completadas de todos los usuarios. Los documentos archivados seguirán estando disponibles al pulsar
                     sobre el botón del reloj de cada una de las carpetas afectadas.</p>
-                <button type="submit" name="archive" class="btn btn-success" onClick="javascript:return confirm('La operación no se puede deshacer. ¿Desea continuar?');">Archivar las carpetas
+                <button type="submit" id="archive" name="archive" class="btn btn-success" onClick="javascript:return confirm('Se creará un nuevo archivo. La operación no se puede deshacer. ¿Desea continuar?');">Archivar las carpetas
                     seleccionadas en un nuevo curso</button>
                 &nbsp;<a class="btn btn-info" href="{{ urlFor('tree') }}">Volver sin realizar cambios</a>
             </div>

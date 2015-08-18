@@ -567,6 +567,44 @@ $app->map('/archivo/listar', function () use ($app, $user, $config, $organizatio
     ));
 })->name('managesnapshots')->via('GET', 'POST');
 
+$app->map('/archivo/:id', function ($id) use ($app, $user, $config, $organization, $preferences) {
+    if ((!$user) || (!$user['is_admin'])) {
+        $app->redirect($app->urlFor('login'));
+    }
+
+    $snapshot = getSnapshotById($organization['id'], $id);
+
+    if (isset($_POST['save'])) {
+
+        $snapshot->set('display_name', $_POST['displayname']);
+
+        $ok = $snapshot->save();
+
+        if ($ok) {
+            $app->flash('save_ok', 'ok');
+            $app->redirect($app->urlFor('managesnapshots'));
+        }
+        else {
+            $app->flash('save_error', 'ok');
+        }
+    }
+
+    // generar barra de navegación
+    $breadcrumb = array(
+        array('display_name' => 'Archivos'),
+        array('display_name' => 'Listado de archivos', 'target' => $app->urlFor('managesnapshots')),
+        array('display_name' => $snapshot['display_name'])
+    );
+
+    // lanzar plantilla
+    $app->render('manage_snapshot.html.twig', array(
+        'select2' => true,
+        'navigation' => $breadcrumb,
+        'snapshot' => $snapshot,
+        'url' => $app->request()->getPathInfo()
+    ));
+})->name('managesnapshot')->via('GET', 'POST');
+
 function getDeliveryUploadersById($deliveryId) {
     return parseArray(ORM::for_table('person')->
         select('person.*')->

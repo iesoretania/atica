@@ -1,0 +1,33 @@
+{#  ATICA - Web application for supporting Quality Management Systems
+    Copyright (C) 2009-2015: Luis-Ramón López López
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
+
+{% extends "layout.html.twig" %}
+{% block maincontent %}
+{% import 'macros.twig' as m %}
+<form class="form-horizontal" role="form" method="post" action="{{ url }}">
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h1>Archivo: {{ snapshot.display_name }}</h1>
+        </div>
+        <div class="panel-body">
+            {{ m.input_text('displayname', '10', 'Nombre del archivo', 'Nombre con el que aparecerá en la plataforma', snapshot.display_name, true, null, null, 'required') }}
+
+            <button type="submit" name="save" class="btn btn-success">Guardar cambios</button>
+            <a class="btn btn-info" href="{{ urlFor('managesnapshots') }}">Volver sin realizar cambios</a>
+        </div>
+    </div>
+</form>
+{% endblock %}
