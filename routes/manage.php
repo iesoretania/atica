@@ -489,11 +489,13 @@ $app->map('/archivo/carpeta/:id(/:return(/:data1(/:data2(/:data3(/:data4)))))', 
 
     $items = getDeliveriesFromFolderNotInSnapshot($organization['id'], $id);
     $snapshots = getSnapshots($organization['id']);
+    $folder = getFolderById($id);
 
     // generar barra de navegación
     $breadcrumb = array(
         array('display_name' => 'Archivos'),
-        array('display_name' => 'Archivado de una carpeta')
+        array('display_name' => 'Archivado de una carpeta'),
+        array('display_name' => $folder['display_name'])
     );
 
 
@@ -503,6 +505,7 @@ $app->map('/archivo/carpeta/:id(/:return(/:data1(/:data2(/:data3(/:data4)))))', 
         'navigation' => $breadcrumb,
         'snapshots' => $snapshots,
         'items' => $items,
+        'folder' => $folder,
         'last_url' => $lastUrl,
         'url' => $app->request()->getPathInfo()
     ));
@@ -536,6 +539,13 @@ function getRevisionById($revisionId) {
 function getDocumentById($documentId) {
     $data = ORM::for_table('document')->
             find_one($documentId);
+
+    return $data;
+}
+
+function getFolderById($folderId) {
+    $data = ORM::for_table('folder')->
+    find_one($folderId);
 
     return $data;
 }

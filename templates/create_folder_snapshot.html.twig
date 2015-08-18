@@ -33,7 +33,7 @@ function switchChecks(e) {
 {% import "macros.twig" as m %}
 <div class="panel panel-info">
     <div class="panel-heading">
-    <h1>Archivado de carpeta</h1>
+    <h1>Archivado de carpeta: {{ folder['display_name'] }}</h1>
     </div>
 </div>
 <form class="form-horizontal" role="form" method="post" action="{{ url }}">
