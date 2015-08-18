@@ -38,8 +38,10 @@
                             <ul class="dropdown-menu" role="menu" aria-labelledby="usermenu">
                                 <li role="presentation"><a href="{{ urlFor('personal', {'id': user['id'], 'section': 0 }) }}">Datos personales</a></li>
                                 {% if user['is_admin'] %}
+                                    <li role="presentation" class="divider"></li>
                                     <li role="presentation"><a href="{{ urlFor('personlist') }}">Gestionar usuarios y perfiles</a></li>
-                                    <li role="presentation"><a href="{{ urlFor('addsnapshot') }}">Archivado masivo de carpetas</a></li>
+                                    <li role="presentation"><a href="{{ urlFor('managesnapshots') }}">Gestionar
+                                            cursos archivados</a></li>
                                 {% endif %}
                                 <li role="presentation" class="divider"></li>
                                 <li role="presentation"><a href="{{ urlFor('logout') }}">Salir</a></li>

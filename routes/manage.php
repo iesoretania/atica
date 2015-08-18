@@ -498,7 +498,6 @@ $app->map('/archivo/carpeta/:id(/:return(/:data1(/:data2(/:data3(/:data4)))))', 
         array('display_name' => $folder['display_name'])
     );
 
-
     // lanzar plantilla
     $app->render('create_folder_snapshot.html.twig', array(
         'select2' => true,
@@ -511,6 +510,62 @@ $app->map('/archivo/carpeta/:id(/:return(/:data1(/:data2(/:data3(/:data4)))))', 
     ));
 
 })->name('addfoldersnapshot')->via('GET', 'POST');
+
+$app->map('/archivo/listar', function () use ($app, $user, $config, $organization, $preferences) {
+    if ((!$user) || (!$user['is_admin'])) {
+        $app->redirect($app->urlFor('login'));
+    }
+
+    if (isset($_POST['up']) || isset($_POST['down'])) {
+        if (isset($_POST['up'])) {
+            $snap1 = getSnapshotById($organization['id'], $_POST['up']);
+            $snap2 = getNextSnapshot($organization['id'], $_POST['up']);
+        }
+        else {
+            $snap1 = getSnapshotById($organization['id'], $_POST['down']);
+            $snap2 = getPreviousSnapshot($organization['id'], $_POST['down']);
+        }
+        if (!$snap1 || !$snap2) {
+            $app->redirect($app->urlFor('login'));
+        }
+        $order_nr = $snap1['order_nr'];
+        $snap1->set('order_nr', $snap2['order_nr'])->save();
+        $snap2->set('order_nr', $order_nr)->save();
+    }
+
+    if (isset($_POST['delete'])) {
+
+        // realizar los cambios en una transacción
+        ORM::get_db()->beginTransaction();
+
+        $ok = deleteSnapshots($organization['id'], $_POST['snapshot']);
+
+        if ($ok) {
+            $app->flash('save_ok', 'delete');
+            ORM::get_db()->commit();
+        }
+        else {
+            $app->flash('save_error', 'delete');
+            ORM::get_db()->rollback();
+        }
+    }
+
+    $snapshots = getSnapshots($organization['id']);
+
+    // generar barra de navegación
+    $breadcrumb = array(
+        array('display_name' => 'Archivos'),
+        array('display_name' => 'Listado de archivos')
+    );
+
+    // lanzar plantilla
+    $app->render('manage_snapshot_list.html.twig', array(
+        'select2' => true,
+        'navigation' => $breadcrumb,
+        'snapshots' => $snapshots,
+        'url' => $app->request()->getPathInfo()
+    ));
+})->name('managesnapshots')->via('GET', 'POST');
 
 function getDeliveryUploadersById($deliveryId) {
     return parseArray(ORM::for_table('person')->
@@ -745,7 +800,15 @@ function deleteAllCompletedEvents($orgId) {
 }
 
 function getSnapshots($orgId) {
-    return ORM::for_table('snapshot')->where('organization_id', $orgId)->order_by_desc('order_nr')->find_array();
+    return ORM::for_table('folder_delivery')->
+        select('snapshot.*')->
+        select_expr('COUNT(*)', 'total')->
+        inner_join('snapshot', array('snapshot.id', '=', 'snapshot_id'))->
+        where('snapshot.organization_id', $orgId)->
+        having_not_null('snapshot_id')->
+        order_by_desc('order_nr')->
+        group_by('snapshot_id')->
+        find_array();
 }
 
 function getDeliveriesFromFolderNotInSnapshot($orgId, $folderId) {
@@ -758,4 +821,38 @@ function getDeliveriesFromFolderNotInSnapshot($orgId, $folderId) {
         where('folder_delivery.folder_id', $folderId)->
         where_null('snapshot_id')->
         find_array();
+}
+
+function getSnapshotById($orgId, $snapId) {
+    return ORM::for_table('snapshot')->
+        where('organization_id', $orgId)->
+        where('id', $snapId)->
+        find_one();
+}
+
+function getNextSnapshot($orgId, $snapId) {
+    $snap = getSnapshotById($orgId, $snapId);
+
+    return ORM::for_table('snapshot')->
+        where('organization_id', $orgId)->
+        where_gt('order_nr', $snap['order_nr'])->
+        order_by_asc('order_nr')->
+        find_one();
+}
+
+function getPreviousSnapshot($orgId, $snapId) {
+    $snap = getSnapshotById($orgId, $snapId);
+
+    return ORM::for_table('snapshot')->
+        where('organization_id', $orgId)->
+        where_lt('order_nr', $snap['order_nr'])->
+        order_by_desc('order_nr')->
+        find_one();
+}
+
+function deleteSnapshots($orgId, $snapshots) {
+    return ORM::for_table('snapshot')->
+        where('organization_id', $orgId)->
+        where_id_in($snapshots)->
+        delete_many();
 }

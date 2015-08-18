@@ -200,6 +200,7 @@ footer {
 
 .delivery-tools {
     color: #888;
+    padding: 0;
 }
 
 .delivery-tools:hover {
