@@ -371,13 +371,13 @@ $app->map('/archivo/crear', function () use ($app, $user, $config, $organization
         $ok = $ok && deleteAllCompletedEvents($organization['id']);
 
         if ($ok) {
-            $app->flash('save_ok', 'delete');
+            $app->flash('save_ok', 'ok');
             ORM::get_db()->commit();
 
             $app->redirect($app->urlFor('tree'));
         }
         else {
-            $app->flash('save_error', 'delete');
+            $app->flash('save_error', 'ok');
             ORM::get_db()->rollback();
         }
     }
@@ -525,11 +525,20 @@ function getAutoCleaningFolders($orgId) {
 function archiveFolders($orgId, $snapId, $folders) {
 
     $ok = ORM::for_table('folder')->
+        select('folder.*')->
         inner_join('category', array('category.id', '=', 'category_id'))->
         where_in('folder.id', $folders)->
         where('category.organization_id', $orgId)->
         find_result_set()->
         set('has_snapshot', 1)->
+        save();
+
+    $ok = $ok && ORM::for_table('delivery')->
+        inner_join('folder_delivery', array('delivery.id', '=', 'delivery_id'))->
+        where_in('folder_id', $folders)->
+        where_null('snapshot_id')->
+        find_result_set()->
+        set('item_id', null)->
         save();
 
     $ok = $ok && ORM::for_table('folder_delivery')->

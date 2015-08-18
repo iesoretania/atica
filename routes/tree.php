@@ -514,7 +514,7 @@ $app->get('/historial/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $r
         'navigation' => $breadcrumb,
         'search' => false,
         'url' => $app->request()->getPathInfo(),
-        'back_url' => array('return' => $return, 'data1' => $data1, 'data2' => $data2, 'data3' => $data3),
+        'backurl' => array('return' => $return, 'data1' => $data1, 'data2' => $data2, 'data3' => $data3),
         'last_url' => $lastUrl,
         'snapshots' => $snapshots,
         'folderProfiles' => $folderProfiles,
