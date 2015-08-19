@@ -37,8 +37,11 @@ $app->map('/upgrade', function () use ($app, $user, $config, $organization) {
         }
         if ($ok && ($core < '2014112501')) {
             include('../sql/upgrades/2014112501.php');
-        }    }
-
+        }
+        if ($ok && ($core < '2015081901')) {
+            include('../sql/upgrades/2015081901.php');
+        }
+    }
     if ($simulate) {
         $app->render('upgrade.html.twig', array(
             'initial' => $initial,

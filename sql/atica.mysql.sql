@@ -135,6 +135,8 @@ CREATE TABLE `event` (
   `from_week` int(11) unsigned DEFAULT NULL,
   `to_week` int(11) unsigned DEFAULT NULL,
   `period_description` varchar(255) DEFAULT NULL,
+  `force_period` tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
+  `grace_period` INT(11) UNSIGNED NOT NULL DEFAULT '0',
   `is_automatic` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `is_manual` tinyint(1) unsigned NOT NULL DEFAULT '1',
   `is_visible` tinyint(1) unsigned NOT NULL DEFAULT '1',
@@ -202,6 +204,8 @@ CREATE TABLE `folder` (
   `is_divided` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `is_visible` tinyint(1) unsigned NOT NULL DEFAULT '1',
   `is_restricted` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `is_private_personal` tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
+  `is_private_profile` tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
   `has_snapshot` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `filter` varchar(255) DEFAULT NULL,
   `filter_description` text,
@@ -500,7 +504,7 @@ ALTER TABLE `configuration`
   ADD CONSTRAINT `configuration_organization_id_fk` FOREIGN KEY (`organization_id`) REFERENCES `organization` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `delivery`
-  ADD CONSTRAINT `delivery_current_revision_id_fk` FOREIGN KEY (`current_revision_id`) REFERENCES `revision` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `delivery_current_revision_id_fk` FOREIGN KEY (`current_revision_id`) REFERENCES `revision` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `delivery_ibfk_1` FOREIGN KEY (`item_id`) REFERENCES `event_profile_delivery_item` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `delivery_profile_id_fk` FOREIGN KEY (`profile_id`) REFERENCES `profile` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -527,7 +531,7 @@ ALTER TABLE `event_profile`
 
 ALTER TABLE `event_profile_delivery_item`
   ADD CONSTRAINT `event_profile_delivery_item_ibfk_1` FOREIGN KEY (`profile_id`) REFERENCES `profile` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `event_profile_delivery_item_ibfk_2` FOREIGN KEY (`event_id`) REFERENCES `aticatest`.`event` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `event_profile_delivery_item_ibfk_2` FOREIGN KEY (`event_id`) REFERENCES `event` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `folder`
   ADD CONSTRAINT `folder_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;

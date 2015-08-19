@@ -141,18 +141,19 @@ $app->map('/modificar/:folderid/:id(/:return(/:data1(/:data2(/:data3(/:data4))))
         foreach($revisions as $revision) {
             if ($ok) {
                 $status = deleteDocumentById($revision['original_document_id'], $preferences);
-                $ok = $status && $ok;
+                $ok = $ok && $status;
             }
         }
+
         foreach($revisions as $revision) {
             $ok = $ok && $revision->delete();
         }
+
         if ($delivery['profile_id']) {
             checkItemUpdateStatus($folderId, $delivery['profile_id']);
         }
-        if ($ok) {
-            $delivery->delete();
-        }
+
+        $ok = $ok && $delivery->delete();
 
         if ($ok) {
             $app->flash('save_ok', 'delete');
