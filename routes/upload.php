@@ -123,7 +123,7 @@ $app->get('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $retu
 
     $localStats = getArrayGroups($items, 'event_id', 'profile_id');
     $now = getdate();
-    $currentWeek = ($now['mon']-1)*4 + floor(($now['mday']-1)/7);
+    $currentWeek = ($now['mon']-1)*4 + min(floor(($now['mday']-1)/7), 3);
 
     $app->render('upload.html.twig', array(
         'navigation' => $breadcrumb, 'search' => false,
@@ -343,7 +343,7 @@ $app->post('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $ret
         $deliveries = parseVariablesArray($deliveries, $organization, $user, $profile);
 
         $now = getdate();
-        $currentWeek = ($now['mon']-1)*4 + floor(($now['mday']-1)/7);
+        $currentWeek = ($now['mon']-1)*4 + min(floor(($now['mday']-1)/7), 3);
 
         $app->flashKeep();
 
@@ -567,7 +567,7 @@ $app->get('/estadisticas/:id(/:return/:data1(/:data2(/:data3)))', function ($id,
 
     $localStats = getArrayGroups($items,'event_id', 'profile_id');
     $now = getdate();
-    $currentWeek = ($now['mon']-1)*4 + floor(($now['mday']-1)/7);
+    $currentWeek = ($now['mon']-1)*4 + min(floor(($now['mday']-1)/7), 3);
 
     $app->render('folder_stats.html.twig', array(
         'navigation' => $breadcrumb,
