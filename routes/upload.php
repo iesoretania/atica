@@ -900,6 +900,22 @@ function checkItemUpdateStatus($folderId, $profileId) {
     }
 }
 
+function checkItemUpdateStatusByProfile($profile) {
+    // revisar los eventos de completado automático
+    $profileData = getProfile($profile);
+    $events = ORM::for_table('event_profile')->
+    select('event.*')->
+    inner_join('event', array('event.id', '=', 'event_id'))->
+    where_in('profile_id', array($profile, $profileData['profile_group_id']))->
+    find_array();
+
+    foreach($events as $event) {
+        if ($event['folder_id']) {
+            checkItemUpdateStatus($event['folder_id'], $profile);
+        }
+    }
+}
+
 function createDelivery($folderId, $userId, $profileId, $fileName, $deliveryName, $description, $itemId, $dataPath, $dataHash, $filesize, $revisionNr = 0) {
 
     $order = ORM::for_table('folder_delivery')->

@@ -222,7 +222,7 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
     if ($id != 0) {
         $sidebar[] = $menu;
         // lista perfiles del usuario
-        $profiles = parseArray(getProfilesByUser($id));
+        $profiles = parseArray(getProfilesByUser($organization['id'], $id));
     }
     else {
         $profiles = array();
@@ -588,7 +588,7 @@ function getUserObjectById($personId) {
                     find_one($personId);
 }
 
-function getProfilesByUser($personId) {
+function getProfilesByUser($orgId, $personId) {
     return ORM::for_table('profile')->
                     select('profile.*')->
                     select('profile_group.display_name_neutral')->
@@ -598,8 +598,21 @@ function getProfilesByUser($personId) {
                     inner_join('profile_group', array('profile_group.id', '=', 'profile.profile_group_id'))->
                     inner_join('person_profile', array('person_profile.profile_id', '=', 'profile.id'))->
                     where('person_profile.person_id', $personId)->
+                    where('profile_group.organization_id', $orgId)->
                     order_by_asc('profile_group.display_name_neutral')->
                     find_array();
+}
+
+function getProfilesListByUser($orgId, $personId) {
+    $data = ORM::for_table('profile')->
+                    select('profile.id')->
+                    inner_join('profile_group', array('profile_group.id', '=', 'profile.profile_group_id'))->
+                    inner_join('person_profile', array('person_profile.profile_id', '=', 'profile.id'))->
+                    where('person_profile.person_id', $personId)->
+                    where('profile_group.organization_id', $orgId)->
+                    find_array();
+
+    return array_column($data, 'id');
 }
 
 function setPersonIsActiveAndLocalAdmin($stateActive, $stateLocalAdmin, $personId, $orgId) {
@@ -842,23 +855,28 @@ function setUserProfiles($userId, $profiles, $orgId) {
             where('profile_group.organization_id', $orgId)->
             find_array();
 
-    $allProfiles = array();
+    $oldProfiles = getProfilesListByUser($orgId, $userId);
 
-    foreach($query as $prof) {
-        $allProfiles[] = $prof['id'];
+    $addProfiles = array_diff($profiles, $oldProfiles);
+    $deleteProfiles = array_diff($oldProfiles, $profiles);
+
+    if ($deleteProfiles) {
+        // primero eliminamos los perfiles antiguos que ya no están
+        ORM::for_table('person_profile')->
+            where('person_id', $userId)->
+            where_in('profile_id', $deleteProfiles)->
+            delete_many();
     }
 
-    $query = ORM::for_table('person_profile')->
-            where('person_id', $userId)->
-            where_in('profile_id', $allProfiles)->
-            delete_many();
-
+    // añadimos los nuevos
     $ok = true;
-    foreach ($profiles as $profile) {
+    foreach ($addProfiles as $profile) {
         $insert = ORM::for_table('person_profile')->create();
         $insert->set('person_id', $userId);
         $insert->set('profile_id', $profile);
         $ok = $ok && $insert->save();
+
+        checkItemUpdateStatusByProfile($profile);
     }
 
     return $ok;
