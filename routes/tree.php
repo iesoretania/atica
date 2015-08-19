@@ -136,7 +136,7 @@ $app->get('/descargar/:kind/:cid/:id/(:p1/)(:p2/)', function ($kind, $cid, $id, 
 })->name('download');
 
 $app->map('/carpeta/:id(/:catid)', function ($id, $catid = null) use ($app, $user, $organization) {
-    if (!$user) {
+    if (!$user['is_admin']) {
         $app->redirect($app->urlFor('login'));
     }
 
@@ -149,7 +149,7 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = null) use ($app, $use
     $managerProfiles = parseArray(getPermissionProfiles($id, 0));
     $restrictedProfiles = parseArray(getPermissionProfiles($id, 2));
 
-    if ($user['is_admin'] && isset($_POST['savefolder'])) {
+    if (isset($_POST['savefolder'])) {
         ORM::get_db()->beginTransaction();
 
         if ($id == 0) {
@@ -210,6 +210,27 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = null) use ($app, $use
                 $app->request()->getPathInfo();
 
         $app->redirect($url);
+    }
+
+    if (isset($_POST['deletefolder'])) {
+        // realizar los cambios en una transacción
+        ORM::get_db()->beginTransaction();
+
+        $folder = getFolderById($organization['id'], $id);
+
+        $category = $folder['category_id'];
+
+        $ok = $folder->delete();
+
+        if ($ok) {
+            $app->flash('save_ok', 'delete');
+            ORM::get_db()->commit();
+            $app->redirect($app->urlFor('tree', array('id' => $category)));
+        }
+        else {
+            $app->flash('save_error', 'delete');
+            ORM::get_db()->rollback();
+        }
     }
 
     $folder = getFolder($organization['id'], $id);

@@ -489,7 +489,7 @@ $app->map('/historial/archivar/:id(/:return(/:data1(/:data2(/:data3(/:data4)))))
 
     $items = getDeliveriesFromFolderNotInSnapshot($organization['id'], $id);
     $snapshots = getSnapshots($organization['id']);
-    $folder = getFolderById($id);
+    $folder = getFolderById($organization['id'], $id);
 
     // generar barra de navegación
     $breadcrumb = array(
@@ -636,9 +636,12 @@ function getDocumentById($documentId) {
     return $data;
 }
 
-function getFolderById($folderId) {
+function getFolderById($orgId, $folderId) {
     $data = ORM::for_table('folder')->
-    find_one($folderId);
+        select('folder.*')->
+        inner_join('category', array('category.id', '=', 'category_id'))->
+        where('category.organization_id', $orgId)->
+        find_one($folderId);
 
     return $data;
 }
