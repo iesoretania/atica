@@ -346,7 +346,7 @@ $app->map('/revision/:folderid/:id', function ($folderId, $id) use ($app, $user,
 
 })->name('revision')->via('GET', 'POST');
 
-$app->map('/archivo/masivo', function () use ($app, $user, $config, $organization, $preferences) {
+$app->map('/historial/archivar/masivo', function () use ($app, $user, $config, $organization, $preferences) {
 
     if ((!$user) || (!$user['is_admin'])) {
         $app->redirect($app->urlFor('login'));
@@ -403,8 +403,8 @@ $app->map('/archivo/masivo', function () use ($app, $user, $config, $organizatio
 
     // generar barra de navegación
     $breadcrumb = array(
-        array('display_name' => 'Archivos'),
-        array('display_name' => 'Archivado masivo de carpetas')
+        array('display_name' => 'Historial', 'target' => $app->urlFor('managesnapshots')),
+        array('display_name' => 'Archivado masivo de carpetas en el historial')
     );
 
         // lanzar plantilla
@@ -418,7 +418,7 @@ $app->map('/archivo/masivo', function () use ($app, $user, $config, $organizatio
 
 })->name('addsnapshot')->via('GET', 'POST');
 
-$app->map('/archivo/carpeta/:id(/:return(/:data1(/:data2(/:data3(/:data4)))))', function ($id, $return = null, $data1 = null, $data2 = null, $data3 = null, $data4 = null) use ($app, $user, $config, $organization, $preferences) {
+$app->map('/historial/archivar/:id(/:return(/:data1(/:data2(/:data3(/:data4)))))', function ($id, $return = null, $data1 = null, $data2 = null, $data3 = null, $data4 = null) use ($app, $user, $config, $organization, $preferences) {
 
     if ((!$user) || (!$user['is_admin'])) {
         $app->redirect($app->urlFor('login'));
@@ -493,8 +493,8 @@ $app->map('/archivo/carpeta/:id(/:return(/:data1(/:data2(/:data3(/:data4)))))', 
 
     // generar barra de navegación
     $breadcrumb = array(
-        array('display_name' => 'Archivos'),
-        array('display_name' => 'Archivado de una carpeta'),
+        array('display_name' => 'Historial', 'target' => $app->urlFor('managesnapshots')),
+        array('display_name' => 'Archivado de una carpeta en historial'),
         array('display_name' => $folder['display_name'])
     );
 
@@ -511,7 +511,7 @@ $app->map('/archivo/carpeta/:id(/:return(/:data1(/:data2(/:data3(/:data4)))))', 
 
 })->name('addfoldersnapshot')->via('GET', 'POST');
 
-$app->map('/archivo/listar', function () use ($app, $user, $config, $organization, $preferences) {
+$app->map('/historial/listar', function () use ($app, $user, $config, $organization, $preferences) {
     if ((!$user) || (!$user['is_admin'])) {
         $app->redirect($app->urlFor('login'));
     }
@@ -554,8 +554,8 @@ $app->map('/archivo/listar', function () use ($app, $user, $config, $organizatio
 
     // generar barra de navegación
     $breadcrumb = array(
-        array('display_name' => 'Archivos'),
-        array('display_name' => 'Listado de archivos')
+        array('display_name' => 'Historial', 'target' => $app->urlFor('managesnapshots')),
+        array('display_name' => 'Listado de archivos', 'target' => $app->urlFor('managesnapshots'))
     );
 
     // lanzar plantilla
@@ -567,7 +567,7 @@ $app->map('/archivo/listar', function () use ($app, $user, $config, $organizatio
     ));
 })->name('managesnapshots')->via('GET', 'POST');
 
-$app->map('/archivo/:id', function ($id) use ($app, $user, $config, $organization, $preferences) {
+$app->map('/historial/archivo/:id', function ($id) use ($app, $user, $config, $organization, $preferences) {
     if ((!$user) || (!$user['is_admin'])) {
         $app->redirect($app->urlFor('login'));
     }
@@ -591,7 +591,7 @@ $app->map('/archivo/:id', function ($id) use ($app, $user, $config, $organizatio
 
     // generar barra de navegación
     $breadcrumb = array(
-        array('display_name' => 'Archivos'),
+        array('display_name' => 'Historial', 'target' => $app->urlFor('managesnapshots')),
         array('display_name' => 'Listado de archivos', 'target' => $app->urlFor('managesnapshots')),
         array('display_name' => $snapshot['display_name'])
     );
