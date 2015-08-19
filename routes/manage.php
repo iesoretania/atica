@@ -116,6 +116,25 @@ $app->map('/modificar/:folderid/:id(/:return(/:data1(/:data2(/:data3(/:data4))))
         $app->redirect($app->request()->getPathInfo());
     }
 
+    if (isset($_POST['remove'])) {
+        ORM::get_db()->beginTransaction();
+        $ok = true;
+        $revision = getRevisionById($organization['id'], $_POST['remove']);
+
+        $ok = deleteDocumentById($revision['original_document_id'], $preferences);
+        $ok = $ok && $revision->delete();
+
+        if ($ok) {
+            $app->flash('save_ok', 'delete');
+            ORM::get_db()->commit();
+        }
+        else {
+            $app->flash('save_error', 'delete');
+            ORM::get_db()->rollback();
+        }
+        $app->redirect($app->request()->getPathInfo());
+    }
+
     if (isset($_POST['delete'])) {
         ORM::get_db()->beginTransaction();
         $ok = true;
@@ -238,7 +257,7 @@ $app->map('/revision/:folderid/:id', function ($folderId, $id) use ($app, $user,
         $app->redirect($app->urlFor('login'));
     }
 
-    $revision = getRevisionById($id);
+    $revision = getRevisionById($organization['id'], $id);
 
     if (false == $revision) {
         $app->redirect($app->urlFor('tree'));
@@ -630,8 +649,12 @@ function getDeliveryById($deliveryId) {
     return $data;
 }
 
-function getRevisionById($revisionId) {
+function getRevisionById($orgId, $revisionId) {
     $data = ORM::for_table('revision')->
+            select('revision.*')->
+            inner_join('delivery', array('delivery.id', '=', 'revision.delivery_id'))->
+            inner_join('folder_delivery', array('delivery.id', '=', 'folder_delivery.delivery_id'))->
+            where('folder_delivery.snapshot_id', $orgId)->
             find_one($revisionId);
 
     return $data;
