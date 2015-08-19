@@ -98,8 +98,10 @@
     {% set sum_total = 0 %}
     {% set it = (local_stats_item | first)[0] %}
     {% set from = (it.from_week-base+48) % 48 %}
-    {% set to = (it.to_week+it.grace_period-base+48) % 48 %}
+    {% set to = (it.to_week-base+48) % 48 %}
+    {% set to_grace = (it.to_week+it.grace_period-base+48) % 48 %}
     {% set late = ((now>=from) and (now>to)) %}
+    {% set late_grace = ((now>=from) and (now>to_grace)) %}
     {% set ready = ((now>=from) and (now<=to)) %}
 <div class="panel panel-default">
     <div class="panel-heading">
@@ -133,9 +135,13 @@
                             {% if item['c'] %}
                                 <a href="{{ urlFor('download', { 'id': item.delivery_id, 'cid': folder.category_id, 'kind': 1 }) }}">Descargar entrega</a>
                             {% elseif not is_manager and item.force_period and late %}
-                                <button class="btn btn-danger btn-block" disabled="1">No se puede entregar. Fuera de plazo</button>
+                                {% if not late_grace %}
+                                No entregado, en período de gracia
+                                {% else %}
+                                No entregado en plazo
+                                {% endif %}
                             {% else %}
-                                No entregado
+                                Pendiente de entrega
                             {% endif %}
                         </td>
                     </tr>

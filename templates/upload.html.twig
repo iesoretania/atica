@@ -60,7 +60,7 @@
             {% set sum_total = 0 %}
             {% set it = (local_stats_item | first)[0] %}
             {% set from = (it.from_week-base+48) % 48 %}
-            {% set to = (it.to_week+it.grace_period-base+48) % 48 %}
+            {% set to = (item.to_week-base+48) % 48 %}
             {% set late = ((now>=from) and (now>to)) %}
             {% set ready = ((now>=from) and (now<=to)) %}
             <div class="panel-body">
@@ -84,18 +84,20 @@
                         {% for item in local_stats_item %}
                         {% set from = (item.from_week-base+48) % 48 %}
                         {% set to = (item.to_week-base+48) % 48 %}
+                        {% set to_grace = (item.to_week+item.grace_period-base+48) % 48 %}
                         {% set late = ((now>=from) and (now>to)) %}
+                        {% set late_grace = ((now>=from) and (now>to_grace)) %}
                         {% set ready = ((now>=from) and (now<=to)) %}
                         <tr class="{% if item.c %}success{% elseif ready %}warning{% elseif late %}danger{% endif %}">
                             <td class="col-md-8">
                                 <span class="icon-{{ item.c ? 'ok' : 'remove'}}"></span>
-                                {{ item['display_name'] }}{% if not item.c and late %} (fuera de plazo){% endif %}
+                                {{ item['display_name'] }}{% if not item.c and late %} (fuera de plazo{% if not late_grace %}, en período de gracia{% endif %}){% endif %}
                             </td>
                             <td class="col-md-4">
                                 {% if item['c'] %}
                                     <a href="{{ urlFor('download', { 'id': item.delivery_id, 'cid': folder.category_id, 'kind': 1 }) }}">Descargar entrega</a> - 
                                     <a href="{{ urlFor('modify', {'folderid': item.folder_id, 'id': item.delivery_id, 'return': 2, 'data1': back_url['return'], 'data2': back_url['data1'], 'data3': back_url['data2'], 'data4': back_url['data3'] }) }}">Modificar entrega</a>
-                                {% elseif not is_manager and item.force_period and late %}
+                                {% elseif not is_manager and item.force_period and late_grace %}
                                     <button class="btn btn-danger btn-block" disabled="1">No se puede entregar. Fuera de plazo</button>
                                 {% else %}
                                     <input type="file" multiple class="form-control" name="localdocument_{{ item.id }}">{% set show_upload = true %}
