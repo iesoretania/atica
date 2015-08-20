@@ -144,8 +144,13 @@ $app->map('/actividad/:id', function ($id) use ($app, $user, $organization) {
         $local->set('force_period', $_POST['forceperiod']);
         $local->set('grace_period', $_POST['graceperiod']);
         $local->set('is_automatic', $_POST['automatic']);
+        $folder_change = ($local['folder_id'] != $_POST['folder']);
         if ($_POST['folder']) {
+            if ($local['folder_id'] && $folder_change) {
+                checkItemUpdateStatusByFolder($local['folder_id']);
+            }
             $local->set('folder_id', $_POST['folder']);
+
         }
         $local->set('from_week', $_POST['fromweek']+4*$_POST['frommonth']);
         $local->set('to_week', $_POST['toweek']+4*$_POST['tomonth']);
@@ -160,6 +165,9 @@ $app->map('/actividad/:id', function ($id) use ($app, $user, $organization) {
                 $ok = $ok && setEventDeliveries($id, $_POST['deliveries']);
             }
             if ($ok) {
+                if ($_POST['folder'] && $folder_change) {
+                    checkItemUpdateStatusByFolder($local['folder_id']);
+                }
                 $app->flash('save_ok', 'ok');
                 ORM::get_db()->commit();
             }
@@ -261,6 +269,9 @@ $app->map('/elemento/:id/:profileid/(:actid)', function ($id, $profileid, $actid
             }
         }
         if ($ok) {
+            if ($event['folder_id']) {
+                checkItemUpdateStatusByFolder($event['folder_id']);
+            }
             $app->flash('save_ok', 'ok');
             ORM::get_db()->commit();
         }
@@ -274,6 +285,9 @@ $app->map('/elemento/:id/:profileid/(:actid)', function ($id, $profileid, $actid
     if (isset($_POST['delete'])) {
         ORM::get_db()->beginTransaction();
         if (deleteEventItems($id, $_POST['item'])) {
+            if ($event['folder_id']) {
+                checkItemUpdateStatusByFolder($event['folder_id']);
+            }
             ORM::get_db()->commit();
             $app->flash('save_ok', 'ok');
         }
@@ -384,6 +398,9 @@ $app->map('/elemento/:id', function ($id) use ($app, $user, $organization) {
     if (isset($_POST['delete'])) {
         ORM::get_db()->beginTransaction();
         if (deleteEventItems($id, $_POST['item'])) {
+            if ($event['folder_id']) {
+                checkItemUpdateStatusByFolder($event['folder_id']);
+            }
             ORM::get_db()->commit();
             $app->flash('save_ok', 'ok');
         }
@@ -432,6 +449,9 @@ $app->map('/elemento/:id', function ($id) use ($app, $user, $organization) {
             }
         }
         if ($ok) {
+            if ($event['folder_id']) {
+                checkItemUpdateStatusByFolder($event['folder_id']);
+            }
             $app->flash('save_ok', 'ok');
             ORM::get_db()->commit();
         }
@@ -455,6 +475,9 @@ $app->map('/elemento/:id', function ($id) use ($app, $user, $organization) {
         }
 
         if ($ok) {
+            if ($event['folder_id']) {
+                checkItemUpdateStatusByFolder($event['folder_id']);
+            }
             $app->flash('save_ok', 'ok');
             ORM::get_db()->commit();
         }
