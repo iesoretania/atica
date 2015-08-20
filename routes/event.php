@@ -362,12 +362,14 @@ $app->map('/elemento/:id', function ($id) use ($app, $user, $organization) {
 
     if (isset($_POST['up']) || isset($_POST['down'])) {
         if (isset($_POST['up'])) {
-            $item1 = getItemById($organization['id'], $_POST['up']);
-            $item2 = getPreviousItem($organization['id'], $_POST['up'], $profileid);
+            $split = explode("!", $_POST['up']);
+            $item1 = getItemById($organization['id'], $split[0]);
+            $item2 = getPreviousItem($organization['id'], $split[0], $split[1]);
         }
         else {
-            $item1 = getItemById($organization['id'], $_POST['down']);
-            $item2 = getNextItem($organization['id'], $_POST['down'], $profileid);
+            $split = explode("!", $_POST['down']);
+            $item1 = getItemById($organization['id'], $split[0]);
+            $item2 = getNextItem($organization['id'], $split[0], $split[1]);
         }
 
         if (!$item1 || !$item2) {
@@ -444,6 +446,8 @@ $app->map('/elemento/:id', function ($id) use ($app, $user, $organization) {
 
     $profiles1 = parseArrayMix(getEventDeliveryItems($id), 'profile_id');
 
+    $profiles = array();
+    
     // damos una vuelta a la lista por si hay perfiles sin elementos
     // hay que ponerlos en orden, de ahí la chapuza
     foreach($uploadAs as $prof) {

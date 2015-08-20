@@ -59,8 +59,8 @@ function switchChecks(e, c) {
                 <tr>
                     <td><input type="checkbox" class="check" name="item[]" value="{{ item['id'] }}">
                         {{ item['display_name'] }}&nbsp; <a class="delivery-tools hidden-print" title="Modificar elemento" href="{{ urlFor('managedeliveryitem', { 'id': item['id'], 'all': 1 }) }}"><span class="icon-pencil"></span></a>
-                        {% if not loop.first %}<button type="submit" name="up" class="btn btn-link delivery-tools hidden-print" value="{{ item['id'] }}"><span class="icon-arrow-up"></span></button>{% endif %}
-                        {% if not loop.last %}<button type="submit" name="down" class="btn btn-link delivery-tools hidden-print" value="{{ item['id'] }}"><span class="icon-arrow-down"></span></button>{% endif %}
+                        {% if not loop.first %}<button type="submit" name="up" class="btn btn-link delivery-tools hidden-print" value="{{ item['id'] }}!{{ profile }}"><span class="icon-arrow-up"></span></button>{% endif %}
+                        {% if not loop.last %}<button type="submit" name="down" class="btn btn-link delivery-tools hidden-print" value="{{ item['id'] }}!{{ profile }}"><span class="icon-arrow-down"></span></button>{% endif %}
                     </td>
                     <td>
                         {{ item['document_name'] }}
