@@ -465,6 +465,29 @@ $app->map('/elemento/:id', function ($id) use ($app, $user, $organization) {
         $app->redirect($app->request()->getPathInfo());
     }
 
+    if (isset($_POST['replace']) && isset($_POST['replace_this']) && $_POST['replace_this']) {
+        $items = getEventDeliveryItems($organization['id'], $id);
+
+        ORM::get_db()->beginTransaction();
+        $ok = true;
+
+        foreach($items as $it) {
+            $it->set('display_name', str_replace($_POST['replace_this'], $_POST['replace_with'], $it['display_name']));
+            $it->set('document_name', str_replace($_POST['replace_this'], $_POST['replace_with'], $it['document_name']));
+            $ok = $ok && $it->save();
+        }
+
+        if ($ok) {
+            $app->flash('save_ok', 'ok');
+            ORM::get_db()->commit();
+        }
+        else {
+            $app->flash('save_error', 'error');
+            ORM::get_db()->rollBack();
+        }
+        $app->redirect($app->request()->getPathInfo());
+    }
+
     $folder = getFolder($organization['id'], $event['folder_id']);
 
     $profiles1 = parseArrayMix(getEventDeliveryItems($organization['id'], $id), 'profile_id');

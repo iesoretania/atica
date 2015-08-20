@@ -139,5 +139,19 @@ function switchChecks(e, c) {
             <button type="submit" name="import" class="btn btn-warning" onClick="javascript:return confirm('¡Cuidado: La operación de agregación no se puede deshacer.\n\nConfirme que la actividad origen es correcta.\n\n¿Desea continuar?');">Agregar todos los elementos de entrega de la actividad</button>
         </div>
     </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3>Sustitución de textos</h3>
+        </div>
+        <div class="panel-body">
+            <p>Esta opción le permite sustituir un texto del nombre del elemento y de descarga por otro.</p>
+            {{ m.input_text('replace_this', 8, 'Texto a reemplazar', 'Introduzca el texto a buscar en el nombre del elemento y el nombre de la descarga', '') }}
+            {{ m.input_text('replace_with', 8, 'Sustituir por', 'Introduzca el texto por el que se sustituirá cada ocurrencia. Si lo deja vacío, se borrarán', '') }}
+        </div>
+        <div class="panel-footer hidden-print">
+            <button type="submit" name="replace" class="btn btn-warning" onClick="javascript:return confirm('¡Cuidado: La operación de sustitución no se puede deshacer.\n\nConfirme que los datos introducidos (incluidos los espacios) son correctos.\n\n¿Desea continuar?');">Sustituir texto en todas las entregas</button>
+        </div>
+    </div>
 </form>
 {% endblock %}
