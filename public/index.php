@@ -168,3 +168,13 @@ function parseArray($data, $column='id') {
     
     return $return;
 }
+
+function parseArrayMix($data, $column='id') {
+    $return = array();
+
+    foreach($data as $item) {
+        $return[$item[$column]][] = $item;
+    }
+
+    return $return;
+}

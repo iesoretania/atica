@@ -33,31 +33,19 @@ function switchChecks(e) {
 {% import "macros.twig" as m %}
 <div class="panel panel-info">
     <div class="panel-heading">
-    <h1>Elementos de la actividad: {{ event['display_name'] }}</h1>
-    <h2>Carpeta de entrega: {{ folder['display_name'] }}</h2>
+        <h1>Elementos de la actividad: {{ event['display_name'] }}</h1>
+        <h2>Carpeta de entrega: {{ folder['display_name'] }}</h2>
     </div>
     {% if event['description'] %}<div class="panel-body"><h4>{{ event['description'] | nl2br }}</h4></div>{% endif %}
     <div class="panel-footer hidden-print">
-        <a class="btn btn-info" href="{{ urlFor('manageallitems', { 'id': event['id'] }) }}">Ver listado completo de todos los perfiles</a>
+        <a class="btn btn-info" href="{{ urlFor('manageitem', { 'id': event['id'], 'profileid': 0 }) }}">Ver elementos por perfiles individuales</a>
     </div>
 </div>
 <form class="form-horizontal" role="form" method="post" action="{{ url }}">
+    {% for profile, items in profiles %}
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h3>Entregas asociadas al perfil</h3>
-        </div>
-        <div class="panel-body">
-            <div class="form-group">
-                <label for="category" class="col-md-2 control-label">Perfil</label>
-                <div class="col-md-8">
-                    <select class="form-control select" id="profile" name="profile" onchange="window.location='{{ urlFor('manageitem', { 'id': id, 'profileid': '\'+this.value+\'', 'catid': catid }) }}'">
-                        {% for profile in uploaders %}
-                        <option value="{{ profile['id'] }}" {% if profile['id'] == profileid %} selected {% endif %}>{{ profile['display_name_neutral'] }}{% if profile['display_name'] %} ({{ profile['display_name'] }}){% endif %}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <input class="btn btn-info hidejs" type="submit" name="changeprofile" value="Ver perfil" />
-            </div>
+            <h3>{{ uploaders[profile]['display_name_neutral'] ~ ' ' ~ uploaders[profile]['display_name'] }} <a class="delivery-tools hidden-print" title="Ver elementos del perfil" href="{{ urlFor('manageitem', { 'id': event['id'], 'profileid': profile }) }}"><span class="icon-cog"></span></a></h3>
         </div>
         <table class="table table-striped table-condensed table-hover">
             <thead>
@@ -70,7 +58,7 @@ function switchChecks(e) {
                 {% for item in items %}
                 <tr>
                     <td><input type="checkbox" class="check" name="item[]" value="{{ item['id'] }}">
-                        {{ item['display_name'] }}&nbsp; <a class="delivery-tools hidden-print" title="Modificar elemento" href="{{ urlFor('managedeliveryitem', { 'id': item['id'], 'all': 0 }) }}"><span class="icon-pencil"></span></a>
+                        {{ item['display_name'] }}&nbsp; <a class="delivery-tools hidden-print" title="Modificar elemento" href="{{ urlFor('managedeliveryitem', { 'id': item['id'], 'all': 1 }) }}"><span class="icon-pencil"></span></a>
                         {% if not loop.first %}<button type="submit" name="up" class="btn btn-link delivery-tools hidden-print" value="{{ item['id'] }}"><span class="icon-arrow-up"></span></button>{% endif %}
                         {% if not loop.last %}<button type="submit" name="down" class="btn btn-link delivery-tools hidden-print" value="{{ item['id'] }}"><span class="icon-arrow-down"></span></button>{% endif %}
                     </td>
@@ -85,13 +73,13 @@ function switchChecks(e) {
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+    {% endfor %}
 
+    <div class="panel panel-default">
         <div class="panel-footer hidden-print">
             <a class="btn btn-success" href="{{ urlFor('newdeliveryitem', {'id': event.id, 'profileid': profileid}) }}">Nuevo elemento</a>
-            {% if items %}
-            <button type="submit" name="order" class="btn btn-warning">Ordenar todo por orden alfabético</button>
             <button type="submit" name="delete" class="btn btn-danger" onClick="javascript:return confirm('¡Cuidado: La operación de borrado no se puede deshacer.\n\nTodos los documentos actuales asociados a las entregas se perderán para siempre.\n\n¿Desea continuar?');">Eliminar elementos seleccionados</button>
-            {% endif %}
             <a class="btn btn-info" href="{{ back_url }}">Volver sin realizar cambios</a>
         </div>
     </div>
@@ -100,11 +88,11 @@ function switchChecks(e) {
             <h3>Creación masiva de elementos</h3>
         </div>
         <div class="panel-body">
-            <p>Esta opción le permite crear múltiples elementos de entrega de una sola vez.</p>
+            <p>Esta opción le permite crear múltiples elementos de entrega de una sola vez en todos los perfiles.</p>
             {{ m.input_textarea('newelements', 8, 'Nuevos elementos', 'Coloque un elemento por línea. Si desea incluir el nombre de la descarga, añádalo al final separando con un asterisco (*)', '') }}
         </div>
         <div class="panel-footer hidden-print">
-            <button type="submit" name="new" class="btn btn-success">Crear los elementos del cuadro sólo en este perfil</button>
+            <button type="submit" name="new" class="btn btn-warning">Crear los elementos del cuadro en todos los perfiles</button>
         </div>
     </div>
 </form>

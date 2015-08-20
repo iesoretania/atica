@@ -772,22 +772,22 @@ function createEventItem($id, $profileId, $displayName, $documentName) {
             where('profile_id', $profileId)->
             where('event_id', $id)->max('order_nr');
 
-    $order = ($order) ? ($order + 1000) : 0;
+    $order = ($order) ? ($order + 1000) : 1000;
 
     $item = ORM::for_table('event_profile_delivery_item')->create()->
             set('profile_id', $profileId)->
             set('event_id', $id)->
             set('display_name', $displayName)->
+            set('order_nr', $order)->
             set('document_name', $documentName);
     return $item->save();
 }
 
-function deleteEventItems($id, $profileId, $items) {
+function deleteEventItems($id, $items) {
     $ok = true;
     foreach($items as $item) {
         $ok = $ok && ORM::for_table('event_profile_delivery_item')->
             where('id', $item)->
-            where('profile_id', $profileId)->
             where('event_id', $id)->delete_many();
     }
     return $ok;
@@ -817,5 +817,19 @@ function getEventProfileDeliveryItems($profileId, $eventId) {
             where('is_visible', 1)->
             order_by_asc('order_nr')->
             find_many();
+    return $data;
+}
+
+function getEventDeliveryItems($eventId) {
+    $data = ORM::for_table('event_profile_delivery_item')->
+        select('event_profile_delivery_item.*')->
+        inner_join('profile',array('profile_id', '=', 'profile.id'))->
+        inner_join('profile_group',array('profile.profile_group_id', '=', 'profile_group.id'))->
+        where('event_id', $eventId)->
+        where('is_visible', 1)->
+        order_by_asc('profile_group.display_name_neutral')->
+        order_by_asc('profile.display_name')->
+        order_by_asc('order_nr')->
+        find_many();
     return $data;
 }
