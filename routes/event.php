@@ -426,6 +426,87 @@ $app->map('/elemento/modificar/:id', function ($id) use ($app, $user, $organizat
     ));
 })->name('managedeliveryitem')->via('GET', 'POST');
 
+$app->map('/elemento/nuevo/:id/:profileid', function ($id, $profileid) use ($app, $user, $organization) {
+    if (!$user && $user['is_admin']) {
+        $app->redirect($app->urlFor('login'));
+    }
+
+    $event = getEventByIdObject($organization['id'], $id);
+    if ($event === false) {
+        $app->redirect($app->urlFor('login'));
+    }
+
+    $uploadProfiles = parseArray(getPermissionProfiles($event['folder_id'], 1));
+
+    $uploadAs = array();
+    $profile = getProfileById($organization['id'], $profileid);
+    foreach ($uploadProfiles as $newitem) {
+        if (null == $newitem['display_name']) {
+            $data = parseArray(getSubprofiles($newitem['id']));
+            if (count($data)>1) {
+                foreach($data as $subItem) {
+                    if (null != $subItem['display_name']) {
+                        $uploadAs[$subItem['id']] = $subItem;
+                    }
+                }
+            }
+            else {
+                $uploadAs[$newitem['id']] = $newitem;
+            }
+        }
+        else {
+            $uploadAs[$newitem['id']] = $newitem;
+        }
+    }
+    $item = ORM::for_table('event_profile_delivery_item')->create();
+    $item->set('event_id', $id);
+    $item->set('profile_id', $profileid);
+    $item->set('display_name', '');
+    $item->set('document_name', '');
+
+    if (!isset($uploadAs[$profileid])) {
+        $app->redirect($app->urlFor('login'));
+    }
+
+    $backUrl = $app->urlFor('manageitem', array('id' => $event['id'], 'profileid' => $item['profile_id']));
+
+    if (isset($_POST['save'])) {
+        $displayName = trim($_POST['displayname']);
+        $item->set('display_name', $displayName);
+        $documentName = trim($_POST['documentname']);
+        $item->set('document_name', $documentName ? $documentName : $displayName);
+        $item->set('order_nr', getLastItemOrderNr($event['id'], $profileid) + 1000);
+        $ok = $item->save();
+
+        if ($ok) {
+            $app->flash('save_ok', 'ok');
+            $app->redirect($backUrl);
+        }
+        else {
+            $app->flash('save_error', 'error');
+        }
+    }
+
+    $breadcrumb = array(
+        array('display_name' => 'Actividades', 'target' => $app->urlFor('activities')),
+        array('display_name' => $event['display_name'], 'target' => $app->urlFor('manageevent', array('id' => $event['id']))),
+        array('display_name' => $profile['display_name_neutral'] . ' ' . $profile['display_name'], 'target' => $backUrl),
+        array('display_name' => 'Nueva entrada')
+    );
+
+    $app->render('manage_delivery_item.html.twig', array(
+        'navigation' => $breadcrumb, 'search' => true,
+        'select2' => true,
+        'url' => $app->request()->getPathInfo(),
+        'upload_as' => $uploadAs,
+        'id' => $id,
+        'event' => $event,
+        'item' => $item,
+        'new' => true,
+        'back_url' => $backUrl
+    ));
+})->name('newdeliveryitem')->via('GET', 'POST');
+
 function getActivityEvent($eventId, $activityId, $user) {
     return ORM::for_table('event')->
             select('event.*')->
@@ -731,4 +812,17 @@ function getPreviousItem($orgId, $itemId, $profileId) {
         where_lt('order_nr', $item['order_nr'])->
         order_by_desc('order_nr')->
         find_one();
+}
+
+function getLastItemOrderNr($eventId, $profileId) {
+    $data = ORM::for_table('event_profile_delivery_item')->
+        where('event_id', $eventId)->
+        where('profile_id',  $profileId)->
+        order_by_desc('order_nr')->
+        find_one();
+
+    if (false === $data) {
+        return 0;
+    }
+    return $data['order_nr'];
 }

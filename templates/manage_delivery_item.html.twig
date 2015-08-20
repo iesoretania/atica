@@ -25,6 +25,7 @@
 <div class="panel panel-default">
     <div class="panel-body">
         <form class="form-horizontal" role="form" method="post" action="{{ url }}">
+            {% if not new %}
             <div class="form-group">
                 <label class="col-md-2 control-label" for="profile">Asociada al perfil</label>
                 <div class="col-md-10">
@@ -33,8 +34,9 @@
                     </select>
                 </div>
             </div>
-            {{ m.input_text('displayname', 10, 'Nombre del elemento', 'Nombre con el que se mostrará el documento', item.display_name) }}
-            {{ m.input_text('documentname', 10, 'Nombre de la descarga', 'Nombre con el que se descargará el documento', item.document_name) }}
+            {% endif %}
+            {{ m.input_text('displayname', 10, 'Nombre del elemento', 'Nombre con el que se mostrará el documento', item.display_name, true, null, null, 'required') }}
+            {{ m.input_text('documentname', 10, 'Nombre de la descarga', 'Nombre con el que se descargará el documento. Si se deja en blanco será el nombre del elemento', item.document_name) }}
             <button type="submit" name="save" class="btn btn-success">{{ new ? 'Crear elemento' : 'Guardar cambios' }}</button>
             <a class="btn btn-info" href="{{ back_url }}">Volver sin realizar cambios</a>
         </form>

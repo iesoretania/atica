@@ -36,7 +36,7 @@ function switchChecks(e) {
     <h1>Gestionar elementos de la actividad: {{ event['display_name'] }}</h1>
     <h2>Carpeta de entrega: {{ folder['display_name'] }}</h2>
     </div>
-    {% if event['description'] %}<div class="panel-body"><h4>{{  event['description'] | nl2br }}</h4></div>{% endif %}
+    {% if event['description'] %}<div class="panel-body"><h4>{{ event['description'] | nl2br }}</h4></div>{% endif %}
 </div>
 <form class="form-horizontal" role="form" method="post" action="{{ url }}">
     <div class="panel panel-default">
@@ -84,9 +84,10 @@ function switchChecks(e) {
         </table>
 
         <div class="panel-footer hidden-print">
+            <a class="btn btn-success" href="{{ urlFor('newdeliveryitem', {'id': event.id, 'profileid': profileid}) }}">Nuevo elemento</a>
             {% if items %}
             <button type="submit" name="order" class="btn btn-warning">Ordenar todo por orden alfabético</button>
-            <button type="submit" name="delete" class="btn btn-danger">Eliminar elementos seleccionados</button>
+            <button type="submit" name="delete" class="btn btn-danger" onClick="javascript:return confirm('¡Cuidado: La operación de borrado no se puede deshacer.\n\nTodos los documentos actuales asociados a las entregas se perderán para siempre.\n\n¿Desea continuar?');">Eliminar elementos seleccionados</button>
             {% endif %}
             <a class="btn btn-info" href="{{ back_url }}">Volver sin realizar cambios</a>
         </div>
