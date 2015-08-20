@@ -113,5 +113,31 @@ function switchChecks(e, c) {
             <button type="submit" name="new" class="btn btn-warning">Crear los elementos del cuadro en todos los perfiles seleccionados</button>
         </div>
     </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3>Copia desde otra actividad</h3>
+        </div>
+        <div class="panel-body">
+            <p>Esta opción le permite copiar los elementos de entrega desde otra actividad. Sólo se agregarán aquellos
+            elementos que pertenezcan a los perfiles asociados a esta actividad.</p>
+            <div class="form-group">
+                <label for="event" class="col-md-2 control-label">Actividad</label>
+                <select class="select col-md-10" id="event" name="event">
+                    <option value="" selected>Seleccione una actividad...</option>
+                    {% for activity_id, evs in events %}
+                        <optgroup label="{{ activities[activity_id]['display_name'] }}">
+                        {% for ev in evs %}
+                            <option value="{{ ev['id'] }}">{{ ev['display_name'] }}</option>
+                        {% endfor %}
+                        </optgroup>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="panel-footer hidden-print">
+            <button type="submit" name="import" class="btn btn-warning" onClick="javascript:return confirm('¡Cuidado: La operación de agregación no se puede deshacer.\n\nConfirme que la actividad origen es correcta.\n\n¿Desea continuar?');">Agregar todos los elementos de entrega de la actividad</button>
+        </div>
+    </div>
 </form>
 {% endblock %}

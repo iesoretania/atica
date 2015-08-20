@@ -442,9 +442,32 @@ $app->map('/elemento/:id', function ($id) use ($app, $user, $organization) {
         $app->redirect($app->request()->getPathInfo());
     }
 
+    if (isset($_POST['import']) && isset($_POST['event']) && $_POST['event']) {
+        $ok = true;
+        ORM::get_db()->beginTransaction();
+
+        $origin = getEventDeliveryItems($organization['id'], $_POST['event']);
+
+        foreach($origin as $it) {
+            if (isset($uploadAs[$it['profile_id']])) {
+                $ok = $ok && createEventItem($id, $it['profile_id'], $it['display_name'], $it['document_name']);
+            }
+        }
+
+        if ($ok) {
+            $app->flash('save_ok', 'ok');
+            ORM::get_db()->commit();
+        }
+        else {
+            $app->flash('save_error', 'error');
+            ORM::get_db()->rollBack();
+        }
+        $app->redirect($app->request()->getPathInfo());
+    }
+
     $folder = getFolder($organization['id'], $event['folder_id']);
 
-    $profiles1 = parseArrayMix(getEventDeliveryItems($id), 'profile_id');
+    $profiles1 = parseArrayMix(getEventDeliveryItems($organization['id'], $id), 'profile_id');
 
     $profiles = array();
     
@@ -465,6 +488,9 @@ $app->map('/elemento/:id', function ($id) use ($app, $user, $organization) {
         array('display_name' => 'Gestionar entregas')
     );
 
+    $events = getAllEventsGroupedByActivity($organization['id']);
+    $activities = getAllActivities($organization['id']);
+
     $app->render('manage_all_item.html.twig', array(
         'navigation' => $breadcrumb, 'search' => true,
         'select2' => true,
@@ -473,6 +499,8 @@ $app->map('/elemento/:id', function ($id) use ($app, $user, $organization) {
         'profiles' => $profiles,
         'id' => $id,
         'event' => $event,
+        'events' => $events,
+        'activities' => $activities,
         'back_url' => $app->urlFor('manageevent', array('id' => $id)),
         'folder' => $folder));
 })->name('manageallitems')->via('GET', 'POST');
@@ -959,4 +987,23 @@ function getLastItemOrderNr($eventId, $profileId) {
         return 0;
     }
     return $data['order_nr'];
+}
+
+function getAllActivities($orgId) {
+    return ORM::for_table('activity')->
+        where('organization_id', $orgId)->
+        order_by_asc('display_name')->
+        find_many();
+}
+
+function getAllEventsGroupedByActivity($orgId) {
+    $events = ORM::for_table('activity_event')->
+        inner_join('event', array('event.id', '=', 'event_id'))->
+        where('event.organization_id', $orgId)->
+        order_by_asc('event.display_name')->
+        find_many();
+
+    $data = parseArrayMix($events, 'activity_id');
+
+    return $data;
 }

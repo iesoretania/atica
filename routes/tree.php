@@ -820,13 +820,14 @@ function getEventProfileDeliveryItems($profileId, $eventId) {
     return $data;
 }
 
-function getEventDeliveryItems($eventId) {
+function getEventDeliveryItems($orgId, $eventId) {
     $data = ORM::for_table('event_profile_delivery_item')->
         select('event_profile_delivery_item.*')->
         inner_join('profile',array('profile_id', '=', 'profile.id'))->
         inner_join('profile_group',array('profile.profile_group_id', '=', 'profile_group.id'))->
         where('event_id', $eventId)->
         where('is_visible', 1)->
+        where('profile_group.organization_id', $orgId)->
         order_by_asc('profile_group.display_name_neutral')->
         order_by_asc('profile.display_name')->
         order_by_asc('order_nr')->
