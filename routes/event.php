@@ -137,7 +137,7 @@ $app->map('/actividad/:id', function ($id) use ($app, $user, $organization) {
         }
         $local->set('organization_id', $organization['id']);
         $local->set('display_name', $_POST['displayname']);
-        $local->set('description', strlen($_POST['description'])>0 ? $_POST['description'] : null);
+        $local->set('description', strlen($_POST['description'])>0 ? $_POST['description'] : $_POST['displayname']);
         $local->set('is_visible', $_POST['visible']);
         $local->set('is_manual', $_POST['manual']);
         $local->set('is_automatic', $_POST['automatic']);
@@ -254,10 +254,10 @@ $app->map('/elemento/:id/:profileid/(:actid)', function ($id, $profileid, $actid
         $ok = true;
         ORM::get_db()->beginTransaction();
         foreach($lines as $line) {
-            $line = str_replace($line, '\r', '');
+            $line = str_replace('\r', '', $line);
             if ($line) {
                 $item = explode("*", trim($line));
-                $ok = $ok && createEventItem($id, $_POST['profile'], $item[0], isset($item[1]) ? $item[1] : null);
+                $ok = $ok && createEventItem($id, $_POST['profile'], $item[0], isset($item[1]) ? $item[1] : $item[0]);
             }
         }
         if ($ok) {
@@ -419,11 +419,13 @@ $app->map('/elemento/:id', function ($id) use ($app, $user, $organization) {
         ORM::get_db()->beginTransaction();
         foreach($lines as $line) {
             $line = trim($line);
-            $line = str_replace($line, '\r', '');
+            $line = str_replace('\r', '', $line);
             if ($line) {
                 $item = explode("*", trim($line));
-                foreach($uploadAs as $profile) {
-                    $ok = $ok && createEventItem($id, $profile['id'], $item[0], isset($item[1]) ? $item[1] : null);
+                foreach($_POST['profilenew'] as $profile) {
+                    if (isset($uploadAs[$profile])) {
+                        $ok = $ok && createEventItem($id, $profile, $item[0], isset($item[1]) ? $item[1] : $item[0]);
+                    }
                 }
             }
         }
@@ -440,7 +442,18 @@ $app->map('/elemento/:id', function ($id) use ($app, $user, $organization) {
 
     $folder = getFolder($organization['id'], $event['folder_id']);
 
-    $profiles = parseArrayMix(getEventDeliveryItems($id), 'profile_id');
+    $profiles1 = parseArrayMix(getEventDeliveryItems($id), 'profile_id');
+
+    // damos una vuelta a la lista por si hay perfiles sin elementos
+    // hay que ponerlos en orden, de ahí la chapuza
+    foreach($uploadAs as $prof) {
+        if (!isset($profiles1[$prof['id']])) {
+            $profiles[$prof['id']] = array();
+        }
+        else {
+            $profiles[$prof['id']] = $profiles1[$prof['id']];
+        }
+    }
 
     $breadcrumb = array(
         array('display_name' => 'Actividades', 'target' => $app->urlFor('activities')),
@@ -507,8 +520,11 @@ $app->map('/elemento/modificar/:id/:all', function ($id, $all) use ($app, $user,
 
     if (isset($_POST['save']) && isset($uploadAs[$_POST['profile']])) {
         $item->set('profile_id', $_POST['profile']);
-        $item->set('display_name', trim($_POST['displayname']));
-        $item->set('document_name', trim($_POST['documentname']));
+        $displayName = trim($_POST['displayname']);
+        $item->set('display_name', $displayName);
+        $documentName = trim($_POST['documentname']);
+        $item->set('document_name', $documentName ? $documentName : $displayName);
+
         $ok = $item->save();
 
         if ($ok) {

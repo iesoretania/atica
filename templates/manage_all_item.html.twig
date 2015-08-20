@@ -17,12 +17,12 @@
 {% extends "tree.html.twig" %}
 {% block scripts %}
 <script>
-function switchChecks(e) {
+function switchChecks(e, c) {
     if (!$(e).prop('checked')) {
-        $('.check').removeAttr('checked');
+        $(c).removeAttr('checked');
     }
     else {
-        $('.check').prop('checked', 'checked');
+        $(c).prop('checked', 'checked');
     }
     console.log($(e).prop('checked'));
     console.dir($(e));
@@ -50,7 +50,7 @@ function switchChecks(e) {
         <table class="table table-striped table-condensed table-hover">
             <thead>
                 <tr>
-                    <th class="col-md-7"><input type="checkbox" class="showjs-inline" onChange="switchChecks(this);"> Elemento</th>
+                    <th class="col-md-7"><input type="checkbox" class="showjs-inline" onChange="switchChecks(this, '.check');"> Elemento</th>
                     <th class="col-md-5">Nombre de la descarga</th>
                 </tr>
             </thead>
@@ -73,26 +73,44 @@ function switchChecks(e) {
                 {% endfor %}
             </tbody>
         </table>
+        <div class="panel-footer hidden-print">
+            <a class="btn btn-success" href="{{ urlFor('newdeliveryitem', {'id': event.id, 'profileid': profile}) }}">Nuevo elemento</a>
+            <button type="submit" name="delete" class="btn btn-danger" onClick="javascript:return confirm('¡Cuidado: La operación de borrado no se puede deshacer.\n\nTodos los documentos actuales asociados a las entregas se perderán para siempre.\n\n¿Desea continuar?');">Eliminar elementos seleccionados</button>
+            <a class="btn btn-info" href="{{ back_url }}">Volver a la actividad sin realizar cambios</a>
+        </div>
     </div>
     {% endfor %}
 
-    <div class="panel panel-default">
-        <div class="panel-footer hidden-print">
-            <a class="btn btn-success" href="{{ urlFor('newdeliveryitem', {'id': event.id, 'profileid': profileid}) }}">Nuevo elemento</a>
-            <button type="submit" name="delete" class="btn btn-danger" onClick="javascript:return confirm('¡Cuidado: La operación de borrado no se puede deshacer.\n\nTodos los documentos actuales asociados a las entregas se perderán para siempre.\n\n¿Desea continuar?');">Eliminar elementos seleccionados</button>
-            <a class="btn btn-info" href="{{ back_url }}">Volver sin realizar cambios</a>
-        </div>
-    </div>
     <div class="panel panel-default">
         <div class="panel-heading">
             <h3>Creación masiva de elementos</h3>
         </div>
         <div class="panel-body">
-            <p>Esta opción le permite crear múltiples elementos de entrega de una sola vez en todos los perfiles.</p>
+            <p>Esta opción le permite crear múltiples elementos de entrega de una sola vez en todos los perfiles seleccionados.</p>
             {{ m.input_textarea('newelements', 8, 'Nuevos elementos', 'Coloque un elemento por línea. Si desea incluir el nombre de la descarga, añádalo al final separando con un asterisco (*)', '') }}
         </div>
+        <table class="table table-striped table-condensed table-hover">
+            <thead>
+            <tr>
+                <th class="col-md-12"><input type="checkbox" class="showjs-inline" checked="checked" onChange="switchChecks(this, '.checkp');"> Perfil</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for profile in uploaders %}
+                <tr>
+                    <td><input type="checkbox" class="checkp" name="profilenew[]" checked="checked" value="{{ profile['id'] }}">
+                        {{ profile['display_name_neutral'] ~ ' ' ~ profile['display_name'] }}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td><h4>No hay perfiles asociados a este evento</h4></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
         <div class="panel-footer hidden-print">
-            <button type="submit" name="new" class="btn btn-warning">Crear los elementos del cuadro en todos los perfiles</button>
+            <button type="submit" name="new" class="btn btn-warning">Crear los elementos del cuadro en todos los perfiles seleccionados</button>
         </div>
     </div>
 </form>
