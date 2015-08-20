@@ -1,0 +1,43 @@
+{#  ATICA - Web application for supporting Quality Management Systems
+    Copyright (C) 2009-2015: Luis-Ramón López López
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
+
+{% extends "layout.html.twig" %}
+{% block maincontent %}
+{% import 'macros.twig' as m %}
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <h1>{{ new ? 'Nueva entrega' : 'Modificar entrega' }}</h1>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-body">
+        <form class="form-horizontal" role="form" method="post" action="{{ url }}">
+            <div class="form-group">
+                <label class="col-md-2 control-label" for="profile">Asociada al perfil</label>
+                <div class="col-md-10">
+                    <select class="form-control select" name="profile">
+                        {% for profile in upload_as %}<option value="{{ profile['id'] }}" {{ (item['profile_id'] == profile['id']) ? " selected" : "" }}>{{ profile['display_name_neutral'] }}{% if profile['display_name'] %} ({{ profile['display_name'] }}){% endif %}</option>{% endfor %}
+                    </select>
+                </div>
+            </div>
+            {{ m.input_text('displayname', 10, 'Nombre del elemento', 'Nombre con el que se mostrará el documento', item.display_name) }}
+            {{ m.input_text('documentname', 10, 'Nombre de la descarga', 'Nombre con el que se descargará el documento', item.document_name) }}
+            <button type="submit" name="save" class="btn btn-success">{{ new ? 'Crear elemento' : 'Guardar cambios' }}</button>
+            <a class="btn btn-info" href="{{ back_url }}">Volver sin realizar cambios</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

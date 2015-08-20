@@ -158,7 +158,7 @@ $app->map('/carpeta/:id(/:catid)', function ($id, $catid = null) use ($app, $use
             $local->set('order_nr', $order);
         }
         else {
-            $local = getFolderObjectById($organization['id'], $id);
+            $local = getFolderById($organization['id'], $id);
         }
         $local->set('category_id', $_POST['category']);
         $local->set('display_name', $_POST['displayname']);
@@ -289,12 +289,12 @@ $app->get('/opcarpeta/:id/:oper(/:data)', function ($id, $oper, $data = null) us
         $app->redirect($app->urlFor('login'));
     }
 
-    $folder = getFolderObjectById($organization['id'], $id);
+    $folder = getFolderById($organization['id'], $id);
 
     switch ($oper) {
         case 'swap':
             ORM::get_db()->beginTransaction();
-            $folder2 = getFolderObjectById($organization['id'], $data);
+            $folder2 = getFolderById($organization['id'], $data);
             $tmpOrderNr = $folder2['order_nr'];
             $folder2->set('order_nr', $folder['order_nr']);
             $folder->set('order_nr', $tmpOrderNr);
@@ -317,135 +317,13 @@ $app->get('/opcarpeta/:id/:oper(/:data)', function ($id, $oper, $data = null) us
     $app->redirect($app->urlFor('tree', array('id' => $folder['category_id'])));
 })->name('folderoperation');
 
-$app->map('/elemento/:id/:profileid/(:actid)', function ($id, $profileid, $actid = null) use ($app, $user, $organization) {
-    if (!$user && $user['is_admin']) {
-        $app->redirect($app->urlFor('login'));
-    }
-
-    $event = getEventObject($organization['id'], $id);
-    $uploadProfiles = parseArray(getPermissionProfiles($event['folder_id'], 1));
-
-    if (isset($_POST['changeprofile'])) {
-        $app->redirect($app->urlFor('manageitem', array('id' => $id, 'profileid' => $_POST['profile'], 'actid' => $actid )));
-    }
-
-    if (isset($_POST['new'])) {
-        $lines = explode("\n", $_POST['newelements']);
-        $ok = true;
-        ORM::get_db()->beginTransaction();
-        foreach($lines as $line) {
-            $line = str_replace($line, '\r', '');
-            if ($line) {
-                $item = explode("*", trim($line));
-                $ok = $ok && createEventItem($id, $_POST['profile'], $item[0], isset($item[1]) ? $item[1] : null);
-            }
-        }
-        if ($ok) {
-            $app->flash('save_ok', 'ok');
-            ORM::get_db()->commit();
-        }
-        else {
-            $app->flash('save_error', 'error');
-            ORM::get_db()->rollBack();
-        }
-        $app->redirect($app->request()->getPathInfo());
-    }
-
-    if (isset($_POST['delete'])) {
-        ORM::get_db()->beginTransaction();
-        if (deleteEventItems($id, $_POST['profile'], $_POST['item'])) {
-            ORM::get_db()->commit();
-            $app->flash('save_ok', 'ok');
-        }
-        else {
-            ORM::get_db()->rollBack();
-            $app->flash('save_error', 'error');
-        }
-        $app->redirect($app->request()->getPathInfo());
-    }
-
-    if (isset($_POST['order'])) {
-        ORM::get_db()->beginTransaction();
-        if (orderEventItems($id, $_POST['profile'])) {
-            ORM::get_db()->commit();
-            $app->flash('save_ok', 'ok');
-        }
-        else {
-            ORM::get_db()->rollBack();
-            $app->flash('save_error', 'error');
-        }
-        $app->redirect($app->request()->getPathInfo());
-    }
-
-    $uploadAs = array();
-
-    foreach ($uploadProfiles as $item) {
-        if (null == $item['display_name']) {
-            $data = parseArray(getSubprofiles($item['id']));
-            if (count($data)>1) {
-                foreach($data as $subItem) {
-                    if (null != $subItem['display_name']) {
-                        $uploadAs[$subItem['id']] = $subItem;
-                        if ($profileid == 0) {
-                            $profileid = $subItem['id'];
-                        }
-                    }
-                }
-            }
-            else {
-                $uploadAs[$item['id']] = $item;
-                if ($profileid == 0) {
-                    $profileid = $item['id'];
-                }
-            }
-        }
-        else {
-            $uploadAs[$item['id']] = $item;
-            if ($profileid == 0) {
-                $profileid = $item['id'];
-            }
-        }
-    }
-    $folder = getFolder($organization['id'], $event['folder_id']);
-
-    $items = parseArray(getEventProfileDeliveryItems($profileid, $id));
-
-    // barra lateral
-    $topbar = array(
-        array(
-            array('caption' => 'Gestión de actividades', 'icon' => 'calendar'),
-            array('caption' => 'Gestionar actividad', 'active' => true, 'target' => $app->request()->getPathInfo())
-        )
-    );
-
-    $breadcrumb = array(
-        array('display_name' => 'Actividades', 'target' => $app->urlFor('activities')),
-        array('display_name' => $event['display_name'], 'target' => $app->urlFor('event', array('id' => $id, 'actid' => $actid))),
-        array('display_name' => 'Gestionar entregas')
-    );
-
-    $app->flashKeep();
-
-    $app->render('manage_item.html.twig', array(
-        'navigation' => $breadcrumb, 'search' => true, 'topbar' => $topbar,
-        'select2' => true,
-        'url' => $app->request()->getPathInfo(),
-        'uploaders' => $uploadAs,
-        'items' => $items,
-        'profileid' => $profileid,
-        'id' => $id,
-        'event' => $event,
-        'actid' => $actid,
-        'folder' => $folder));
-})->name('manageitem')->via('GET', 'POST');
-
 $app->get('/historial/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $return=0, $data1=null, $data2=null, $data3=null)
         use ($app, $user, $organization, $config) {
     if (!$user) {
         $app->redirect($app->urlFor('login'));
     }
 
-    $folder = getFolderObjectById($organization['id'], $id);
+    $folder = getFolderById($organization['id'], $id);
     if (!$folder) {
         $app->redirect($app->urlFor('login'));
     }
@@ -501,9 +379,9 @@ $app->get('/historial/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $r
             $lastUrl = $app->urlFor('tree', array('id' => $data1));
             break;
         case 1:
-            $event = getEventObject($organization['id'], $data3);
+            $event = getEventByIdObject($organization['id'], $data3);
             $activityevent = getActivityEvent($data3, $data2, $user);
-            $profile = getProfileById($data1, $organization['id']);
+            $profile = getProfileById($organization['id'], $data1);
             if ((!$event) || (!$activityevent) || (!$profile) || ($event['folder_id'] != $id)) {
                 $app->redirect($app->urlFor('login'));
             }
@@ -670,20 +548,21 @@ function getProfilesByCategory($category_id) {
             find_array());
 }
 
-function getFolderObjectById($orgId, $folderId) {
-return ORM::for_table('folder')->
-            select('folder.*')->
-            inner_join('category', array('category.id', '=', 'folder.category_id'))->
-            where('category.organization_id', $orgId)->
-            where('folder.id', $folderId)->
-            find_one();
+function getFolderById($orgId, $folderId) {
+    $data = ORM::for_table('folder')->
+        select('folder.*')->
+        inner_join('category', array('category.id', '=', 'category_id'))->
+        where('category.organization_id', $orgId)->
+        find_one($folderId);
+
+    return $data;
 }
 
 function getFolder($orgId, $folderId) {
-    if ((null == $folderId) || (0 == $folderId)) {
+    if ((null === $folderId) || (0 === $folderId)) {
         return false;
     }
-    return getFolderObjectById($orgId, $folderId)->as_array();
+    return getFolderById($orgId, $folderId)->as_array();
 }
 
 function getCategories($orgId) {

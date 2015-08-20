@@ -43,7 +43,7 @@ $app->map('/modificar/:folderid/:id(/:return(/:data1(/:data2(/:data3(/:data4))))
     }
 
     if ($delivery['item_id']) {
-        $deliveredItem = getItemFromId($delivery['item_id']);
+        $deliveredItem = getItemById($organization['id'], $delivery['item_id']);
         $deliveredItem['display_name'] = parseVariables($deliveredItem['display_name'], $organization, $user, $profile);
     }
     else {
@@ -664,16 +664,6 @@ function getRevisionById($orgId, $revisionId) {
 function getDocumentById($documentId) {
     $data = ORM::for_table('document')->
             find_one($documentId);
-
-    return $data;
-}
-
-function getFolderById($orgId, $folderId) {
-    $data = ORM::for_table('folder')->
-        select('folder.*')->
-        inner_join('category', array('category.id', '=', 'category_id'))->
-        where('category.organization_id', $orgId)->
-        find_one($folderId);
 
     return $data;
 }

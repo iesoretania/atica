@@ -94,9 +94,9 @@ $app->get('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $retu
             $lastUrl = $app->urlFor('tree', array('id' => $data1));
             break;
         case 1:
-            $event = getEventObject($organization['id'], $data3);
+            $event = getEventByIdObject($organization['id'], $data3);
             $activityevent = getActivityEvent($data3, $data2, $user);
-            $profile = getProfileById($data1, $organization['id']);
+            $profile = getProfileById($organization['id'], $data1);
             if ((!$event) || (!$activityevent) || (!$profile) || ($event['folder_id'] != $id)) {
                 $app->redirect($app->urlFor('login'));
             }
@@ -511,7 +511,7 @@ $app->get('/estadisticas/:id(/:return/:data1(/:data2(/:data3)))', function ($id,
         $app->redirect($app->urlFor('login'));
     }
 
-    $folder = getFolderObjectById($organization['id'], $id);
+    $folder = getFolderById($organization['id'], $id);
 
     $restrictedProfiles = parseArray(getPermissionProfiles($id, 2));
     $uploadProfiles = parseArray(getPermissionProfiles($id, 1));
@@ -542,9 +542,9 @@ $app->get('/estadisticas/:id(/:return/:data1(/:data2(/:data3)))', function ($id,
             $lastUrl = $app->urlFor('tree', array('id' => $data1));
             break;
         case 1:
-            $event = getEventObject($organization['id'], $data3);
+            $event = getEventByIdObject($organization['id'], $data3);
             $activityevent = getActivityEvent($data3, $data2, $user);
-            $profile = getProfileById($data1, $organization['id']);
+            $profile = getProfileById($organization['id'], $data1);
             if ((!$event) || (!$activityevent) || (!$profile) || ($event['folder_id'] != $id)) {
                 $app->redirect($app->urlFor('login'));
             }

@@ -33,13 +33,16 @@ function switchChecks(e) {
 {% import "macros.twig" as m %}
 <div class="panel panel-info">
     <div class="panel-heading">
-    <h1>Gestionar elementos del evento: {{ event['display_name'] }}</h1>
+    <h1>Gestionar elementos de la actividad: {{ event['display_name'] }}</h1>
     <h2>Carpeta de entrega: {{ folder['display_name'] }}</h2>
     </div>
     {% if event['description'] %}<div class="panel-body"><h4>{{  event['description'] | nl2br }}</h4></div>{% endif %}
 </div>
 <form class="form-horizontal" role="form" method="post" action="{{ url }}">
     <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3>Entregas por perfil</h3>
+        </div>
         <div class="panel-body">
             <div class="form-group">
                 <label for="category" class="col-md-2 control-label">Perfil</label>
@@ -52,33 +55,52 @@ function switchChecks(e) {
                 </div>
                 <input class="btn btn-info hidejs" type="submit" name="changeprofile" value="Ver perfil" />
             </div>
-        
-            {{ m.input_textarea('newelements', 8, 'Nuevos elementos', 'Coloque un elemento por línea, separando el nombre del documento con un asterisco (*) y seleccione el botón correspondiente', '') }}
         </div>
         <table class="table table-striped table-condensed table-hover">
             <thead>
                 <tr>
                     <th class="col-md-7"><input type="checkbox" class="showjs-inline" onChange="switchChecks(this);"> Elemento</th>
-                    <th class="col-md-5">Nombre del documento</th>
+                    <th class="col-md-5">Nombre de la descarga</th>
                 </tr>
             </thead>
             <tbody>
                 {% for item in items %}
                 <tr>
                     <td><input type="checkbox" class="check" name="item[]" value="{{ item['id'] }}">
-                        {{ item['display_name'] }}
+                        {{ item['display_name'] }}&nbsp; <a class="delivery-tools hidden-print" title="Modificar elemento" href="{{ urlFor('managedeliveryitem', {'id': item['id']}) }}"><span class="icon-pencil"></span></a>
+                        {% if not loop.first %}<button type="submit" name="up" class="btn btn-link delivery-tools hidden-print" value="{{ item['id'] }}"><span class="icon-arrow-up"></span></button>{% endif %}
+                        {% if not loop.last %}<button type="submit" name="down" class="btn btn-link delivery-tools hidden-print" value="{{ item['id'] }}"><span class="icon-arrow-down"></span></button>{% endif %}
                     </td>
                     <td>
                         {{ item['document_name'] }}
                     </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="2"><h4>No hay elementos asociados a este perfil</h4></td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
 
         <div class="panel-footer hidden-print">
-            <button type="submit" name="new" class="btn btn-success">Crear los elementos del cuadro</button>
+            {% if items %}
             <button type="submit" name="order" class="btn btn-warning">Ordenar todo por orden alfabético</button>
             <button type="submit" name="delete" class="btn btn-danger">Eliminar elementos seleccionados</button>
+            {% endif %}
+            <a class="btn btn-info" href="{{ back_url }}">Volver sin realizar cambios</a>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3>Creación masiva de elementos</h3>
+        </div>
+        <div class="panel-body">
+            <p>Esta opción le permite crear múltiples elementos de entrega de una sola vez.</p>
+            {{ m.input_textarea('newelements', 8, 'Nuevos elementos', 'Coloque un elemento por línea. Si desea incluir el nombre de la descarga, añádalo al final separando con un asterisco (*)', '') }}
+        </div>
+        <div class="panel-footer hidden-print">
+            <button type="submit" name="new" class="btn btn-success">Crear los elementos del cuadro</button>
         </div>
     </div>
 </form>

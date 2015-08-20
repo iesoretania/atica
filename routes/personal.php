@@ -497,7 +497,7 @@ $app->map('/detalleperfil/:id(/:gid)', function ($id, $gid = null) use ($app, $u
         $new = true;
     }
     else {
-        $profile = getProfileById($id, $organization['id']);
+        $profile = getProfileById($organization['id'], $id);
 
         if (!$profile) {
             $app->redirect($app->urlFor('login'));
@@ -717,7 +717,7 @@ function getProfilesByOrganization($orgId, $filter = true, $containers = false) 
     return $data->find_array();
 }
 
-function getProfileById($id, $orgId) {
+function getProfileById($orgId, $id) {
     $data = ORM::for_table('profile')->
             select('profile.*')->
             select('profile_group.display_name_neutral')->
