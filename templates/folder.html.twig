@@ -42,7 +42,7 @@
                 {% endif %}
             <tr>
                 <td class="thin"><a href="{{ urlFor('download', { 'id': delivery.id, 'cid': info.category_id, 'kind': 1 }) }}">{{ delivery.display_name | replace({'_':' '})}}</a> 
-                {% if user['is_admin'] or (not no_manager and (info['manage_permission'] or delivery['uploader_person_id'] == user['id'])) %}<a class="delivery-tools hidden-print" title="Modificar envío" href="{{ urlFor('modify', {'id': delivery['id'], 'folderid': info['id'], 'return': backurl['return'], 'data1': backurl['data1'], 'data2': backurl['data2'], 'data3': backurl['data3'] }) }}"><span class="icon-pencil"></span></a>{% endif %}</td>
+                {% if user['is_admin'] or ((not no_manager) and (info['manage_permission'] or (delivery['uploader_person_id'] == user['id']))) %}<a class="delivery-tools hidden-print" title="Modificar envío" href="{{ urlFor('modify', {'id': delivery['id'], 'folderid': info['id'], 'return': backurl['return'], 'data1': backurl['data1'], 'data2': backurl['data2'], 'data3': backurl['data3'] }) }}"><span class="icon-pencil"></span></a>{% endif %}</td>
                 <td>{% if info['show_revision_nr'] %}{{ delivery['revision_nr'] ~ ' ('}}{% endif %}<abbr title="{{ delivery.upload_date | date('H:i') }}">{{ delivery.upload_date | date('Y/m/d') }}</abbr>{% if info['show_revision_nr'] %}){% endif %}</td>
                 <td><a href="{{ urlFor('personal', { 'id': personId, 'section': 0 }) }}">{{ persons[personId]['display_name']}}</a></td>
             </tr>

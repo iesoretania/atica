@@ -88,6 +88,7 @@
     {% endif %}
 </div>
 {% if data %}
+{% set no_manager = false %}
 {% include 'folder.html.twig' %}
 {% elseif not content %}
 <div class="panel panel-default">

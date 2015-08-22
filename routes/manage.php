@@ -360,7 +360,7 @@ $app->map('/revision/:folderid/:id', function ($folderId, $id) use ($app, $user,
     );
 
     $app->render('manage_revision.html.twig', array(
-        'navigation' => $breadcrumb, 'search' => false, 'sidebar' => $sidebar,
+        'navigation' => $breadcrumb, 'search' => false,
         'select2' => true,
         'url' => $app->request()->getPathInfo(),
         'category' => $category,
@@ -655,7 +655,9 @@ function getRevisionById($orgId, $revisionId) {
             select('revision.*')->
             inner_join('delivery', array('delivery.id', '=', 'revision.delivery_id'))->
             inner_join('folder_delivery', array('delivery.id', '=', 'folder_delivery.delivery_id'))->
-            where('folder_delivery.snapshot_id', $orgId)->
+            inner_join('folder', array('folder.id', '=', 'folder_delivery.folder_id'))->
+            inner_join('category', array('category.id', '=', 'folder.category_id'))->
+            where('category.organization_id', $orgId)->
             find_one($revisionId);
 
     return $data;

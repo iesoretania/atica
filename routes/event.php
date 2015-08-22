@@ -1068,3 +1068,4 @@ function deleteEvent($orgId, $id) {
         where('event.id', $id)->
         delete_many();
 }
+
