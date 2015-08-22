@@ -158,6 +158,22 @@ $app->map('/grupoactividad/:id', function ($id) use ($app, $user, $config, $orga
         $activity = array();
     }
 
+    if ((0 != $id) && isset($_POST['delete'])) {
+
+        ORM::get_db()->beginTransaction();
+        $ok = $activity->delete();
+
+        if ($ok) {
+            $app->flash('save_ok', 'delete');
+            ORM::get_db()->commit();
+            $app->redirect($app->urlFor('manageallevents'));
+        }
+        else {
+            $app->flash('save_error', 'delete');
+            ORM::get_db()->rollback();
+            $app->redirect($app->request()->getPathInfo());
+        }
+    }
 
     if (isset($_POST['saveactivity'])) {
         ORM::get_db()->beginTransaction();
@@ -196,6 +212,54 @@ $app->map('/grupoactividad/:id', function ($id) use ($app, $user, $config, $orga
         'activity' => ($id == 0) ? array() : $activity));
 
 })->name('manageactivity')->via('GET', 'POST');
+
+$app->map('/actividad/listar', function () use ($app, $user, $organization) {
+    if (!$user && $user['is_admin']) {
+        $app->redirect($app->urlFor('login'));
+    }
+
+    if (isset($_POST['delete'])) {
+        ORM::get_db()->beginTransaction();
+        $ok = true;
+
+        foreach($_POST['item'] as $item) {
+            $ok = $ok && deleteEvent($organization['id'], $item);
+        }
+
+        if ($ok) {
+            ORM::get_db()->commit();
+            $app->flash('save_ok', 'ok');
+        }
+        else {
+            ORM::get_db()->rollBack();
+            $app->flash('save_error', 'error');
+        }
+        $app->redirect($app->request()->getPathInfo());
+    }
+
+    $breadcrumb = array(
+        array('display_name' => 'Actividades', 'target' => $app->urlFor('activities')),
+        array('display_name' => 'Gestionar actividades')
+    );
+
+    $events = getAllEventsGroupedByActivity($organization['id']);
+    $activities = getAllActivities($organization['id']);
+    $folders = getAllFoldersFromActivities($organization['id']);
+    $profilesEvent = getProfilesForAllEvents($organization['id']);
+    $allProfiles = parseArray(getProfilesByOrganization($organization['id'], false, true));
+
+    $app->render('manage_all_event.html.twig', array(
+        'navigation' => $breadcrumb, 'search' => true,
+        'select2' => true,
+        'url' => $app->request()->getPathInfo(),
+        'events' => $events,
+        'activities' => $activities,
+        'profiles_event' => $profilesEvent,
+        'all_profiles' => $allProfiles,
+        'back_url' => $app->urlFor('activities'),
+        'folders' => $folders)
+    );
+})->name('manageallevents')->via('GET', 'POST');
 
 function getUserProfiles($user_id, $org_id, $extended) {
     // $extended indica si queremos recibir también los perfiles generales
@@ -359,4 +423,33 @@ function getActivityObject($orgId, $actId) {
             where('organization_id', $orgId)->
             where('id', $actId)->
             find_one();
+}
+
+function getAllFoldersFromActivities($orgId) {
+    $folders = ORM::for_table('event')->
+            select('id')->
+            distinct()->
+            where('organization_id', $orgId)->
+            find_array();
+
+    $folders = array_column($folders, 'id');
+
+    $data = parseArray(
+        ORM::for_table('folder')->
+            where_id_in($folders)->
+            find_many()
+    );
+    return $data;
+}
+
+function getProfilesForAllEvents($orgId) {
+    $folders = ORM::for_table('event_profile')->
+            select('event_profile.*')->
+            inner_join('event', array('event_id', '=', 'event.id'))->
+            where('event.organization_id', $orgId)->
+            find_array();
+
+    $data = parseArrayMix($folders, 'event_id');
+
+    return $data;
 }

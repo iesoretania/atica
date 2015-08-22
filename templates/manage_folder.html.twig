@@ -51,8 +51,8 @@
             {{ m.input_profiles('restricted', 'Tienen acceso si está restringido', restricted, allProfiles, 0) }}
             {{ m.input_radio_array('private', 'Los usuarios autorizados pueden ver', {'0': 'Todas las entregas', '1': 'Sólo sus entregas', '2': 'Sólo las entregas de sus perfiles'}, private) }}
             <button type="submit" name="savefolder" class="btn btn-success">{{ folder.new ? 'Crear carpeta' : 'Guardar cambios' }}</button>
-            <a href="{{ flash['last_url'] }}" class="btn btn-info">Volver sin guardar los cambios</a>
             <button type="submit" name="deletefolder" class="btn btn-danger" onClick="javascript:return confirm('¡Cuidado: La operación de borrado no se puede deshacer.\n\nTodos los documentos actuales y archivados de la carpeta se perderán para siempre.\n\n¿Desea continuar?');">Eliminar carpeta, sus entregas e historial</button>
+            <a href="{{ flash['last_url'] }}" class="btn btn-info">Volver sin guardar los cambios</a>
         </form>
     </div>
 </div>

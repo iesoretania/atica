@@ -29,8 +29,9 @@
             {{ m.input_textarea('description', 8, 'Más información', 'Descripción del contenido de la actividad e instrucciones de uso', activity.description) }}
             <button type="submit" name="saveactivity" class="btn btn-success">{{ new ? 'Crear categoría de actividad' : 'Guardar cambios' }}</button>
             {% if not new %}
-                <button type="submit" name="deleteactivity" class="btn btn-danger">Eliminar categoría y todos sus eventos</button>
+                <button type="submit" name="delete" class="btn btn-danger" onClick="javascript:return confirm('La operación de borrado no se puede deshacer.\n\nTodos las actividades que sólo pertenezcan a esta categoría también serán eliminadas.\n\n¿Desea continuar?');">Eliminar categoría y todos los eventos que sólo pertenezcan a ella</button>
             {% endif %}
+            <a class="btn btn-info" href="{{ urlFor('manageallevents') }}">Volver al listado sin guardar los cambios</a>
         </form>
     </div>
 </div>

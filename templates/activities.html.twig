@@ -24,7 +24,7 @@
     {% if user['is_admin'] %}
     <div class="panel-footer">
         <a class="btn btn-success" href="{{ urlFor('manageactivity', { 'id':0 }) }}">Crear nueva categoría de actividad</a>
-        <a class="btn btn-success" href="{{ urlFor('manageevent', { 'id': 0 }) }}">Crear nueva actividad</a>
+        <a class="btn btn-warning" href="{{ urlFor('manageallevents') }}">Gestionar actividades</a>
     </div>
     {% endif %}
 </div>
@@ -37,7 +37,7 @@
     </div>
     {% for activity in profile.data %}
     <div class="panel-body">
-        <h3>{{ activity.info.activity_display_name }}{% if user['is_admin'] %}&nbsp;<small class="pull-right hidden-print"><a class="folder-tools" href="{{ urlFor('manageactivity', { 'id': activity.info.activity_id }) }}"><span class="icon-cog"></span></a></small>{% endif %}</h3>
+        <h3>{{ activity.info.activity_display_name }}{% if user['is_admin'] %}&nbsp;<span class="delivery-tools hidden-print"><a class="folder-tools" href="{{ urlFor('manageactivity', { 'id': activity.info.activity_id }) }}"><span class="icon-cog"></span></a></span>{% endif %}</h3>
         {% if activity.info.activity_description %}<p>{{ activity.info.activity_description | nl2br }}</p>{% endif %}
     </div>
     <table class="table table-striped table-condensed table-hover">

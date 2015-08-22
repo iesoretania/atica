@@ -63,7 +63,7 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
 
     $breadcrumb = array(
         array('display_name' => 'Actividades', 'target' => $app->urlFor('activities')),
-        //array('display_name' => $detail, 'target' => $app->urlFor('activities', array('id' => $pid))),
+        array('display_name' => 'Gestionar actividades', 'target' => $app->urlFor('manageallevents')),
         array('display_name' => $event['activity_display_name'], 'target' => $app->urlFor('activities', array('id' => $pid))),
         array('display_name' => $event['display_name'])
     );
@@ -104,7 +104,7 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
         'event' => $event));
 })->name('event')->via('GET', 'POST');
 
-$app->map('/actividad/:id', function ($id) use ($app, $user, $organization) {
+$app->map('/actividad/:id(/:actid)', function ($id, $actid = null) use ($app, $user, $organization) {
     if (!$user || !$user['is_admin']) {
         $app->redirect($app->urlFor('login'));
     }
@@ -118,7 +118,9 @@ $app->map('/actividad/:id', function ($id) use ($app, $user, $organization) {
         $event = array(
             'is_visible' => 1,
             'is_manual' => 0,
-            'is_automatic' => 0
+            'is_automatic' => 0,
+            'force_period' => 0,
+            'grace_period' => 0
         );
     }
 
@@ -191,7 +193,12 @@ $app->map('/actividad/:id', function ($id) use ($app, $user, $organization) {
     $categories = getActivities($organization['id']);
 
     // obtener las activas en este evento
-    $selectedCategories = ($id == 0) ? array() : getEventActivitiesId($id);
+    if ($id == 0) {
+        $selectedCategories = ($actid != 0) ? array($actid => array('id' => $actid)) : array();
+    }
+    else {
+        $selectedCategories = getEventActivitiesId($id);
+    }
 
     // obtener todos los perfiles
     $allProfiles = getProfilesByOrganization($organization['id'], true, true);
@@ -207,6 +214,7 @@ $app->map('/actividad/:id', function ($id) use ($app, $user, $organization) {
 
     $breadcrumb = array(
         array('display_name' => 'Actividades', 'target' => $app->urlFor('activities')),
+        array('display_name' => 'Gestionar actividades', 'target' => $app->urlFor('manageallevents')),
         array('display_name' => ($id == 0) ? 'Nueva actividad' : $event['display_name'])
     );
 
@@ -1036,10 +1044,10 @@ function getLastItemOrderNr($eventId, $profileId) {
 }
 
 function getAllActivities($orgId) {
-    return ORM::for_table('activity')->
+    return parseArray(ORM::for_table('activity')->
         where('organization_id', $orgId)->
         order_by_asc('display_name')->
-        find_many();
+        find_many());
 }
 
 function getAllEventsGroupedByActivity($orgId) {
@@ -1052,4 +1060,11 @@ function getAllEventsGroupedByActivity($orgId) {
     $data = parseArrayMix($events, 'activity_id');
 
     return $data;
+}
+
+function deleteEvent($orgId, $id) {
+    return ORM::for_table('event')->
+        where('organization_id', $orgId)->
+        where('event.id', $id)->
+        delete_many();
 }
