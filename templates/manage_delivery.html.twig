@@ -82,7 +82,16 @@
                 </div>
             </div>
             {% endif %}
-            {{ m.input_text('displayname', 10, 'Nombre a mostrar', 'Nombre con el que se mostrará la entrega en los listados', delivery['display_name']) }}
+            {% if is_manager or (delivery['item_id'] is null) %}
+                {{ m.input_text('displayname', 10, 'Nombre a mostrar', 'Nombre con el que se mostrará la entrega en los listados', delivery['display_name']) }}
+            {% else %}
+                <div class="form-group">
+                    <label class="col-md-2 control-label">Nombre a mostrar</label>
+                    <div class="col-md-10">
+                        <p class="form-control-static">{{ delivery.display_name }}</p>
+                    </div>
+                </div>
+            {% endif %}
             {{ m.input_textarea('description', 3, 'Descripción detallada', 'Notas adicionales sobre la entrega', delivery['description']) }}
         </div>
         <div class="panel-footer">
@@ -101,11 +110,11 @@
     <div class="panel panel-default">
         <div class="panel-body">
             <h3>Entregar una nueva revisión</h3>
-            <blockquote><p>Desde este apartado podrá enviar nuevas versiones de la entrega</p></blockquote>
+            <blockquote><p>Desde este apartado podrá enviar nuevas versiones del documento en cualquier momento, aunque haya finalizado el plazo de presentación</p></blockquote>
             <div class="form-group">
-                <label for="document">Enviar un documento nuevo a la plataforma</label>
+                <label for="document">Enviar un documento como nueva revisión a la plataforma</label>
                 <input type="file" class="form-control trigger" name="document[]">
-                <p class="help-block">El documento enviado podrá ser almacenado como una nueva revisión</p>
+                <p class="help-block">El documento enviado será almacenado con las demás revisiones</p>
             </div>
             <div class="form-group">
                 <button type="submit" name="new" class="btn btn-primary auto-enable">Entregar como nueva revisión</button>
@@ -115,7 +124,7 @@
     <div class="panel panel-default">
         <div class="panel-body">
             <h3>Revisiones almacenadas</h3>
-            <blockquote><p>Desde este apartado podrá observar las revisiones almacenadas</p></blockquote>
+            <blockquote><p>Desde este apartado podrá observar las distintas revisiones que hay almacenadas en la plataforma</p></blockquote>
         </div>
         <ul class="list-group">
             {% for revision in revisions %}

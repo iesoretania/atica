@@ -177,7 +177,14 @@ $app->map('/modificar/:folderid/:id(/:return(/:data1(/:data2(/:data3(/:data4))))
         $hash = sha1_file($_FILES['document']['tmp_name'][0]);
         $filesize = filesize($_FILES['document']['tmp_name'][0]);
         $documentDestination = createDocumentFolder($preferences['upload.folder'], $hash);
-        $filename = $_FILES['document']['name'][0];
+
+        if (null !== $delivery['item_id']) {
+            $ext = pathinfo($_FILES['document']['name'][0], PATHINFO_EXTENSION);
+            $filename = parseVariables($deliveredItem['document_name'], $organization, $user, $profile) . '.' . $ext;
+        }
+        else {
+            $filename = $_FILES['document']['name'][0];
+        }
 
         $documentData = getDocumentDataByHash($hash);
         $newData = (false == $documentData);
@@ -204,7 +211,7 @@ $app->map('/modificar/:folderid/:id(/:return(/:data1(/:data2(/:data3(/:data4))))
             ORM::get_db()->rollback();
         }
 
-        $app->redirect($app->urlFor('tree', array('id' => $category['id'])));
+        $app->redirect($app->request()->getPathInfo());
     }
 
     $breadcrumb = array(
