@@ -1,0 +1,157 @@
+{#  ATICA - Web application for supporting Quality Management Systems
+    Copyright (C) 2009-2015: Luis-Ramón López López
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see [http://www.gnu.org/licenses/]. #}
+
+{% extends "tree.html.twig" %}
+{% block scripts %}
+<script>
+function switchChecks(e, c) {
+    if (!$(e).prop('checked')) {
+        $(c).removeAttr('checked');
+    }
+    else {
+        $(c).prop('checked', 'checked');
+    }
+    console.log($(e).prop('checked'));
+    console.dir($(e));
+}
+</script>
+{% endblock %}
+{% block maincontent %}
+{% import "macros.twig" as m %}
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <h1>Elementos de la actividad: {{ event['display_name'] }}</h1>
+        <h2>Carpeta de entrega: {{ folder['display_name'] }}</h2>
+    </div>
+    {% if event['description'] %}<div class="panel-body"><h4>{{ event['description'] | nl2br }}</h4></div>{% endif %}
+    <div class="panel-footer hidden-print">
+        <a class="btn btn-info" href="{{ urlFor('manageitem', { 'id': event['id'], 'profileid': 0 }) }}">Ver elementos por perfiles individuales</a>
+    </div>
+</div>
+<form class="form-horizontal" role="form" method="post" action="{{ url }}">
+    {% for profile, items in profiles %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3>{{ uploaders[profile]['display_name_neutral'] ~ ' ' ~ uploaders[profile]['display_name'] }} <a class="delivery-tools hidden-print" title="Ver elementos del perfil" href="{{ urlFor('manageitem', { 'id': event['id'], 'profileid': profile }) }}"><span class="icon-cog"></span></a></h3>
+        </div>
+        <table class="table table-striped table-condensed table-hover">
+            <thead>
+                <tr>
+                    <th class="col-md-7"><input type="checkbox" class="showjs-inline" onChange="switchChecks(this, '.check');"> Elemento</th>
+                    <th class="col-md-5">Nombre de la descarga</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td><input type="checkbox" class="check" name="item[]" value="{{ item['id'] }}">
+                        {{ item['display_name'] }}&nbsp; <a class="delivery-tools hidden-print" title="Modificar elemento" href="{{ urlFor('managedeliveryitem', { 'id': item['id'], 'all': 1 }) }}"><span class="icon-pencil"></span></a>
+                        {% if not loop.first %}<button type="submit" name="up" class="btn btn-link delivery-tools hidden-print" value="{{ item['id'] }}!{{ profile }}"><span class="icon-arrow-up"></span></button>{% endif %}
+                        {% if not loop.last %}<button type="submit" name="down" class="btn btn-link delivery-tools hidden-print" value="{{ item['id'] }}!{{ profile }}"><span class="icon-arrow-down"></span></button>{% endif %}
+                    </td>
+                    <td>
+                        {{ item['document_name'] }}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="2"><h4>No hay elementos asociados a este perfil</h4></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="panel-footer hidden-print">
+            <a class="btn btn-success" href="{{ urlFor('newdeliveryitem', {'id': event.id, 'profileid': profile}) }}">Nuevo elemento</a>
+            <button type="submit" name="delete" class="btn btn-danger" onClick="javascript:return confirm('¡Cuidado: La operación de borrado no se puede deshacer.\n\nTodos los documentos actuales asociados a las entregas se perderán para siempre.\n\n¿Desea continuar?');">Eliminar elementos seleccionados</button>
+            <a class="btn btn-info" href="{{ back_url }}">Volver a la actividad sin realizar cambios</a>
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3>Creación masiva de elementos</h3>
+        </div>
+        <div class="panel-body">
+            <p>Esta opción le permite crear múltiples elementos de entrega de una sola vez en todos los perfiles seleccionados.</p>
+            {{ m.input_textarea('newelements', 8, 'Nuevos elementos', 'Coloque un elemento por línea. Si desea incluir el nombre de la descarga, añádalo al final separando con un asterisco (*)', '') }}
+        </div>
+        <table class="table table-striped table-condensed table-hover">
+            <thead>
+            <tr>
+                <th class="col-md-12"><input type="checkbox" class="showjs-inline" checked="checked" onChange="switchChecks(this, '.checkp');"> Perfil</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for profile in uploaders %}
+                <tr>
+                    <td><input type="checkbox" class="checkp" name="profilenew[]" checked="checked" value="{{ profile['id'] }}">
+                        {{ profile['display_name_neutral'] ~ ' ' ~ profile['display_name'] }}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td><h4>No hay perfiles asociados a este evento</h4></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <div class="panel-footer hidden-print">
+            <button type="submit" name="new" class="btn btn-warning">Crear los elementos del cuadro en todos los perfiles seleccionados</button>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3>Copia desde otra actividad</h3>
+        </div>
+        <div class="panel-body">
+            <p>Esta opción le permite copiar los elementos de entrega desde otra actividad. Sólo se agregarán aquellos
+            elementos que pertenezcan a los perfiles asociados a esta actividad.</p>
+            <div class="form-group">
+                <label for="event" class="col-md-2 control-label">Actividad</label>
+                <select class="select col-md-10" id="event" name="event">
+                    <option value="" selected>Seleccione una actividad...</option>
+                    {% for activity_id, evs in events %}
+                        <optgroup label="{{ activities[activity_id]['display_name'] }}">
+                        {% for ev in evs %}
+                            <option value="{{ ev['id'] }}">{{ ev['display_name'] }}</option>
+                        {% endfor %}
+                        </optgroup>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="panel-footer hidden-print">
+            <button type="submit" name="import" class="btn btn-warning" onClick="javascript:return confirm('¡Cuidado: La operación de agregación no se puede deshacer.\n\nConfirme que la actividad origen es correcta.\n\n¿Desea continuar?');">Agregar todos los elementos de entrega de la actividad</button>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3>Sustitución de textos</h3>
+        </div>
+        <div class="panel-body">
+            <p>Esta opción le permite sustituir un texto del nombre del elemento y de descarga por otro.</p>
+            {{ m.input_text('replace_this', 8, 'Texto a reemplazar', 'Introduzca el texto a buscar en el nombre del elemento y el nombre de la descarga', '') }}
+            {{ m.input_text('replace_with', 8, 'Sustituir por', 'Introduzca el texto por el que se sustituirá cada ocurrencia. Si lo deja vacío, se borrarán', '') }}
+        </div>
+        <div class="panel-footer hidden-print">
+            <button type="submit" name="replace" class="btn btn-warning" onClick="javascript:return confirm('¡Cuidado: La operación de sustitución no se puede deshacer.\n\nConfirme que los datos introducidos (incluidos los espacios) son correctos.\n\n¿Desea continuar?');">Sustituir texto en todas las entregas</button>
+        </div>
+    </div>
+</form>
+{% endblock %}

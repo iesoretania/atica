@@ -20,7 +20,7 @@
 
 $updates[] = array(
     'id' => '2015081901',
-    'description' => 'Solución al fallo que impedía eliminar entregas completas'
+    'description' => 'Solución al fallo que impedía eliminar entregas completas. Tampoco desaparecen los eventos asociados a una carpeta borrada.'
 );
 
 if ($ok && (false === $simulate)) {
@@ -28,6 +28,8 @@ if ($ok && (false === $simulate)) {
     try {
         $query = ORM::get_db()->exec("ALTER TABLE `delivery` DROP FOREIGN KEY `delivery_current_revision_id_fk`;");
         $query = ORM::get_db()->exec("ALTER TABLE `delivery` ADD  CONSTRAINT `delivery_current_revision_id_fk` FOREIGN KEY (`current_revision_id`) REFERENCES `atica`.`revision`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;");
+        $query = ORM::get_db()->exec("ALTER TABLE `event` DROP FOREIGN KEY `event_ibfk_1`;");
+        $query = ORM::get_db()->exec("ALTER TABLE `event` ADD  CONSTRAINT `event_ibfk_1` FOREIGN KEY (`folder_id`) REFERENCES `atica`.`folder`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;");
     }
     catch(Exception $e) {
         $ok = false;
