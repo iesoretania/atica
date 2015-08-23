@@ -95,15 +95,23 @@ $app->get('/descargar/:kind/:cid/:id/(:p1/)(:p2/)', function ($kind, $cid, $id, 
         case 3:
             $eventId = $cid;
             break;
+        case 4:
+            break;
         default:
             $app->redirect($app->urlFor('frontpage'));
     }
 
-    $delivery = getDelivery($id, $user['id']);
+    if (is_null($p1)) {
+        $delivery = getDelivery($id);
+    }
+    else {
+        $delivery = getDeliveryWithRevision($id, $p1);
+    }
+
     if (!$delivery) {
        doRegisterAction($app, $user, $organization, 'tree', 1, 'download_error', 'no delivery',
                null, null, null, $eventId, $groupId, null, null, $id,
-               $delivery['current_delivery_id'], null, null);
+               $delivery['current_revision_id'], null, null);
        $app->flash('home_error', 'no_delivery');
        $app->redirect($app->request->getReferrer());
     }
@@ -112,7 +120,7 @@ $app->get('/descargar/:kind/:cid/:id/(:p1/)(:p2/)', function ($kind, $cid, $id, 
     if (!file_exists($file)) {
        doRegisterAction($app, $user, $organization, 'tree', 1, 'download_error', 'no document',
                null, null, null, $eventId, $groupId, null, null, $id,
-               $delivery['current_delivery_id'], null, null);
+               $delivery['current_revision_id'], null, null);
        $app->flash('home_error', 'no_document');
        $app->redirect($app->request->getReferrer());
     }

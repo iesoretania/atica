@@ -124,18 +124,18 @@
     <div class="panel panel-default">
         <div class="panel-body">
             <h3>Revisiones almacenadas</h3>
-            <blockquote><p>Desde este apartado podrá observar las distintas revisiones que hay almacenadas en la plataforma</p></blockquote>
+            <blockquote><p>Desde este apartado podrá observar y descargar las distintas revisiones que hay almacenadas en la plataforma. La revisión que aparece en negrita es la revisión activa</p></blockquote>
         </div>
         <ul class="list-group">
             {% for revision in revisions %}
                 <li class="list-group-item{{ delivery['current_revision_id'] == revision['id'] ? ' warning' }}">
                     <h4>
-                        {{ delivery['current_revision_id'] == revision['id'] ? '<strong>' }}Rev. {{ revision['revision_nr'] }} - {{ revision['upload_date'] | date('Y-m-d') }}
-                        - {{ revision['download_filename'] }}{{ delivery['current_revision_id'] == revision['id'] ? '</strong>' }}
+                        {{ delivery['current_revision_id'] == revision['id'] ? '<strong>' }}<a href="{{ urlFor('download', { 'id': delivery.id, 'cid': 0, 'kind': 4, 'p1': revision['id'] }) }}">Rev. {{ revision['revision_nr'] }} - {{ revision['upload_date'] | date('Y-m-d') }}
+                        - {{ revision['download_filename'] }}{{ delivery['current_revision_id'] == revision['id'] ? '</strong>' }}</a>
                         {% if user['is_admin'] %}<a class="delivery-tools hidden-print" title="Modificar entrega" href="{{ urlFor('revision', {'id': revision['id'], 'folderid': folder['id'] }) }}"><span class="icon-pencil"></span></a>{% endif %}
                     </h4>
                     <p>
-                    Entregado por <a href="{{ urlFor('personal', { 'id': revision['uploader_person_id'], 'section': 0 }) }}">{{ uploaders[revision['uploader_person_id']]['display_name'] }}</a></p>
+                    Entregada por {% if user['is_admin'] %}<a href="{{ urlFor('personal', { 'id': revision['uploader_person_id'], 'section': 0 }) }}">{% endif %}{{ uploaders[revision['uploader_person_id']]['display_name'] }}{% if user['is_admin'] %}</a>{% endif %}</p>
                     {% if is_manager %}
                     <p>
                         {% if delivery['current_revision_id'] != revision['id'] %}

@@ -601,6 +601,22 @@ function getDelivery($deliveryId) {
             where('delivery.id', $deliveryId)->
             find_one();
 }
+
+function getDeliveryWithRevision($deliveryId, $revId) {
+    return ORM::for_table('delivery')->
+        select('document.download_filename')->
+        select('file_extension.mime')->
+        select('document_data.download_path')->
+        select('document_data.download_filesize')->
+        inner_join('revision', array('delivery.id', '=', 'revision.delivery_id'))->
+        inner_join('document', array('document.id', '=', 'revision.original_document_id'))->
+        inner_join('file_extension', array('file_extension.id', '=', 'document.extension_id'))->
+        inner_join('document_data', array('document_data.id', '=', 'document.document_data_id'))->
+        where('delivery.id', $deliveryId)->
+        where('revision.id', $revId)->
+        find_one();
+}
+
 function getPermissionProfiles($folderId, $permission) {
     return ORM::for_table('profile')->
             select('profile.*')->
