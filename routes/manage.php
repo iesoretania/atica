@@ -88,7 +88,7 @@ $app->map('/modificar/:folderid/:id(/:return(/:data1(/:data2(/:data3(/:data4))))
         }
     }
 
-    $sidebar = getTree($organization['id'], $app, $folder['category_id'], $category, $parent);
+    getTree($organization['id'], $app, $folder['category_id'], $category, $parent);
 
     if (isset($_POST['save'])) {
         $delivery->set('display_name', $_POST['displayname']);
@@ -118,10 +118,12 @@ $app->map('/modificar/:folderid/:id(/:return(/:data1(/:data2(/:data3(/:data4))))
 
     if (isset($_POST['remove'])) {
         ORM::get_db()->beginTransaction();
-        $ok = true;
+
         $revision = getRevisionById($organization['id'], $_POST['remove']);
 
-        $ok = deleteDocumentById($revision['original_document_id'], $preferences);
+        $ok = ($revision !== false);
+
+        $ok = $ok && deleteDocumentById($revision['original_document_id'], $preferences);
         $ok = $ok && $revision->delete();
 
         if ($ok) {
@@ -281,7 +283,7 @@ $app->map('/revision/:folderid/:id', function ($folderId, $id) use ($app, $user,
 
     $folder = getFolder($organization['id'], $folderId);
 
-    $sidebar = getTree($organization['id'], $app, $folder['category_id'], $category, $parent);
+    getTree($organization['id'], $app, $folder['category_id'], $category, $parent);
 
     if (isset($_SESSION['slim.flash']['last_url'])) {
         $app->flash('last_url', $_SESSION['slim.flash']['last_url']);

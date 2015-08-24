@@ -938,7 +938,7 @@ function getParsedDeliveriesByOrganization($orgId) {
 }
 
 function setEventProfiles($eventId, $profiles) {
-    $query = ORM::for_table('event_profile')->
+    ORM::for_table('event_profile')->
             where('event_id', $eventId)->
             delete_many();
 
@@ -954,7 +954,7 @@ function setEventProfiles($eventId, $profiles) {
 }
 
 function setEventActivities($eventId, $activities) {
-    $query = ORM::for_table('activity_event')->
+    ORM::for_table('activity_event')->
             where('event_id', $eventId)->
             delete_many();
 
@@ -970,7 +970,7 @@ function setEventActivities($eventId, $activities) {
 }
 
 function setEventDeliveries($eventId, $deliveries) {
-    $query = ORM::for_table('event_delivery')->
+    ORM::for_table('event_delivery')->
             where('event_id', $eventId)->
             delete_many();
 

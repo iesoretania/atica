@@ -849,12 +849,6 @@ function setUserProfiles($userId, $profiles, $orgId) {
 
     // hay que eliminar los perfiles a los que pertenezca este usuario
     // dentro de la organización
-    $query = ORM::for_table('profile')->
-            select('profile.id')->
-            inner_join('profile_group', array('profile_group.id', '=', 'profile.profile_group_id'))->
-            where('profile_group.organization_id', $orgId)->
-            find_array();
-
     $oldProfiles = getProfilesListByUser($orgId, $userId);
 
     $addProfiles = array_diff($profiles, $oldProfiles);
@@ -903,14 +897,14 @@ function deleteProfileGroupsById($profileGroupsIds, $orgId) {
 
     $data->save();
 
-    $profileGroup = ORM::for_table('profile_group')->
+    $ok = ORM::for_table('profile_group')->
             where('organization_id', $orgId)->
             where_in('id', $profileGroupsIds)->
             delete();
 
-    $data->delete();
+    $ok = $ok && $data->delete();
 
-    return $data->delete();
+    return $ok;
 }
 
 function enablePersons($orgId, $persons, $status) {

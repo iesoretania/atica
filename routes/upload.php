@@ -146,7 +146,7 @@ $app->get('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $retu
         'data' => $data));
 })->name('upload');
 
-$app->post('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $return=0, $data1=null, $data2=null, $data3=null)
+$app->post('/enviar/:id', function ($id)
     use ($app, $user, $config, $organization, $preferences) {
     if (!$user) {
         $app->redirect($app->urlFor('login'));
@@ -246,7 +246,6 @@ $app->post('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $ret
         $failed = 0;
         $success = 0;
         while (isset($_FILES['document']['name'][$loop])) {
-            $ok = true;
             $type = "";
             if ( is_uploaded_file($_FILES['document']['tmp_name'][$loop]) ) {
                 $hash = sha1_file($_FILES['document']['tmp_name'][$loop]);
@@ -261,17 +260,14 @@ $app->post('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $ret
                         $description = str_replace ('_', ' ', $info['filename']);
 
                         if (false == createDelivery($id, $user['id'], $profileId, $_FILES['document']['name'][$loop], $description, null, null, $documentDestination, $hash, $filesize)) {
-                            $ok = false;
                             $type = 'danger';
                             $message = 'cannot register';
                         }
                         else {
-                            $ok = true;
                             $type = 'ok';
                         }
                     }
                     else {
-                        $ok = false;
                         $type = 'danger';
                         $message = 'cannot register';
                     }
@@ -294,7 +290,6 @@ $app->post('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $ret
                 }
             }
             else {
-                $ok = false;
                 $type = 'danger';
                 $message = 'cannot move';
             }
@@ -338,7 +333,7 @@ $app->post('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $ret
         );
 
         $deliveries = $profileIsSet ?
-                getFolderProfileDeliveredItems($profileId, $id, $organization['id'], $user, $profile) :
+                getFolderProfileDeliveredItems($profileId, $id, $organization['id']) :
                 array();
         $deliveries = parseVariablesArray($deliveries, $organization, $user, $profile);
 
@@ -579,6 +574,7 @@ $app->get('/estadisticas/:id(/:return/:data1(/:data2(/:data3)))', function ($id,
         'local_stats' => $localStats,
         'base' => $config['calendar.base_week'],
         'current' => $currentWeek,
+        'is_manager' => $isManager,
         'restricted_profiles' => $restrictedProfiles,
         'upload_profiles' => $uploadProfiles,
         'manager_profiles' => $managerProfiles,
@@ -702,7 +698,7 @@ function getFolderProfileDeliveryStatsByProfile($folderId, $profileId) {
     return $data;
 }
 
-function getFolderProfileDeliveredItems($profileId, $folderId, $orgId, $user, $profile) {
+function getFolderProfileDeliveredItems($profileId, $folderId, $orgId) {
     $data = ORM::for_table('event_profile_delivery_item')->
             inner_join('event', array('event.id', '=', 'event_id'))->
             select('event_profile_delivery_item.id')->
@@ -715,6 +711,7 @@ function getFolderProfileDeliveredItems($profileId, $folderId, $orgId, $user, $p
             where('event.folder_id', $folderId)->
             where('event_profile_delivery_item.profile_id', $profileId)->
             where('event_profile_delivery_item.is_visible', 1)->
+            where('event.organization_id', $orgId)->
             group_by('event_profile_delivery_item.id')->
             order_by_asc('event_profile_delivery_item.order_nr')->
             find_array();
@@ -826,10 +823,6 @@ function getFolderItemsByUser($userId, $folderId, $orgId) {
             find_array();
 
     return $data;
-}
-
-function getEventItemsByUser($userId, $eventId) {
-
 }
 
 function getProfile($profileId) {

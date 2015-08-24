@@ -39,8 +39,6 @@ class TwigExtension extends \Twig_Extension
         if (($from === NULL) || ($to === NULL)) {
             return "";
         }
-        
-        $return = "";
 
         // Mes(es) completo
         if ((($from % 4) == 0) && (($to % 4) == 3)) {

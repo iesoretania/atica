@@ -74,7 +74,6 @@ $app->get('/arbol(/:id)', function ($id = null) use ($app, $user, $organization)
 
 $app->get('/descargar/:kind/:cid/:id/(:p1/)(:p2/)', function ($kind, $cid, $id, $p1 = null, $p2 = null) use ($app, $user, $preferences, $organization) {
 
-    $catId = null;
     $groupId = null;
     $eventId = null;
     // $kind =
@@ -610,7 +609,7 @@ function getCategories($orgId) {
 }
 
 function setFolderProfiles($folderId, $permission, $profiles) {
-    $query = ORM::for_table('folder_permission')->
+    ORM::for_table('folder_permission')->
             where('folder_id', $folderId)->
             where('permission', $permission)->
             delete_many();
