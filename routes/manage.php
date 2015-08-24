@@ -207,7 +207,7 @@ $app->map('/modificar/:folderid/:id(/:return(/:data1(/:data2(/:data3(/:data4))))
         }
         else {
             if ($newData) {
-                @unlink($documentDestination);
+                unlink($documentDestination);
             }
             $app->flash('save_error', 'error');
             ORM::get_db()->rollback();
@@ -352,7 +352,7 @@ $app->map('/revision/:folderid/:id', function ($folderId, $id) use ($app, $user,
         }
         else {
             if ($newData) {
-                @unlink($documentDestination);
+                unlink($documentDestination);
             }
             $app->flash('save_error', 'error');
             ORM::get_db()->rollback();
@@ -716,7 +716,7 @@ function deleteDocumentById($docId, $preferences) {
 
         // borrar físicamente del sistema de archivos si existe
         if (strlen($document_data['download_path'])>0) {
-            @unlink($preferences['upload.folder'] . $document_data['download_path']);
+            unlink($preferences['upload.folder'] . $document_data['download_path']);
         }
         $ok = $document->delete();
         $ok = $ok && $document_data->delete();

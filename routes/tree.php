@@ -72,21 +72,20 @@ $app->get('/arbol(/:id)', function ($id = null) use ($app, $user, $organization)
         'folders' => $folders));
 })->name('tree');
 
-$app->get('/descargar/:kind/:cid/:id/(:p1/)(:p2/)', function ($kind, $cid, $id, $p1 = null, $p2 = null) use ($app, $user, $preferences, $organization) {
+$app->get('/descargar/:kind/:cid/:id/(:p1/)', function ($kind, $cid, $id, $p1 = null) use ($app, $user, $preferences, $organization) {
 
     $groupId = null;
     $eventId = null;
     // $kind =
     // 1 -> la descarga se produce desde una carpeta del árbol, $cid = category.id
     // 2 -> la descarga se produce desde un agrupamiento, $cid = grouping.id
-    // 3 -> la descarga se produce desde un evento, $cid = event.id, $p1, $p2 pasan
+    // 3 -> la descarga se produce desde un evento, $cid = event.id, $p1 pasan
     switch($kind) {
         case 1:
             // sólo usuarios autenticados
             if (!$user) {
                 $app->redirect($app->urlFor('login'));
             }
-            $catId = $cid;
             break;
         case 2:
             $groupId = $cid;
@@ -371,6 +370,9 @@ $app->get('/historial/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $r
         $app->redirect($app->urlFor('login'));
     }
 
+    $breadcrumb = array();
+    $lastUrl = $app->redirect($app->request()->getPathInfo());
+
     switch ($return) {
         case 0:
             $breadcrumb = array(
@@ -640,7 +642,7 @@ function getCategoryParentsById($catId) {
         $category = ORM::for_table('category')->
                 where('category_level', $category['category_level']-1)->
                 where_lt('category_left', $category['category_left'])->
-                order_by_Desc('category_left')->
+                order_by_desc('category_left')->
                 find_one();
         array_unshift($data, $category);
     }
@@ -696,7 +698,7 @@ function getDeliveriesFromFolders($folders, $userProfiles, &$profileGender, $use
             
             $skip = ($visible == 0);
         }
-        if ($skip == false) {    
+        if ($skip === false) {
             $deliveries = ORM::for_table('delivery')->
                     select('delivery.*')->
                     select('folder_delivery.order_nr')->
@@ -716,7 +718,7 @@ function getDeliveriesFromFolders($folders, $userProfiles, &$profileGender, $use
 
             if (!is_null($userProfiles) && ($folder['is_private_personal'] || $folder['is_private_profile'])) {
                 $managerProfiles = array_keys(parseArray(getPermissionProfiles($folder['id'], 0)));
-                $isManager = count(array_intersect($managerProfiles, array_keys($userProfiles)));
+                $isManager = (count(array_intersect($managerProfiles, array_keys($userProfiles))) != 0);
             }
 
             if (!is_null($userProfiles) && !$isManager) {

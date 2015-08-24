@@ -819,9 +819,6 @@ function getActivities($orgId) {
             order_by_asc('display_name')->
             find_array();
 
-    if (!$data) {
-        return array();
-    }
     return $data;
 }
 

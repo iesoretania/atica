@@ -707,7 +707,7 @@ function getProfilesByOrganization($orgId, $filter = true, $containers = false) 
             order_by_asc('profile_group.display_name_neutral')->
             order_by_asc('profile.display_name');
 
-    if ($containers == false) {
+    if ($containers === false) {
         $data = $data->where('profile.is_container', 0);
     }
     if ($filter) {
@@ -854,7 +854,7 @@ function setUserProfiles($userId, $profiles, $orgId) {
     $addProfiles = array_diff($profiles, $oldProfiles);
     $deleteProfiles = array_diff($oldProfiles, $profiles);
 
-    if ($deleteProfiles) {
+    if (!empty($deleteProfiles)) {
         // primero eliminamos los perfiles antiguos que ya no están
         ORM::for_table('person_profile')->
             where('person_id', $userId)->

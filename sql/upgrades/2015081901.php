@@ -24,20 +24,16 @@ $updates[] = array(
 );
 
 if ($ok && (false === $simulate)) {
-    $query = false;
     try {
-        $query = ORM::get_db()->exec("ALTER TABLE `delivery` DROP FOREIGN KEY `delivery_current_revision_id_fk`;");
-        $query = ORM::get_db()->exec("ALTER TABLE `delivery` ADD  CONSTRAINT `delivery_current_revision_id_fk` FOREIGN KEY (`current_revision_id`) REFERENCES `atica`.`revision`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;");
-        $query = ORM::get_db()->exec("ALTER TABLE `event` DROP FOREIGN KEY `event_ibfk_1`;");
-        $query = ORM::get_db()->exec("ALTER TABLE `event` ADD  CONSTRAINT `event_ibfk_1` FOREIGN KEY (`folder_id`) REFERENCES `atica`.`folder`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;");
+        ORM::get_db()->exec("ALTER TABLE `delivery` DROP FOREIGN KEY `delivery_current_revision_id_fk`;");
+        ORM::get_db()->exec("ALTER TABLE `delivery` ADD  CONSTRAINT `delivery_current_revision_id_fk` FOREIGN KEY (`current_revision_id`) REFERENCES `atica`.`revision`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;");
+        ORM::get_db()->exec("ALTER TABLE `event` DROP FOREIGN KEY `event_ibfk_1`;");
+        ORM::get_db()->exec("ALTER TABLE `event` ADD  CONSTRAINT `event_ibfk_1` FOREIGN KEY (`folder_id`) REFERENCES `atica`.`folder`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;");
     }
     catch(Exception $e) {
         $ok = false;
-        $query = false;
     }
-    if ($query) {
-        $ok = setModuleVersion('core', '2015081901');
-    }
+    $ok = $ok && setModuleVersion('core', '2015081901');
 }
 // Volver a obtener la versión del núcleo
 $core = getModuleVersion('core');

@@ -24,17 +24,13 @@ $updates[] = array(
 );
 
 if ($ok && (false === $simulate)) {
-    $query = false;
     try {
-        $query = ORM::get_db()->exec("ALTER TABLE `event` ADD `force_period` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0' AFTER `period_description`, ADD `grace_period` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `force_period`;");
+        ORM::get_db()->exec("ALTER TABLE `event` ADD `force_period` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0' AFTER `period_description`, ADD `grace_period` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `force_period`;");
     }
     catch(Exception $e) {
         $ok = false;
-        $query = false;
     }
-    if ($query) {
-        $ok = setModuleVersion('core', '2014081001');
-    }
+    $ok = $ok && setModuleVersion('core', '2014081001');
 }
 // Volver a obtener la versión del núcleo
 $core = getModuleVersion('core');

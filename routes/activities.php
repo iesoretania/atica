@@ -40,7 +40,7 @@ $app->get('/actividades(/:id)', function ($id = null) use ($app, $user, $config,
     $profile_group_ids = array();
     foreach ($profiles as $profile) {
         $gender = array ($profile['display_name_neutral'], $profile['display_name_male'], $profile['display_name_female']);
-        $caption = $gender[$user['gender']] . " " . $profile['display_name'];
+        $caption = $gender[$user['gender']] . ' ' . $profile['display_name'];
         if ($profile['id'] == $id) {
             $current = $profile;
             $detail = $caption;
@@ -58,12 +58,12 @@ $app->get('/actividades(/:id)', function ($id = null) use ($app, $user, $config,
     }
 
     // obtener otros perfiles
-    $otherProfiles = getUserOtherProfiles($user['id'], $organization['id'], $profile_group_ids);
+    $otherProfiles = getUserOtherProfiles($organization['id'], $profile_group_ids);
     if (count($otherProfiles, COUNT_NORMAL) > 0) {
         $other_profile_bar = array();
 
         foreach ($otherProfiles as $profile) {
-            $captionOther = $profile['display_name_neutral'] . " " . $profile['display_name'];
+            $captionOther = $profile['display_name_neutral'] . ' ' . $profile['display_name'];
             if ($profile['id'] == $id) {
                 $current = $profile;
                 $detail = $captionOther;
@@ -298,7 +298,7 @@ function getUserProfiles($user_id, $org_id, $extended) {
     return $data;
 }
 
-function getUserOtherProfiles($user_id, $org_id, $current) {
+function getUserOtherProfiles($org_id, $current) {
     $data = ORM::for_table('profile_group')->
             select('profile_group.*')->
             where_not_in('profile_group.id', $current)->

@@ -24,17 +24,13 @@ $updates[] = array(
 );
 
 if ($ok && (false === $simulate)) {
-    $query = false;
     try {
-        $query = ORM::get_db()->exec("ALTER TABLE `folder`  ADD `is_private_personal` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0'  AFTER `is_restricted`,  ADD `is_private_profile` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0'  AFTER `is_private_personal`;");
+        ORM::get_db()->exec("ALTER TABLE `folder`  ADD `is_private_personal` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0'  AFTER `is_restricted`,  ADD `is_private_profile` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0'  AFTER `is_private_personal`;");
     }
     catch(Exception $e) {
         $ok = false;
-        $query = false;
     }
-    if ($query) {
-        $ok = setModuleVersion('core', '2014112501');
-    }
+    $ok = $ok && setModuleVersion('core', '2014112501');
 }
 // Volver a obtener la versión del núcleo
 $core = getModuleVersion('core');

@@ -80,6 +80,8 @@ $app->get('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $retu
         $app->redirect($app->urlFor('login'));
     }
 
+    $breadcrumb = array();
+    $lastUrl = $app->redirect($app->request()->getPathInfo());
     switch ($return) {
         case 0:
             $breadcrumb = array(
@@ -172,6 +174,7 @@ $app->post('/enviar/:id', function ($id)
                 $hash = sha1_file($_FILES[$ref]['tmp_name']);
                 $filesize = filesize($_FILES[$ref]['tmp_name']);
 
+                $message = "";
                 $documentDestination = createDocumentFolder($preferences['upload.folder'], $hash);
                 if (move_uploaded_file($_FILES[$ref]['tmp_name'], $preferences['upload.folder'] . $documentDestination)) {
                     $ext = pathinfo($_FILES[$ref]['name'], PATHINFO_EXTENSION);
@@ -182,18 +185,15 @@ $app->post('/enviar/:id', function ($id)
                     $filename = parseVariables($name, $organization, $user, $profile) . $ext;
                     $description = parseVariables($item['display_name'], $organization, $user, $profile);
 
-                    if (false == createDelivery($id, $user['id'], $item['profile_id'], $filename, $description, null, $item['id'], $documentDestination, $hash, $filesize)) {
-                        $ok = false;
+                    if (false === createDelivery($id, $user['id'], $item['profile_id'], $filename, $description, null, $item['id'], $documentDestination, $hash, $filesize)) {
                         $type = 'danger';
                         $message = 'cannot register';
                     }
                     else {
-                        $ok = true;
                         $type = 'ok';
                     }
                 }
                 else {
-                    $ok = false;
                     $type = 'danger';
                     $message = 'cannot move';
                 }
@@ -259,7 +259,7 @@ $app->post('/enviar/:id', function ($id)
                         $info = pathinfo( $filename );
                         $description = str_replace ('_', ' ', $info['filename']);
 
-                        if (false == createDelivery($id, $user['id'], $profileId, $_FILES['document']['name'][$loop], $description, null, null, $documentDestination, $hash, $filesize)) {
+                        if (false === createDelivery($id, $user['id'], $profileId, $_FILES['document']['name'][$loop], $description, null, null, $documentDestination, $hash, $filesize)) {
                             $type = 'danger';
                             $message = 'cannot register';
                         }
@@ -274,7 +274,7 @@ $app->post('/enviar/:id', function ($id)
                 }
                 else {
                     // Mover a una carpeta temporal
-                    @mkdir($preferences['upload.folder'] . "temp/", 0770, true);
+                    mkdir($preferences['upload.folder'] . "temp/", 0770, true);
                     $tempDestination = $preferences['upload.folder'] . "temp/" . $hash;
                     move_uploaded_file($_FILES['document']['tmp_name'][$loop], $tempDestination);
 
@@ -369,7 +369,7 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
         $loop = 1;
         while (isset($_POST['hash' . $loop])) {
             $tempDestination = $preferences['upload.folder'] . "temp/" . $_POST['hash' . $loop];
-            @unlink($tempDestination);
+            unlink($tempDestination);
             $loop++;
         }
         $app->redirect($app->urlFor('tree', array('id' => $folder['category_id'])));
@@ -406,6 +406,7 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
         $itemId = null;
 
         if (file_exists($tempDestination)) {
+            $message = "";
 
             // si es un ítem, hacer comprobaciones adicionales
             if (count($list) > 0) {
@@ -449,7 +450,7 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
             }
             else {
                 // ¿se ha elegido ignorar el documento?
-                if (false == isset($_POST['confirm' . $loop])) {
+                if (false === isset($_POST['confirm' . $loop])) {
                     $ok = false;
                     $type = 'warning';
                     $message = 'ignored';
@@ -460,7 +461,7 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
                 $filesize = filesize($tempDestination);
                 $documentDestination = createDocumentFolder($preferences['upload.folder'], $hash);
                 if (rename($tempDestination, $preferences['upload.folder'] . $documentDestination)) {
-                    if (false == createDelivery($id, $user['id'], $profileId, $filename, $description, null, $itemId, $documentDestination, $hash, $filesize)) {
+                    if (false === createDelivery($id, $user['id'], $profileId, $filename, $description, null, $itemId, $documentDestination, $hash, $filesize)) {
                         $ok = false;
                         $type = 'danger';
                         $message = 'cannot register';
@@ -480,12 +481,12 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
             $type = 'danger';
             $message = 'not_found';
         }
-        if (false == $ok) {
+        if (false === $ok) {
             $app->flash('upload_status_' . $failed, $type);
             $app->flash('upload_name_' . $failed, $_POST['filename' . $loop]);
             $app->flash('upload_error_' . $failed, $message);
             $failed++;
-            @unlink($tempDestination);
+            unlink($tempDestination);
         }
         else {
             $success++;
@@ -521,6 +522,9 @@ $app->get('/estadisticas/:id(/:return/:data1(/:data2(/:data3)))', function ($id,
             break;
         }
     }
+
+    $breadcrumb = array();
+    $lastUrl = $app->redirect($app->request()->getPathInfo());
 
     switch ($return) {
         case 0:
@@ -640,7 +644,7 @@ function getSubprofiles($profileGroupId) {
 
 function createDocumentFolder($prefix, $hash) {
     $path = substr($hash,0,2) . "/" . substr($hash,2,2);
-    @mkdir($prefix . $path, 0770, true);
+    mkdir($prefix . $path, 0770, true);
     return $path . "/" . $hash;
 }
 

@@ -33,4 +33,3 @@ $preferences = array(
     'login.retries' => 5,   // 5 intentos infructuosos de entrar antes del bloqueo
     'login.block' => 5      // 5 minutos de bloqueo
 );
-?>

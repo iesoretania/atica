@@ -50,8 +50,6 @@ $app->map('/upgrade', function () use ($app, $user, $config, $organization) {
         ));
     }
     else {
-        $final = getModuleVersion('core');
-
         if ($ok) {
             $app->flash('save_ok', 'upgrade');
         }
