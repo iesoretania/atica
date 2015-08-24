@@ -261,7 +261,7 @@ $app->map('/listado(/:sort(/:filter))', function ($sort = 0, $filter = 1) use ($
     }
     $sidebar = getPersonManagementSidebar(1, $app);
 
-    $persons = getOrganizationPersons($organization['id'], $sort, $filter);
+    $persons = getOrganizationPersons($organization['id'], $sort, ($filter === 1));
 
     // generar barra de navegación
     $breadcrumb = array(
@@ -371,7 +371,7 @@ $app->map('/perfiles/:id(/:filter)', function ($id, $filter = 0) use ($app, $use
             $app->redirect($app->request()->getPathInfo());
         }
 
-        $profiles = getProfilesByGroup($id, $organization['id'], $filter);
+        $profiles = getProfilesByGroup($id, $organization['id'], ($filter === 1));
         $personCount = 0;
         foreach($profiles as $profile) {
             $personCount += count($profile['persons']);

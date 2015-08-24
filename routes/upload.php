@@ -247,6 +247,7 @@ $app->post('/enviar/:id', function ($id)
         $success = 0;
         while (isset($_FILES['document']['name'][$loop])) {
             $type = "";
+            $message = "";
             if ( is_uploaded_file($_FILES['document']['tmp_name'][$loop]) ) {
                 $hash = sha1_file($_FILES['document']['tmp_name'][$loop]);
                 $filesize = filesize($_FILES['document']['tmp_name'][$loop]);
@@ -407,6 +408,7 @@ $app->post('/confirmar/:id', function ($id) use ($app, $user, $preferences, $org
 
         if (file_exists($tempDestination)) {
             $message = "";
+            $type = "";
 
             // si es un ítem, hacer comprobaciones adicionales
             if (count($list) > 0) {
