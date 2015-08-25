@@ -43,7 +43,7 @@ function switchChecks(e, c) {
 </div>
 <form class="form-horizontal" role="form" method="post" action="{{ url }}">
     {% for profile, items in profiles %}
-    <div class="panel panel-default">
+    <div class="panel panel-default filter">
         <div class="panel-heading">
             <h3>{{ uploaders[profile]['display_name_neutral'] ~ ' ' ~ uploaders[profile]['display_name'] }} <a class="delivery-tools hidden-print" title="Ver elementos del perfil" href="{{ urlFor('manageitem', { 'id': event['id'], 'profileid': profile }) }}"><span class="icon-cog"></span></a></h3>
         </div>

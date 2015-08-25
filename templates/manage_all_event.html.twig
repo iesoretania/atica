@@ -17,6 +17,7 @@
 {% extends "tree.html.twig" %}
 {% block scripts %}
 <script>
+
 function switchChecks(e, c) {
     if (!$(e).prop('checked')) {
         $(c).removeAttr('checked');
@@ -41,7 +42,7 @@ function switchChecks(e, c) {
 </div>
 <form class="form-horizontal" role="form" method="post" action="{{ url }}">
     {% for activity_id, activity in events %}
-    <div class="panel panel-default">
+    <div class="panel panel-default filter">
         <div class="panel-heading">
             <h3>
                 {{ activities[activity_id]['display_name'] }} <a class="delivery-tools hidden-print" title="Editar categoría" href="{{ urlFor('manageactivity', { 'id': activity_id }) }}"><span class="icon-cog"></span></a>

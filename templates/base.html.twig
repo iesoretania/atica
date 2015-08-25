@@ -56,7 +56,7 @@
             {% if search %}
             <nav role="search">
                 <form class="pull-right hidden-print visible-md visible-lg" action="">
-                    <input type="text" class="input-small search-bar" placeholder="Buscar...">
+                    <input type="text" id="search" class="input-small search-bar" placeholder="Filtrar...">
                 </form>
             </nav>
             {% endif %}
@@ -77,7 +77,7 @@
             {% if search %}
             <nav role="search" class="well well-small hidden-print hidden-md hidden-lg">
                 <form action="">
-                    <input type="text" class="input-small search-bar col-md-12 form-control" placeholder="Buscar...">
+                    <input type="text" id="search" class="input-small search-bar col-md-12 form-control" placeholder="Filtrar...">
                 </form>
             </nav>
             {% endif %}
@@ -122,6 +122,22 @@
                 $('.showjs').css('display', 'block');
                 $('.hidejs').css('display', 'none');
                 $('.showjs-inline').css('display', 'inline');
+            });
+
+            jQuery.expr[':'].Contains = function(a, i, m) {
+                return jQuery(a).text().toUpperCase().indexOf(m[3].toUpperCase()) >= 0;
+            };
+
+            $("#search").keyup(function() {
+                var tables = $("div.filter");
+                tables.hide();
+                var rows = tables.find("tbody > tr").hide();
+                var data = this.value.split(" ");
+                $.each(data, function(i, v) {
+                    var items = rows.filter(":Contains('" + v + "')");
+                    items.show();
+                    items.parent().parent().parent().show();
+                });
             });
         </script>
     </body>

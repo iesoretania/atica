@@ -30,7 +30,7 @@
 {% if events %}
 {% set now = (current-base+48) % 48 %}
 {% for profile in events %}
-<div class="panel panel-default">
+<div class="panel panel-default filter">
     <div class="panel-heading">
         <h2>{{ profile.info.profile_group_display_name }} {{ profile.info.profile_display_name }}</h2>
     </div>
@@ -39,7 +39,7 @@
         <h3>{{ activity.info.activity_display_name }}{% if user['is_admin'] %}&nbsp;<span class="delivery-tools hidden-print"><a class="folder-tools" href="{{ urlFor('manageactivity', { 'id': activity.info.activity_id }) }}"><span class="icon-cog"></span></a></span>{% endif %}</h3>
         {% if activity.info.activity_description %}<p>{{ activity.info.activity_description | nl2br }}</p>{% endif %}
     </div>
-    <table class="table table-striped table-condensed table-hover">
+    <table class="table table-striped table-condensed table-hover filter">
         <thead>
             <tr>
                 <th class="col-md-2">Calendario</th>
@@ -68,7 +68,6 @@
         </tbody>
     </table>
     {% endfor %}
-
 </div>
 {% endfor %}
 {% else %}

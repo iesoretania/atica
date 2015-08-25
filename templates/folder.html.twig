@@ -1,7 +1,7 @@
 {% for folder in data %}
 {% set info = folders[folder.id] %}
 {% set buttons = not no_buttons and (user['is_admin'] or info['upload_permission'] or info['manage_permission']) %}
-<div class="panel panel-default">
+<div class="panel panel-default filter">
     <div class="panel-heading">
         <h2>{% if snapshot %}{{ snapshot['display_name'] }}:<br/>{% endif %}{{ info['display_name'] }}
             {% if not snapshot %}
