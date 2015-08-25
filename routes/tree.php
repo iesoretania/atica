@@ -371,7 +371,7 @@ $app->get('/historial/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $r
     }
 
     $breadcrumb = array();
-    $lastUrl = $app->redirect($app->request()->getPathInfo());
+    $lastUrl = $app->request()->getPathInfo();
 
     switch ($return) {
         case 0:

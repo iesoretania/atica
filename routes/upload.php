@@ -81,7 +81,7 @@ $app->get('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $retu
     }
 
     $breadcrumb = array();
-    $lastUrl = $app->redirect($app->request()->getPathInfo());
+    $lastUrl = $app->request()->getPathInfo();
     switch ($return) {
         case 0:
             $breadcrumb = array(
@@ -526,7 +526,7 @@ $app->get('/estadisticas/:id(/:return/:data1(/:data2(/:data3)))', function ($id,
     }
 
     $breadcrumb = array();
-    $lastUrl = $app->redirect($app->request()->getPathInfo());
+    $lastUrl = $app->request()->getPathInfo();
 
     switch ($return) {
         case 0:
