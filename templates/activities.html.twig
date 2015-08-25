@@ -23,7 +23,6 @@
     </div>
     {% if user['is_admin'] %}
     <div class="panel-footer">
-        <a class="btn btn-success" href="{{ urlFor('manageactivity', { 'id':0 }) }}">Crear nueva categoría de actividad</a>
         <a class="btn btn-warning" href="{{ urlFor('manageallevents') }}">Gestionar actividades</a>
     </div>
     {% endif %}
