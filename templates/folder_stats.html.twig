@@ -54,7 +54,7 @@
 </div>
 {% if stats %}
 <div class="panel panel-default">
-    <div class="panel-body">
+    <div class="panel-body filter">
         <h3>Cuadro resumen de entregas</h3>
         {% set sum_c = 0 %}{% set sum_total = 0 %}
         <table class="table table-condensed table-hover">
@@ -115,7 +115,7 @@
         </p>
 
     </div>
-    <div class="panel-body">
+    <div class="panel-body filter">
         <table class="table table-hover">
             <tbody>
                 {% for profile_id, items in local_stats_item %}

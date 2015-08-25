@@ -62,7 +62,9 @@ $app->get('/arbol(/:id)', function ($id = null) use ($app, $user, $organization)
     $app->flash('last_url', $app->request()->getPathInfo());
 
     $app->render('tree.html.twig', array(
-        'navigation' => $breadcrumb, 'search' => true, 'topbar' => $topbar,
+        'navigation' => $breadcrumb,
+        'search' => !empty($allFolders),
+        'topbar' => $topbar,
         'category' => $category,
         'data' => $data,
         'persons' => $persons,
@@ -420,7 +422,7 @@ $app->get('/historial/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $r
 
     $app->render('folder_snapshots.html.twig', array(
         'navigation' => $breadcrumb,
-        'search' => false,
+        'search' => true,
         'url' => $app->request()->getPathInfo(),
         'backurl' => array('return' => $return, 'data1' => $data1, 'data2' => $data2, 'data3' => $data3),
         'last_url' => $lastUrl,

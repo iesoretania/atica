@@ -30,7 +30,9 @@ $app->get('/(portada)', function () use ($app, $user) {
     $sidebar = getGroupings($_SESSION['organization_id'], $app, null, $matchedGrouping, $parentGrouping);
 
     $app->render('frontpage.html.twig', array(
-        'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar,
+        'navigation' => $breadcrumb,
+        'search' => false,
+        'sidebar' => $sidebar,
         'user' => $user));
 
 })->name('frontpage');
@@ -58,7 +60,9 @@ $app->get('/portada/:id', function ($id) use ($app, $user) {
     $data = getParsedDeliveriesFromGroupingFolders($folders);
 
     $app->render('grouping.html.twig', array(
-        'navigation' => $breadcrumb, 'search' => true, 'sidebar' => $sidebar,
+        'navigation' => $breadcrumb,
+        'search' => !empty($data),
+        'sidebar' => $sidebar,
         'data' => $data,
         'folders' => $folders,
         'grouping' => $matchedGrouping,

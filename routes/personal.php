@@ -255,7 +255,7 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
 })->name('personal')->via('GET', 'POST')->
     conditions(array('section' => '[0-9]{1}'));
 
-$app->map('/listado(/:sort(/:filter))', function ($sort = 0, $filter = 1) use ($app, $user, $organization) {
+$app->map('/personal/listado(/:sort(/:filter))', function ($sort = 0, $filter = 1) use ($app, $user, $organization) {
     if ((!$user) || (!$user['is_admin'])) {
         $app->redirect($app->urlFor('login'));
     }
@@ -283,6 +283,7 @@ $app->map('/listado(/:sort(/:filter))', function ($sort = 0, $filter = 1) use ($
     // lanzar plantilla
     $app->render('manage_person.html.twig', array(
         'navigation' => $breadcrumb,
+        'search' => true,
         'sidebar' => $sidebar,
         'sort' => $sort,
         'filter' => $filter,
@@ -320,6 +321,7 @@ $app->map('/perfiles', function () use ($app, $user, $organization) {
     // lanzar plantilla
     $app->render('manage_profile_groups.html.twig', array(
         'navigation' => $breadcrumb,
+        'search' => true,
         'sidebar' => $sidebar,
         'profiles' => $profiles,
         'url' => $app->request()->getPathInfo()
@@ -467,6 +469,7 @@ $app->map('/perfiles/:id(/:filter)', function ($id, $filter = 0) use ($app, $use
     $app->render('manage_profiles.html.twig', array(
         'select2' => true,
         'navigation' => $breadcrumb,
+        'search' => true,
         'sidebar' => $sidebar,
         'profiles' => $profiles,
         'isContainer' => $isContainer,

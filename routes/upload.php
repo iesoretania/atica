@@ -572,7 +572,7 @@ $app->get('/estadisticas/:id(/:return/:data1(/:data2(/:data3)))', function ($id,
 
     $app->render('folder_stats.html.twig', array(
         'navigation' => $breadcrumb,
-        'search' => false,
+        'search' => true,
         'url' => $app->request()->getPathInfo(),
         'back_url' => array('return' => $return, 'data1' => $data1, 'data2' => $data2, 'data3' => $data3),
         'last_url' => $lastUrl,
