@@ -832,23 +832,28 @@ function archiveDeliveriesFromFolder($orgId, $snapId, $folderId, $deliveries) {
     return $ok;
 }
 
-function deleteCompletedEventsForFolder($orgId, $folderId) {
-    $events = ORM::for_table('event')->
-        select('event.id')->
-        where('event.organization_id', $orgId)->
-        where('event.folder_id', $folderId)->
-        find_array();
-
-    $events = array_column($events, 'id');
-
+function deleteEventsIn($events) {
+    $ok = true;
     if (count($events) > 0) {
         $ok = ORM::for_table('completed_event')->
         where_in('event_id', $events)->
         delete_many();
     }
-    else {
-        $ok = true;
-    }
+
+    return $ok;
+}
+
+function deleteCompletedEventsForFolder($orgId, $folderId) {
+    $events = ORM::for_table('event')->
+        select('event.id')->
+        where('event.organization_id', $orgId)->
+        where('event.folder_id', $folderId)->
+        where('event.is_automatic', 1)->
+        find_array();
+
+    $events = array_column($events, 'id');
+
+    $ok = deleteEventsIn($events);
 
     return $ok;
 }
@@ -861,14 +866,7 @@ function deleteAllCompletedEvents($orgId) {
 
     $events = array_column($events, 'id');
 
-    if (count($events) > 0) {
-        $ok = ORM::for_table('completed_event')->
-        where_in('event_id', $events)->
-        delete_many();
-    }
-    else {
-        $ok = true;
-    }
+    $ok = deleteEventsIn($events);
 
     return $ok;
 }

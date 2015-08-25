@@ -31,7 +31,7 @@ $app->map('/actividad/:pid/:aid/:id', function ($pid, $aid, $id) use ($app, $use
 
     // marcar evento como no completado
     if ($event['is_manual'] && ($event['completed_date'] != null) && isset($_POST['unmark'])) {
-        deleteCompletedEvent($id, $user['id']);
+        removeCompletedEvent($id, $user['id']);
         $app->redirect($app->urlFor('activities', array('id' => $pid)));
     }
 
@@ -788,13 +788,6 @@ function getProfilesByFolderId($folderId) {
     return parseArray(getProfiles()->
             where('folder.id', $folderId)->
             find_array());
-}
-
-function deleteCompletedEvent($eventId, $personId) {
-    return ORM::for_table('completed_event')->
-            where('event_id', $eventId)->
-            where('person_id', $personId)->
-            delete_many();
 }
 
 function addCompletedEvent($eventId, $personId) {
