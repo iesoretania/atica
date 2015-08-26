@@ -335,21 +335,7 @@ function getEventsForProfiles($profile_ids, $profile_group_ids, $user, $base = 3
             order_by_asc('n_to_week');
 
     if (($profile_ids) || ($profile_group_ids)) {
-        $condition = '(';
-        if ($profile_ids) {
-            $placeholders1 = '?' . str_repeat(', ?', count($profile_ids)-1);
-            $condition .= 'profile_id IN (' . $placeholders1 . ')';
-        }
-        if ($profile_group_ids) {
-            $placeholders2 = ($profile_group_ids) ? '?' . str_repeat(', ?', count($profile_group_ids)-1) : '';
-            if ($profile_ids) {
-                $condition .= ' OR ';
-            }
-            $condition .= 'is_container=1 AND profile_group_id IN (' . $placeholders2 . ')';
-        }
-        $condition .= ')';
-        $data = $data->where_raw($condition,
-                array_merge($profile_ids, $profile_group_ids));
+        $data = $data->where_in('profile_id', array_merge($profile_ids, $profile_group_ids));
     }
 
     return $data->find_array();
