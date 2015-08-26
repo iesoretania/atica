@@ -52,7 +52,7 @@ function switchChecks(e) {
                     {% set link = urlFor('personal', { 'id': person['id'], 'section': 0 }) %}
                     {% set gender = ['', 'male', 'female'][person['gender']] %}
                     <tr>
-                        <td><input type="checkbox" class="check" name="user[]" value="{{ person['id'] }}">
+                        <td><input type="checkbox" {% if user.id != person.id %}class="check"{% else %}disabled="1"{% endif %} name="user[]" value="{{ person['id'] }}">
                             <a href="{{ link }}">{{ person['user_name'] }}</a>
                             {% if not person['is_active'] %}
                                 <span class="icon-eye-close" title="Desactivado"></span>
@@ -79,7 +79,7 @@ function switchChecks(e) {
                 <button type="submit" name="enable" class="btn btn-info">Activar usuarios</button>
                 <button type="submit" name="disable" class="btn btn-warning">Desactivar usuarios</button>
                 {% if user['is_global_administrator'] %}
-                <button type="submit" name="delete" class="btn btn-danger" disabled>Eliminar usuarios</button>
+                <button type="submit" name="delete" class="btn btn-danger" onClick="javascript:return confirm('¡Cuidado! La operación de borrado no se puede deshacer y es extremadamente peligrosa.\n\nTodos los datos y documentos relacionados con cada usuario serán eliminados, incluso aquellos del historial. Si el usuario ya no está activo, desactívelo en lugar de borrarlo.\n\n¿Desea continuar?');">Eliminar usuarios seleccionados de la plataforma</button>
                 {% endif %}
             </div>
         </div>

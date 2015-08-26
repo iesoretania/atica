@@ -50,6 +50,24 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
 
     $app->flashKeep();
 
+    if (isset($_POST['deletepersonal']) && ($user['is_global_administrator'])) {
+        $local = getUserObjectById($id, $organization['id']);
+        if ($local) {
+            $ok = $local->delete();
+
+        }
+        else {
+            $ok = false;
+        }
+        if ($ok) {
+            $app->flash('save_ok', 'delete');
+        }
+        else {
+            $app->flash('save_error', 'delete');
+        }
+        $app->redirect($app->urlFor('personlist'));
+    }
+
     // comprobar si se están cambiando datos
     if (isset($_POST['savepersonal']) && ($user['is_admin'] || $itsMe)) {
 
@@ -60,7 +78,7 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
             $local = ORM::for_table('person')->create();
         }
         else {
-            $local = getUserObjectById($id);
+            $local = getUserObjectById($id, $organization['id']);
         }
         if (isset($_POST['displayname'])) {
             $local->set('display_name', $_POST['displayname']);
@@ -247,6 +265,26 @@ $app->map('/personal/listado(/:sort(/:filter))', function ($sort = 0, $filter = 
         }
         $app->redirect($app->request()->getPathInfo());
     }
+
+    if (isset($_POST['delete']) && $user['is_global_administrator']) {
+        foreach ($_POST['user'] as $item) {
+            $local = getUserObjectById($item, $organization['id']);
+            if ($local) {
+                $ok = $local->delete();
+
+            } else {
+                $ok = false;
+            }
+        }
+
+        if ($ok) {
+            $app->flash('save_ok', 'delete');
+        }
+        else {
+            $app->flash('save_error', 'delete');
+        }
+        $app->redirect($app->urlFor('personlist'));
+    }
     $app->flash('last_url', $app->request()->getPathInfo());
 
     // lanzar plantilla
@@ -257,6 +295,7 @@ $app->map('/personal/listado(/:sort(/:filter))', function ($sort = 0, $filter = 
         'sort' => $sort,
         'filter' => $filter,
         'url' => $app->request()->getPathInfo(),
+        'user' => $user,
         'persons' => $persons
     ));
 })->name('personlist')->via('GET', 'POST');
@@ -539,14 +578,7 @@ $app->map('/detalleperfil/:id(/:gid)', function ($id, $gid = null) use ($app, $u
 })->name('profiledetail')->via('GET', 'POST');
 
 function getUserById($personId, $orgId) {
-    $data = ORM::for_table('person')->
-                    select('person.*')->
-                    select('person_organization.is_local_administrator')->
-                    select('person_organization.is_active')->
-                    inner_join('person_organization', array('person_organization.person_id', '=', 'person.id'))->
-                    where('person_organization.person_id', $personId)->
-                    where('person_organization.organization_id', $orgId)->
-                    find_one();
+    $data = getUserObjectById($personId, $orgId);
     if ($data) {
         return $data->as_array();
     }
@@ -555,9 +587,15 @@ function getUserById($personId, $orgId) {
     }
 }
 
-function getUserObjectById($personId) {
+function getUserObjectById($personId, $orgId) {
     return ORM::for_table('person')->
-                    find_one($personId);
+        select('person.*')->
+        select('person_organization.is_local_administrator')->
+        select('person_organization.is_active')->
+        inner_join('person_organization', array('person_organization.person_id', '=', 'person.id'))->
+        where('person_organization.person_id', $personId)->
+        where('person_organization.organization_id', $orgId)->
+        find_one();
 }
 
 function getProfilesByUser($orgId, $personId) {
