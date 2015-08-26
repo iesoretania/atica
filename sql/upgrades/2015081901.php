@@ -27,6 +27,8 @@ if ($ok && (false === $simulate)) {
     try {
         ORM::get_db()->exec("ALTER TABLE `delivery` DROP FOREIGN KEY `delivery_current_revision_id_fk`;");
         ORM::get_db()->exec("ALTER TABLE `delivery` ADD  CONSTRAINT `delivery_current_revision_id_fk` FOREIGN KEY (`current_revision_id`) REFERENCES `atica`.`revision`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;");
+        ORM::get_db()->exec("ALTER TABLE `delivery` DROP FOREIGN KEY `delivery_profile_id_fk`;");
+        ORM::get_db()->exec("ALTER TABLE `delivery` ADD CONSTRAINT `delivery_profile_id_fk` FOREIGN KEY (`profile_id`) REFERENCES `atica`.`profile`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;");
         ORM::get_db()->exec("ALTER TABLE `event` DROP FOREIGN KEY `event_ibfk_1`;");
         ORM::get_db()->exec("ALTER TABLE `event` ADD  CONSTRAINT `event_ibfk_1` FOREIGN KEY (`folder_id`) REFERENCES `atica`.`folder`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;");
     }
