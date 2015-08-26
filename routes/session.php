@@ -97,6 +97,7 @@ $app->post('/entrar', function () use ($app, $preferences, $organization) {
                     // personales
                     if ($firstLogin) {
                         doRegisterAction($app, $user, $organization, 'session', 0, 'login', 'first');
+                        $app->flash('last_url', $app->urlFor('activities'));
                         $app->redirect($app->urlFor('personal', array('id' => $user['id'], 'section' => 0)));
                     }
                     else {

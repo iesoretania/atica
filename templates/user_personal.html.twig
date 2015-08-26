@@ -20,19 +20,19 @@
 {% set edit = local or user['is_admin'] %}
 {% set global_admin = (userData['is_global_administrator'] == 1) %}
 {% set local_admin = (userData['is_local_administrator'] == 1) %}
-<div class="panel panel-info">
-    <div class="panel-heading">
-{% if local %}
-        <h1>¡Bienvenid{{ ['o/a', 'o', 'a'][user.gender] }} {{ user.first_name }}!</h1>
-{% else %}
-        <h1>{{ userData.new ? 'Nuevo usuario' : ('Datos personales: ' ~ userData.display_name) }}</h1>
-{% endif %}
-    </div>
-    <div class="panel-body">
-{% if local %}
-        <h3>Por favor, tómate unos minutos para asegurarte de que los datos de la aplicación son correctos</h3>
-{% endif %}
-        <form class="form-horizontal" role="form" method="post" action="{{ url }}">
+<form class="form-horizontal" role="form" method="post" action="{{ url }}">
+    <div class="panel panel-info">
+        <div class="panel-heading">
+        {% if local %}
+            <h1>¡Bienvenid{{ ['o/a', 'o', 'a'][user.gender] }} {{ user.first_name }}!</h1>
+        {% else %}
+            <h1>{{ userData.new ? 'Nuevo usuario' : ('Datos personales: ' ~ userData.display_name) }}</h1>
+        {% endif %}
+        </div>
+        <div class="panel-body">
+            {% if local %}
+                <h3>Por favor, tómate unos minutos para asegurarte de que los datos de la aplicación son correctos</h3>
+            {% endif %}
             {% if user.is_admin %}
             {{ m.input_text('username', '10', 'Nombre de usuario', 'Nombre de usuario para entrar en la plataforma', userData.user_name, edit, null, null, 'required') }}
             {% endif %}
@@ -54,14 +54,25 @@
             {% endif %}
             {{ m.input_textarea('description', 3, 'Otra información', 'Notas internas para los administradores', userData['description'], true) }}
             {% endif %}
+
             {% if edit %}
+                {% if local %}
+                    <h4>Desde aquí podrás cambiar la contraseña de acceso a la plataforma. Recuerda que la
+                        contraseña debe tener un mínimo de 6 caracteres</h4>
+                {% endif %}
+                {% if not user.is_admin %}
+                    {{ m.input_password('oldpassword', 10, 'Contraseña actual', 'Contraseña que quieres cambiar, déjala en blanco si no quieres cambiarla') }}
+                {% endif %}
+                {{ m.input_password('password1', 10, 'Nueva contraseña', 'Contraseña nueva que utilizará este usuario a partir de ahora') }}
+                {{ m.input_password('password2', 10, 'Repita la nueva contraseña', 'Escriba de nuevo la nueva contraseña para verificar es correcta') }}
+
                 <button type="submit" name="savepersonal" class="btn btn-success">{{ userData.new ? 'Crear usuario' : 'Guardar cambios' }}</button>
                 {% if user['is_global_administrator'] and not userData['new'] %}
-                <button type="submit" name="deletepersonal" class="btn btn-danger" {{ local ? ' disabled' }} onClick="javascript:return confirm('La operación de borrado no se puede deshacer. ¿Desea continuar?');">Eliminar de la plataforma</button>
+                <button type="submit" name="deletepersonal" class="btn btn-danger" {{ local ? ' disabled' }} onClick="javascript:return confirm('¡Cuidado! La operación de borrado no se puede deshacer y es extremadamente peligrosa.\n\nTodos los datos y documentos relacionados con el usuario serán eliminados, incluso aquellos del historial. Si el usuario ya no está acitvo, desactívelo en lugar de borrarlo.\n\n¿Desea continuar?');">Eliminar de la plataforma</button>
                 {% if flash['last_url'] %}<a class="btn btn-info" href="{{ flash['last_url'] }}">Volver sin realizar cambios</a>{% endif %}
                 {% endif %}
             {% endif %}
-        </form>
+        </div>
     </div>
-</div>
+</form>
 {% endblock %}

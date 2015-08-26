@@ -48,6 +48,8 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
         }
     }
 
+    $app->flashKeep();
+
     // comprobar si se están cambiando datos
     if (isset($_POST['savepersonal']) && ($user['is_admin'] || $itsMe)) {
 
@@ -102,6 +104,25 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
                 $local->set('is_global_administrator', $_POST['globaladmin']);
             }
         }
+
+        if ($ok && isset($_POST['password1']) && isset($_POST['password2']) && $_POST['password1'] && ($user['is_admin'] || $itsMe)) {
+            if (!$user['is_admin'] && (!isset($_POST['oldpassword']) || !checkUserPassword($user['id'], $_POST['oldpassword'], $preferences['salt']))) {
+                $app->flashNow('save_error', 'oldpassword');
+                $ok = false;
+            }
+            elseif ($ok && $_POST['password1'] !== $_POST['password2']) {
+                $app->flashNow('save_error', 'passwordmatch');
+                $ok = false;
+            }
+            elseif (strlen($_POST['password1']) < 6) {
+                $app->flashNow('save_error', 'passwordlength');
+                $ok = false;
+            }
+            if ($ok) {
+                $local->set('password', sha1($preferences['salt'] . $_POST['password1']));
+            }
+        }
+
         $ok = $ok && $local->save();
         // si es nuevo, añadirlo a la organización
         if ($ok && ($id == 0)) {
@@ -124,9 +145,11 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
             $app->flash('save_ok', 'ok');
             ORM::get_db()->commit();
 
-            $url = isset($_SESSION['slim.flash']['last_url']) ?
-                $_SESSION['slim.flash']['last_url'] :
-                $app->urlFor('personal', array('id' => $id, 'section' => 0));
+            if (isset($_SESSION['slim.flash']['last_url'])) {
+                $url = $_SESSION['slim.flash']['last_url'];
+            } else {
+                $url = ($user['is_admin'] ? $app->urlFor('personlist') : $app->urlFor('activities'));
+            }
 
             $app->redirect($url);
 
@@ -136,42 +159,6 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
         }
     }
 
-    // cambio de contraseña
-    if (isset($_POST['savepassword']) && isset($_POST['password1']) &&
-            isset($_POST['password2']) && ($user['is_admin'] || $itsMe)) {
-        $changeOk = false;
-        if (!$user['is_admin']) {
-            if (!isset($_POST['oldpassword']) || !checkUserPassword($user['id'], $_POST['oldpassword'], $preferences['salt'])) {
-                $app->flashNow('save_error', 'oldpassword');
-            } else {
-                $changeOk = true;
-            }
-        } else {
-            $changeOk = true;
-        }
-        if ($changeOk) {
-            if ($_POST['password1'] !== $_POST['password2']) {
-                $app->flashNow('save_error', 'passwordmatch');
-                $changeOk = false;
-            } elseif (strlen($_POST['password1']) < 6) {
-                $app->flashNow('save_error', 'passwordlength');
-                $changeOk = false;
-            }
-        }
-        if ($changeOk) {
-            $local = getUserObjectById($id);
-            $local->set('password', sha1($preferences['salt'] . $_POST['password1']));
-            $local->save();
-            $app->flash('save_ok', 'ok');
-            $url = isset($_SESSION['slim.flash']['last_url']) ?
-                $_SESSION['slim.flash']['last_url'] :
-                $app->urlFor('personal', array('id' => $id, 'section' => 0));
-
-            $app->redirect($url);
-        }
-    }
-    $app->flashKeep();
-
     // menú lateral de secciones
     $menu = array(
         array('caption' => ($itsMe ? 'Mis datos' : (($id != 0) ? $userData['display_name'] : 'Nuevo usuario')), 'icon' => 'user')
@@ -179,26 +166,8 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
 
     // las secciones vienen en este array
     $options = array(
-        0 => array('caption' => 'Personal', 'template' => 'user_personal', 'select2' => true)/*,
-        2 => array('caption' => 'Envíos realizados', 'template' => 'user_deliveries') */
+        0 => array('caption' => 'Personal', 'template' => 'user_personal', 'select2' => true)
     );
-
-    // si el usuario es administrador, permitir ver el informe de actividad
-    if ($user['is_admin']) {
-        $options[3] = array('caption' => 'Registro de actividad', 'template' => 'user_personal', 'select2' => false);
-    }
-
-    // si el usuario es administrador global, permitir asignar organizaciones
-    if ($user['is_global_administrator']) {
-        $options[5] = array('caption' => 'Pertenencia a centros', 'template' => 'user_personal', 'select2' => false);
-    }
-
-    // si el usuario es él mismo o es administrador, permitir cambiar la contraseña
-    // y ver el informe de actividad
-    if ($itsMe || $user['is_admin']) {
-        //$options[3] = array('caption' => 'Registro de actividad', 'template' => 'personal');
-        $options[4] = array('caption' => 'Cambiar contraseña', 'template' => 'user_password', 'select2' => false);
-    }
 
     // comprobar que la sección existe
     if (!isset($options[$section])) {
