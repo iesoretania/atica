@@ -224,7 +224,7 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
 
     // generar barra de navegación
     $breadcrumb = array(
-        array('display_name' => 'Usuarios', 'target' => $app->urlFor('personal', array('id' => $user['id'], 'section' => 0))),
+        array('display_name' => 'Usuarios', 'target' => $user['is_admin'] ? $app->urlFor('personlist') : $app->urlFor('personal', array('id' => $user['id'], 'section' => 0))),
         array('display_name' => ($id != 0) ? $userData['display_name'] : 'Nuevo usuario', 'target' => $app->urlFor('personal', array('id' => $id, 'section' => 0))),
         array('display_name' => $options[$section]['caption'])
     );
