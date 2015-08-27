@@ -267,6 +267,8 @@ $app->map('/personal/listado(/:sort(/:filter))', function ($sort = 0, $filter = 
     }
 
     if (isset($_POST['delete']) && $user['is_global_administrator']) {
+
+        $ok = true;
         foreach ($_POST['user'] as $item) {
             $local = getUserObjectById($item, $organization['id']);
             if ($local) {
