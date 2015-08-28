@@ -30,7 +30,8 @@ if ($ok && (false === $simulate)) {
         ORM::get_db()->exec("ALTER TABLE `delivery` DROP FOREIGN KEY `delivery_profile_id_fk`;");
         ORM::get_db()->exec("ALTER TABLE `delivery` ADD CONSTRAINT `delivery_profile_id_fk` FOREIGN KEY (`profile_id`) REFERENCES `atica`.`profile`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;");
         ORM::get_db()->exec("ALTER TABLE `event` DROP FOREIGN KEY `event_ibfk_1`;");
-        ORM::get_db()->exec("ALTER TABLE `event` ADD  CONSTRAINT `event_ibfk_1` FOREIGN KEY (`folder_id`) REFERENCES `atica`.`folder`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;");
+        ORM::get_db()->exec("ALTER TABLE `event` ADD  CONSTRAINT `event_folder_id_fk` FOREIGN KEY (`folder_id`) REFERENCES `atica`.`folder`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;");
+        ORM::get_db()->exec("ALTER TABLE `profile` CHANGE `display_name` `display_name` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;");
     }
     catch(Exception $e) {
         $ok = false;
