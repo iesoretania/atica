@@ -148,7 +148,7 @@ $app->get('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $retu
         'data' => $data));
 })->name('upload');
 
-$app->post('/enviar/:id', function ($id)
+$app->post('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $return=0, $data1=null, $data2=null, $data3=null)
     use ($app, $user, $config, $organization, $preferences) {
     if (!$user) {
         $app->redirect($app->urlFor('login'));
