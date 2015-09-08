@@ -998,13 +998,16 @@ function createDelivery($folderId, $userId, $profileId, $fileName, $deliveryName
     return ORM::get_db()->commit();
 }
 
-function createRevision($deliveryId, $userId, $fileName, $dataPath, $dataHash, $filesize, $revisionNr) {
+function createRevision($deliveryId, $userId, $fileName, $dataPath, $dataHash, $filesize, $revisionNr, $uploadComment = null) {
 
     $revision = ORM::for_table('revision')->create();
     $revision->set('delivery_id', $deliveryId);
     $revision->set('uploader_person_id', $userId);
     $revision->set('upload_date', date('c'));
     $revision->set('revision_nr', $revisionNr);
+    if ($uploadComment) {
+        $revision->set('upload_comment', $uploadComment);
+    }
     $revision->save();
 
     $document = createDocument($revision['id'], $fileName, $dataHash, $dataPath, $filesize);

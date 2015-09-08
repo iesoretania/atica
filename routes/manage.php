@@ -191,7 +191,7 @@ $app->map('/modificar/:folderid/:id(/:return(/:data1(/:data2(/:data3(/:data4))))
         $documentData = getDocumentDataByHash($hash);
         $newData = (false == $documentData);
 
-        $revision = createRevision($id, $user['id'], $filename, $documentDestination, $hash, $filesize, $newRevision);
+        $revision = createRevision($id, $user['id'], $filename, $documentDestination, $hash, $filesize, $newRevision, $_POST['description_new']);
 
         $ok = ($revision !== false);
 
