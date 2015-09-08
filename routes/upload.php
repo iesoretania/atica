@@ -275,8 +275,11 @@ $app->post('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $ret
                 }
                 else {
                     // Mover a una carpeta temporal
-                    mkdir($preferences['upload.folder'] . "temp/", 0770, true);
-                    $tempDestination = $preferences['upload.folder'] . "temp/" . $hash;
+                    $tempFolder = $preferences['upload.folder'] . "temp/";
+                    if (!is_dir($tempFolder)) {
+                        mkdir($tempFolder, 0770, true);
+                    }
+                    $tempDestination = $tempFolder . $hash;
                     move_uploaded_file($_FILES['document']['tmp_name'][$loop], $tempDestination);
 
                     $filename = $_FILES['document']['name'][$loop];
@@ -646,7 +649,9 @@ function getSubprofiles($profileGroupId) {
 
 function createDocumentFolder($prefix, $hash) {
     $path = substr($hash,0,2) . "/" . substr($hash,2,2);
-    mkdir($prefix . $path, 0770, true);
+    if (!is_dir($prefix . $path)) {
+        mkdir($prefix . $path, 0770, true);
+    }
     return $path . "/" . $hash;
 }
 
