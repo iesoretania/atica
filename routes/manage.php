@@ -50,7 +50,7 @@ $app->map('/modificar/:folderid/:id(/:return(/:data1(/:data2(/:data3(/:data4))))
         $deliveredItem = array();
     }
 
-    $items = getFolderProfileDeliveryItems($delivery['profile_id'], $folderId);
+    $items = parseArray(getFolderProfileDeliveryItems($delivery['profile_id'], $folderId));
 
     $isManager = $user['is_admin'];
     foreach ($managerProfiles as $upload) {
@@ -98,7 +98,7 @@ $app->map('/modificar/:folderid/:id(/:return(/:data1(/:data2(/:data3(/:data4))))
                 $delivery->set('creation_date', $_POST['creation_year'] . '-'. $_POST['creation_month'] . '-' . $_POST['creation_day'] . ' ' .$_POST['creation_hour'] . ':' . $_POST['creation_minute'] . ':00');
             }
         }
-        if (isset($_POST['item']) && isset($items[$_POST['item']])) {
+        if (isset($_POST['item']) && (($_POST['item'] == 0) || isset($items[$_POST['item']]))) {
             $delivery->set('item_id', ($_POST['item'] == 0) ? null : $_POST['item']);
         }
         if (isset($_POST['profile']) && isset($uploadAs[$_POST['profile']])) {
