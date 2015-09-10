@@ -97,6 +97,27 @@ function switchChecks(e) {
     </div>
     <div class="panel panel-default">
         <div class="panel-heading">
+            <h3>Mover elementos seleccionados</h3>
+        </div>
+        <div class="panel-body">
+            <p>Esta opción le permite trasladar elementos de entrega a otro perfil.</p>
+            <div class="form-group">
+                <label for="category" class="col-md-2 control-label">Perfil destino</label>
+                <div class="col-md-8">
+                    <select class="form-control select" id="profileto" name="profileto">
+                        {% for profile in uploaders %}
+                            <option value="{{ profile['id'] }}" {% if profile['id'] == profileid %} selected {% endif %}>{{ profile['display_name_neutral'] }}{% if profile['display_name'] %} ({{ profile['display_name'] }}){% endif %}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="panel-footer hidden-print">
+            <button type="submit" name="move" class="btn btn-info">Mover los elementos seleccionados al perfil indicado</button>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
             <h3>Creación masiva de elementos</h3>
         </div>
         <div class="panel-body">

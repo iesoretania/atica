@@ -290,7 +290,7 @@ $app->map('/elemento/:id/:profileid/(:actid)', function ($id, $profileid, $actid
         $app->redirect($app->request()->getPathInfo());
     }
 
-    if (isset($_POST['delete'])) {
+    if (isset($_POST['delete']) && isset($_POST['item'])) {
         ORM::get_db()->beginTransaction();
         if (deleteEventItems($id, $_POST['item'])) {
             if ($event['folder_id']) {
@@ -348,6 +348,27 @@ $app->map('/elemento/:id/:profileid/(:actid)', function ($id, $profileid, $actid
             }
         }
     }
+
+    if (isset($_POST['move']) && isset($_POST['item']) && isset($uploadAs[$_POST['profileto']])) {
+        ORM::get_db()->beginTransaction();
+        $ok = true;
+        foreach($_POST['item'] as $itemId) {
+            $item = getItemById($organization['id'], $itemId);
+            $item->set('profile_id', $_POST['profileto']);
+            $item->set('order_nr', getLastItemOrderNr($event['id'],$_POST['profileto']) + 1000);
+            $ok = $ok && $item->save();
+        }
+        if ($ok) {
+            ORM::get_db()->commit();
+            $app->flash('save_ok', 'ok');
+        }
+        else {
+            ORM::get_db()->rollBack();
+            $app->flash('save_error', 'error');
+        }
+        $app->redirect($app->request()->getPathInfo());
+    }
+
     $folder = getFolder($organization['id'], $event['folder_id']);
 
     $items = parseArray(getEventProfileDeliveryItems($profileid, $id));
