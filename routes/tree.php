@@ -573,7 +573,7 @@ function getFolder($orgId, $folderId) {
     if ((null === $folderId) || (0 === $folderId)) {
         return false;
     }
-    return getFolderById($orgId, $folderId)->as_array();
+    return getFolderById($orgId, $folderId);
 }
 
 function getCategories($orgId) {
