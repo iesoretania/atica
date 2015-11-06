@@ -518,7 +518,7 @@ $app->get('/estadisticas/:id(/:return/:data1(/:data2(/:data3)))', function ($id,
     $uploadProfiles = parseArray(getPermissionProfiles($id, 1));
     $managerProfiles = parseArray(getPermissionProfiles($id, 0));
     $userProfiles = parseArray(getUserProfiles($user['id'], $organization['id'], true));
-    $allProfiles = parseArray(getProfilesByOrganization($organization['id']));
+    $allProfiles = parseArray(getProfilesByOrganization($organization['id'], false));
 
     $isManager = $user['is_admin'];
     foreach ($managerProfiles as $upload) {
