@@ -690,8 +690,10 @@ function getFolderProfileDeliveryStatsBase($folderId) {
             where('event.folder_id', $folderId)->
             where('event_profile_delivery_item.is_visible', 1)->
             group_by('event_profile_delivery_item.profile_id')->
-            order_by_asc('event_profile_delivery_item.id')->
-            order_by_asc('event_profile_delivery_item.order_nr');
+            order_by_asc('profile_group.display_name_neutral')->
+            order_by_asc('profile.display_name')->
+            order_by_asc('event_profile_delivery_item.order_nr')->
+            order_by_asc('event_profile_delivery_item.display_name');
 
     return $data;
 }
