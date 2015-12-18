@@ -976,6 +976,9 @@ function createDelivery($folderId, $userId, $profileId, $fileName, $deliveryName
 
     ORM::get_db()->beginTransaction();
 
+    if (!trim($profileId)) {
+        $profileId = null;
+    }
     $delivery = ORM::for_table('delivery')->create();
     $delivery->set('profile_id', $profileId);
     $delivery->set('item_id', $itemId);
