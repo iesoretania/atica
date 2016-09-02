@@ -815,7 +815,7 @@ function addCompletedEvent($eventId, $personId) {
     $completedEvent = ORM::for_table('completed_event')->create();
     $completedEvent->set('event_id', $eventId);
     $completedEvent->set('person_id', $personId);
-    $completedEvent->set('completed_date', date('c'));
+    $completedEvent->set('completed_date', date('Y-m-d H:i:s'));
 
     return $completedEvent->save();
 }

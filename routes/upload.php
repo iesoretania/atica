@@ -690,6 +690,8 @@ function getFolderProfileDeliveryStatsBase($folderId) {
             where('event.folder_id', $folderId)->
             where('event_profile_delivery_item.is_visible', 1)->
             group_by('event_profile_delivery_item.profile_id')->
+            group_by('event_profile_delivery_item.id')->
+            group_by('folder_delivery.snapshot_id')->
             order_by_asc('profile_group.display_name_neutral')->
             order_by_asc('profile.display_name')->
             order_by_asc('event_profile_delivery_item.order_nr')->
@@ -781,7 +783,9 @@ function getFolderItemsBase($folderId, $orgId) {
             where('event.folder_id', $folderId)->
             where('event.organization_id', $orgId)->
             where('event_profile_delivery_item.is_visible', 1)->
-            group_by('event_profile_delivery_item.id');
+            group_by('event_profile_delivery_item.id')->
+            group_by('delivery.id')->
+            group_by('delivery.creation_date');
 
     return $data;
 }
@@ -984,7 +988,7 @@ function createDelivery($folderId, $userId, $profileId, $fileName, $deliveryName
     $delivery->set('item_id', $itemId);
     $delivery->set('display_name', $deliveryName);
     $delivery->set('description', $description);
-    $delivery->set('creation_date', date('c'));
+    $delivery->set('creation_date', date('Y-m-d H:s'));
     $delivery->save();
 
     $folderDelivery = ORM::for_table('folder_delivery')->create();
@@ -1008,7 +1012,7 @@ function createRevision($deliveryId, $userId, $fileName, $dataPath, $dataHash, $
     $revision = ORM::for_table('revision')->create();
     $revision->set('delivery_id', $deliveryId);
     $revision->set('uploader_person_id', $userId);
-    $revision->set('upload_date', date('c'));
+    $revision->set('upload_date', date('Y-m-d H:i:s'));
     $revision->set('revision_nr', $revisionNr);
     if ($uploadComment) {
         $revision->set('upload_comment', $uploadComment);

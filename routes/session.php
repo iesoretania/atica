@@ -159,7 +159,7 @@ function doRegisterAction($app, $user, $organization, $module, $command, $action
         $revisionId = null, $documentId = null, $deliveryItemId = null) {
 
     if (null == $time) {
-        $time = date('c');
+        $time = date('Y-m-d H:i:s');
     }
 
     $personId = is_null($user) ? null : $user['id'];
