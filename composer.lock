@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "12ea0446331d939ccdef814132957875",
+    "content-hash": "511fac57ae685b8ce5ea0857738a88b5",
     "packages": [
         {
             "name": "j4mie/idiorm",
@@ -710,7 +710,8 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=5.3.0"
+        "php": ">=5.3.0",
+        "ext-curl": "*"
     },
     "platform-dev": []
 }

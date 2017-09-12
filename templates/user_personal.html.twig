@@ -52,6 +52,7 @@
             {% if user.is_global_administrator %}
             {{ m.input_radio('globaladmin', 'Administración global', '0', 'No', '1', 'Sí, puede administrar la plataforma completa', global_admin, not local, 'danger') }}
             {% endif %}
+            {{ m.input_radio('external', 'Usuario externo', '0', 'No', '1', 'Sí, puede administrar la plataforma completa', global_admin, not local, 'danger') }}
             {{ m.input_textarea('description', 3, 'Otra información', 'Notas internas para los administradores', userData['description'], true) }}
             {% endif %}
 

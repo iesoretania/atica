@@ -64,19 +64,37 @@ $app->post('/entrar', function () use ($app, $preferences, $organization) {
             select('blocked_access')->
             select('retry_count')->
             select('last_login')->
+            select('is_external')->
+            select('password')->
             where('user_name', $username)->
             find_one();
 
     if ((!$login_security) ||
         ($login_security && ($login_security['blocked_access'] <= $now))) {
 
-        $user = ORM::for_table('person')->
-                where('user_name', $username)->
-                where('password', sha1($preferences['salt'] . $_POST['password']))->
-                find_one();
+        $ok = false;
+        $user = null;
 
-        if ($user) {
+        // si la autenticación externa está activada y el usuario habilitado, comprobar
+        if ($login_security && $login_security['is_external'] && isset($preferences['external.enabled'])) {
+            $authenticator = new \Atica\Service\SenecaAuthenticatorService($preferences['external.url'],
+                $preferences['external.url.force_security'], $preferences['external.enabled']);
+            $ok = $authenticator->checkUserCredentials($username, $_POST['password']);
+            // si autentica, actualizar la clave en la base de datos
+            if ($ok) {
+                $login_security->set('password', sha1($preferences['salt'] . $_POST['password']));
+                $login_security->save();
+            }
+        }
 
+        if (!$ok) {
+            $user = ORM::for_table('person')->
+            where('user_name', $username)->
+            where('password', sha1($preferences['salt'] . $_POST['password']))->
+            find_one();
+        }
+
+        if ($ok || $user) {
             // obtener pertenencia a la organización
             $membership = ORM::for_table('person_organization')->
                     where('organization_id', $_SESSION['organization_id'])->

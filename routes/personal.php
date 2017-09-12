@@ -104,6 +104,9 @@ $app->map('/personal/:section/:id', function ($section, $id) use ($app, $user, $
         if (isset($_POST['notify'])) {
             $local->set('email_enabled', $_POST['notify']);
         }
+        if (isset($_POST['external'])) {
+            $local->set('is_external', $_POST['external']);
+        }
         if ($user['is_admin']) {
             if (isset($_POST['username'])) {
                 $local->set('user_name', $_POST['username']);

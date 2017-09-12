@@ -31,5 +31,13 @@ $preferences = array(
     'security.securecookies' => false,
     'salt' => 'v2j4d+-),qh@80q]}6XLqbYrq=)`::HVh9VU9j~jDX?', // ¡¡¡cambiar por favor!!!
     'login.retries' => 5,   // 5 intentos infructuosos de entrar antes del bloqueo
-    'login.block' => 5      // 5 minutos de bloqueo
+    'login.block' => 5,     // 5 minutos de bloqueo
+
+    // iSéneca web URL
+    // Poner a "true" la siguiente opción para activar a nivel global la comprobación externa
+    'external.enabled' => false,
+    'external.url' => 'https://www.juntadeandalucia.es/educacion/seneca/seneca/senecamovil/IdenUsuMovil.jsp',
+    // El siguiente parámetro evita que se pueda interceptar las credenciales mediante un ataque MITM
+    // así que sólo debe ponerse a "false" si existe algún problema con los certificados de la Consejería de Educación
+    'external.url.force_security' => true
 );
