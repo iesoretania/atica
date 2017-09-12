@@ -82,6 +82,9 @@ $app->post('/entrar', function () use ($app, $preferences, $organization) {
             $ok = $authenticator->checkUserCredentials($username, $_POST['password']);
             // si autentica, actualizar la clave en la base de datos
             if ($ok) {
+                $user = ORM::for_table('person')->
+                where('user_name', $username)->
+                find_one();
                 $login_security->set('password', sha1($preferences['salt'] . $_POST['password']));
                 $login_security->save();
             }

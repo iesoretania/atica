@@ -45,6 +45,7 @@
             {% if edit %}
             {{ m.input_text('email', '6', 'Correo electrónico', 'Correo electrónico donde recibir las notificaciones', userData.email, edit) }}
             {{ m.input_radio('notify', 'Notificaciones por correo', '0', 'No quiero recibir notificaciones', '1', 'Sí, quiero recibirlas', userData['email_enabled'], edit) }}
+            {{ m.input_radio('external', 'Usuario externo', '0', 'No, se comprobará la contraseña en local', '1', 'Sí, se comprobará la contraseña en Séneca', userData['is_external'], edit) }}
             {% endif %}
             {{ m.input_profiles('profiles', 'Perfiles asociados', profiles, allProfiles, userData['gender'], user.is_admin) }}
             {% if user.is_admin %}
@@ -52,7 +53,6 @@
             {% if user.is_global_administrator %}
             {{ m.input_radio('globaladmin', 'Administración global', '0', 'No', '1', 'Sí, puede administrar la plataforma completa', global_admin, not local, 'danger') }}
             {% endif %}
-            {{ m.input_radio('external', 'Usuario externo', '0', 'No', '1', 'Sí, puede administrar la plataforma completa', global_admin, not local, 'danger') }}
             {{ m.input_textarea('description', 3, 'Otra información', 'Notas internas para los administradores', userData['description'], true) }}
             {% endif %}
 

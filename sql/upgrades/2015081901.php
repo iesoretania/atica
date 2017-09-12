@@ -19,18 +19,24 @@
 // Upgrade to database version 2015081901
 
 $updates[] = array(
-    'id' => '2017091201',
-    'description' => 'Añadido soporte de autenticación externa.'
+    'id' => '2015081901',
+    'description' => 'Solución al fallo que impedía eliminar entregas completas. Tampoco desaparecen los eventos asociados a una carpeta borrada.'
 );
 
 if ($ok && (false === $simulate)) {
     try {
-        ORM::get_db()->exec("ALTER TABLE `person` ADD `is_external` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0' AFTER `is_global_administrator`;");
+        ORM::get_db()->exec("ALTER TABLE `delivery` DROP FOREIGN KEY `delivery_current_revision_id_fk`;");
+        ORM::get_db()->exec("ALTER TABLE `delivery` ADD  CONSTRAINT `delivery_current_revision_id_fk` FOREIGN KEY (`current_revision_id`) REFERENCES `atica`.`revision`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;");
+        ORM::get_db()->exec("ALTER TABLE `delivery` DROP FOREIGN KEY `delivery_profile_id_fk`;");
+        ORM::get_db()->exec("ALTER TABLE `delivery` ADD CONSTRAINT `delivery_profile_id_fk` FOREIGN KEY (`profile_id`) REFERENCES `atica`.`profile`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;");
+        ORM::get_db()->exec("ALTER TABLE `event` DROP FOREIGN KEY `event_ibfk_1`;");
+        ORM::get_db()->exec("ALTER TABLE `event` ADD  CONSTRAINT `event_folder_id_fk` FOREIGN KEY (`folder_id`) REFERENCES `atica`.`folder`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;");
+        ORM::get_db()->exec("ALTER TABLE `profile` CHANGE `display_name` `display_name` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;");
     }
     catch(Exception $e) {
         $ok = false;
     }
-    $ok = $ok && setModuleVersion('core', '2017091201');
+    $ok = $ok && setModuleVersion('core', '2015081901');
 }
 // Volver a obtener la versión del núcleo
 $core = getModuleVersion('core');
