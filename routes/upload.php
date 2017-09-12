@@ -16,6 +16,11 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see [http://www.gnu.org/licenses/]. */
 
+$app->get('/update_profiles', function() use ($app) {
+    checkItemUpdateStatusAll();
+    $app->redirect($app->urlFor('frontpage'));
+});
+
 $app->get('/enviar/:id(/:return/:data1(/:data2(/:data3)))', function ($id, $return=0, $data1=null, $data2=null, $data3=null)
     use ($app, $user, $config, $organization) {
 
@@ -690,8 +695,8 @@ function getFolderProfileDeliveryStatsBase($folderId) {
             where('event.folder_id', $folderId)->
             where('event_profile_delivery_item.is_visible', 1)->
             group_by('event_profile_delivery_item.profile_id')->
-            group_by('event_profile_delivery_item.id')->
-            group_by('folder_delivery.snapshot_id')->
+            //group_by('event_profile_delivery_item.id')->
+            //group_by('folder_delivery.snapshot_id')->
             order_by_asc('profile_group.display_name_neutral')->
             order_by_asc('profile.display_name')->
             order_by_asc('event_profile_delivery_item.order_nr')->
@@ -783,9 +788,9 @@ function getFolderItemsBase($folderId, $orgId) {
             where('event.folder_id', $folderId)->
             where('event.organization_id', $orgId)->
             where('event_profile_delivery_item.is_visible', 1)->
-            group_by('event_profile_delivery_item.id')->
-            group_by('delivery.id')->
-            group_by('delivery.creation_date');
+            group_by('event_profile_delivery_item.id');//->
+            //group_by('delivery.id')->
+            //group_by('delivery.creation_date');
 
     return $data;
 }
@@ -1101,3 +1106,13 @@ function parseVariablesArray($data, $organization, $user, $profile, $profiles = 
     }
     return $data;
 }
+
+function checkItemUpdateStatusAll() {
+    // revisar los eventos de completado automático
+    $profiles = getProfiles()->find_array();
+
+    foreach($profiles as $profile) {
+        checkItemUpdateStatusByProfile($profile['id']);
+    }
+}
+
