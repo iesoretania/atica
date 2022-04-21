@@ -129,7 +129,7 @@ $app->get('/descargar/:kind/:cid/:id/(:p1/)', function ($kind, $cid, $id, $p1 = 
     $res['Content-Description'] = 'File Transfer';
     $res['Content-Type'] = ($delivery['mime'] == null) ?
             'application/octet-stream' : $delivery['mime'];
-    $res['Content-Disposition'] ='attachment; filename=' . trim(basename($delivery['download_filename']));
+    $res['Content-Disposition'] ='attachment; filename="' . trim(basename($delivery['download_filename'])) . '"';
     $res['Content-Transfer-Encoding'] = 'binary';
     $res['Expires'] = '0';
     $res['Cache-Control'] = 'must-revalidate';

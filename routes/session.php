@@ -183,7 +183,8 @@ function doRegisterAction($app, $user, $organization, $module, $command, $action
         $time = date('Y-m-d H:i:s');
     }
 
-    $personId = is_null($user) ? null : $user['id'];
+    $personId = (is_null($user) || !isset($user['id'])) ? null : $user['id'];
+    //$personId = is_null($user) ? null : $user['id'];
     $orgId = is_null($organization) ? null : $organization['id'];
 
     $log = ORM::for_table('log')->create();
