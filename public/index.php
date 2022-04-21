@@ -18,7 +18,7 @@
 
 require '../vendor/autoload.php';
 require_once '../config/config.php';
-
+error_reporting(E_ALL ^ E_DEPRECATED);
 session_set_cookie_params(0, null, null,
         isset($preferences['security.securecookies']) ?
             $preferences['security.securecookies'] : false,
