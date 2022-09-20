@@ -1,8 +1,6 @@
 <?php
 /*
-  ÁTICA - Aplicación web para la gestión documental de centros educativos
-
-  Copyright (C) 2015-2017: Luis Ramón López López
+  Copyright (C) 2018-2020: Luis Ramón López López
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as published by
@@ -18,7 +16,9 @@
   along with this program.  If not, see [http://www.gnu.org/licenses/].
 */
 
-namespace Atica\Service;
+namespace App\Service;
+
+use phpseclib3\Math\BigInteger;
 
 class SenecaAuthenticatorService
 {
@@ -46,51 +46,48 @@ class SenecaAuthenticatorService
     public function checkUserCredentials($user, $password)
     {
         // devolver error si no está habilitado
-        if (false === $this->enabled) {
-            return null;
+        if (!$this->enabled) {
+            return false;
         }
 
-        // obtener URL de entrada
-        $str = $this->getUrl($this->url, $this->forceSecurity);
-        if (!$str) {
-            return null;
+        $passwordCodificada = "";
+        $password = iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $password);
+        for ($i = 0, $iMax = strlen($password); $i < $iMax; $i++) {
+            $passwordCodificada .= ord($password[$i]);
         }
 
-        $dom = new \DOMDocument();
-        libxml_use_internal_errors(true);
-        $dom->loadHTML($str);
-        $xpath = new \DOMXPath($dom);
-        $form = $xpath->query('//form')->item(0);
-        $hidden = $xpath->query('//input[@name="N_V_"]')->item(0);
+        $p = new BigInteger($passwordCodificada);
 
-        if (!$form || !$hidden) {
-            return null;
-        }
-
-        // enviar datos del formulario
-        $postUrl = $form->getAttribute('action');
-        $hiddenValue = $hidden->getAttribute('value');
+        $passwordCifrada = $p->powMod(
+            new BigInteger('3584956249', 10),
+            new BigInteger('356056806984207294102423357623243547284021', 10)
+        )->toString();
 
         $fields = array(
-            'USUARIO' => urlencode($user),
-            'CLAVE' => urlencode($password),
-            'N_V_' => urlencode($hiddenValue)
+            'USUARIO' => $user,
+            'rndval' => random_int(10000000, 99999999),
+            'CLAVECIFRADA' => $passwordCifrada,
+            'CON_PRUEBA' => 'N',
+            'N_V_' => 'NV_' . random_int(1, 9999),
+            'NAV_WEB_NOMBRE' => 'Chrome',
+            'NAV_WEB_VERSION' => '99',
+            'C_INTERFAZ' => 'PASEN'
+
         );
 
-        $str = $this->postToUrl($fields, $postUrl, $this->url, $this->forceSecurity);
+        $str = $this->postToUrl($fields, $this->url, $this->url, $this->forceSecurity);
 
-        if (!$str) {
-            return null;
+        if ($str === '') {
+            return false;
         }
 
         $dom = new \DOMDocument();
         libxml_use_internal_errors(true);
-        $dom->loadHTML($str);
+        $dom->loadXML($str);
         $xpath = new \DOMXPath($dom);
-        $nav = $xpath->query('//nav');
-        $error = $xpath->query('//p[@class="text-danger"]');
+        $nav = $xpath->query('//correcto');
 
-        return $nav->length === 1 && $error->length === 0;
+        return $nav->length === 1 && $nav->item(0)->textContent === "SI";
     }
 
     /**
@@ -103,14 +100,8 @@ class SenecaAuthenticatorService
     private function getUrl($url, $forceSecurity)
     {
         $curl = curl_init();
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $forceSecurity);
-        curl_setopt($curl, CURLOPT_HEADER, false);
-        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($curl, CURLOPT_MAXREDIRS, 2);
-        curl_setopt($curl, CURLOPT_URL, $url);
+        $this->setCurlDefaultOptions($url, $forceSecurity, $curl);
         curl_setopt($curl, CURLOPT_REFERER, $url);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
-        curl_setopt($curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/533.4 (KHTML, like Gecko) Chrome/5.0.375.125 Safari/533.4");
         $str = curl_exec($curl);
         curl_close($curl);
         return $str === false ? '' : (string) $str;
@@ -129,22 +120,38 @@ class SenecaAuthenticatorService
     {
         $fieldsString = '';
         foreach ($fields as $key => $value) {
-            $fieldsString .= $key.'='.$value.'&';
+            $fieldsString .= $key.'='.rawurlencode($value).'&';
         }
         $fieldsString = rtrim($fieldsString, '&');
 
         $curl = curl_init();
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $forceSecurity);
-        curl_setopt($curl, CURLOPT_HEADER, false);
-        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($curl, CURLOPT_URL, $postUrl);
+        $this->setCurlDefaultOptions($postUrl, $forceSecurity, $curl);
         curl_setopt($curl, CURLOPT_REFERER, $refererUrl);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
-        curl_setopt($curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/533.4 (KHTML, like Gecko) Chrome/5.0.375.125 Safari/533.4");
         curl_setopt($curl, CURLOPT_POST, count($fields));
         curl_setopt($curl, CURLOPT_POSTFIELDS, $fieldsString);
         $str = curl_exec($curl);
         curl_close($curl);
         return $str === false ? '' : (string) $str;
+    }
+
+    /**
+     * @param $url
+     * @param $forceSecurity
+     * @param $curl
+     */
+    private function setCurlDefaultOptions($url, $forceSecurity, $curl)
+    {
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $forceSecurity);
+        curl_setopt($curl, CURLOPT_HEADER, false);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($curl, CURLOPT_MAXREDIRS, 2);
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt(
+            $curl,
+            CURLOPT_USERAGENT,
+            'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) ' .
+            'AppleWebKit/533.4 (KHTML, like Gecko) Chrome/5.0.375.125 Safari/533.4'
+        );
     }
 }

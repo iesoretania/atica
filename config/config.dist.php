@@ -36,7 +36,7 @@ $preferences = array(
     // iSéneca web URL
     // Poner a "true" la siguiente opción para activar a nivel global la comprobación externa
     'external.enabled' => false,
-    'external.url' => 'https://www.juntadeandalucia.es/educacion/seneca/seneca/senecamovil/IdenUsuMovil.jsp',
+    'external.url' => 'https://seneca.juntadeandalucia.es/seneca/jsp/ComprobarUsuarioExt.jsp',
     // El siguiente parámetro evita que se pueda interceptar las credenciales mediante un ataque MITM
     // así que sólo debe ponerse a "false" si existe algún problema con los certificados de la Consejería de Educación
     'external.url.force_security' => true
